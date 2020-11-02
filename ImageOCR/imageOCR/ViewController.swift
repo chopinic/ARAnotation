@@ -59,25 +59,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let buttonL = UIButton(frame: CGRect(x: self.sceneView.bounds.size.width/2-50, y: self.sceneView.bounds.size.height-250, width: 25, height: 25))
         buttonL.backgroundColor = UIColor.gray
         buttonL.setTitle("L", for: .normal)
-        buttonL.addTarget(self, action: #selector(ViewController.buttonTapdecy), for: UIControlEvents.touchUpInside)
+        buttonL.addTarget(self, action: #selector(ViewController.buttonTapdecx), for: UIControlEvents.touchUpInside)
         sceneView.addSubview(buttonL)
         
         let buttonR = UIButton(frame: CGRect(x: self.sceneView.bounds.size.width/2+25, y: self.sceneView.bounds.size.height-250, width: 25, height: 25))
         buttonR.backgroundColor = UIColor.gray
         buttonR.setTitle("R", for: .normal)
-        buttonR.addTarget(self, action: #selector(ViewController.buttonTapaddy), for: UIControlEvents.touchUpInside)
+        buttonR.addTarget(self, action: #selector(ViewController.buttonTapaddx), for: UIControlEvents.touchUpInside)
         sceneView.addSubview(buttonR)
         
         let buttonU = UIButton(frame: CGRect(x: self.sceneView.bounds.size.width/2-12.5, y: self.sceneView.bounds.size.height-300, width: 25, height: 25))
         buttonU.backgroundColor = UIColor.gray
         buttonU.setTitle("U", for: .normal)
-        buttonU.addTarget(self, action: #selector(ViewController.buttonTapdecx), for: UIControlEvents.touchUpInside)
+        buttonU.addTarget(self, action: #selector(ViewController.buttonTapdecy), for: UIControlEvents.touchUpInside)
         sceneView.addSubview(buttonU)
         
         let buttonD = UIButton(frame: CGRect(x: self.sceneView.bounds.size.width/2-12.5, y: self.sceneView.bounds.size.height-200, width: 25, height: 25))
         buttonD.backgroundColor = UIColor.gray
         buttonD.setTitle("D", for: .normal)
-        buttonD.addTarget(self, action: #selector(ViewController.buttonTapaddx), for: UIControlEvents.touchUpInside)
+        buttonD.addTarget(self, action: #selector(ViewController.buttonTapaddy), for: UIControlEvents.touchUpInside)
         sceneView.addSubview(buttonD)
     }
     
@@ -163,10 +163,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         let wordlocs = wordforlocs as! NSDictionary
                         let resloc = wordlocs["location"] as! NSMutableDictionary
                         var loc = Location()
-                        loc.height = resloc["width"] as! Int
-                        loc.width = resloc["height"] as! Int
-                        loc.top = resloc["left"] as! Int
-                        loc.left = resloc["top"] as! Int
+                        loc.height = resloc["height"] as! Int
+                        loc.width = resloc["width"] as! Int
+                        loc.top = resloc["top"] as! Int
+                        loc.left = resloc["left"] as! Int
                         nowbook.words.append(wordlocs["words"] as! String)
                         nowbook.locations.append(loc);
                     }
@@ -230,7 +230,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let id = bookAnchor.id;
         let content = UIColor.white
         let rootLoc = bookAnchor.rootLoc!
-        let size = CGSize(width: HandleBook.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: HandleBook.getActualLen(oriLen:Double(rootLoc.height),isW: false))
+        let size = CGSize(width: HandleBook.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: HandleBook.getActualLen(oriLen:Double(rootLoc.width),isW: false))
         let book = createPlaneNode(size: size, rotation: 0, contents: content)
         book.name = "book"
         book.transform = SCNMatrix4(anchor.transform)
@@ -242,21 +242,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let text = SCNText(string: nowtext, extrusionDepth: 0.1)
             let currentLoc = currentBook.locations[i]
             text.font = UIFont.systemFont(ofSize:1)
-            text.alignmentMode = kCAAlignmentCenter
+            text.alignmentMode = kCAAlignmentLeft
             text.isWrapped = true
-            text.containerFrame = CGRect(x: 0, y: 0, width: HandleBook.getActualLen(oriLen:Double(currentLoc.width),isW: true)*Double(scale)*1.5, height: HandleBook.getActualLen(oriLen: Double(currentLoc.height), isW: false)*Double(scale)*1.5)
+            text.containerFrame = CGRect(x: 0, y: 0, width: HandleBook.getActualLen(oriLen:Double(currentLoc.height),isW: true)*Double(scale*1.5), height: HandleBook.getActualLen(oriLen: Double(currentLoc.width), isW: false)*Double(scale)*1.5)
             
             let min = text.boundingBox.min
             let max = text.boundingBox.max
             let width = max.x - min.x
             let height = max.y - min.y
             let length = max.z - min.z
-            if(width == 0){
-                print("restrict w: \(Double(currentLoc.width)*Double(scale)*1.5)")
-            }
-            let displacex = -width/2.0 - min.x+Float(HandleBook.getActualLen(oriLen: Double(currentLoc.left-rootLoc.left), isW: true))
-            let displacey = -height/2.0 - min.y+Float(HandleBook.getActualLen(oriLen: Double(currentLoc.top-rootLoc.top), isW: true))
-            print("displacex:\(HandleBook.getActualLen(oriLen: Double(currentLoc.left-rootLoc.left), isW: true)),displacey:\(HandleBook.getActualLen(oriLen: Double(currentLoc.top-rootLoc.top), isW: true))")
+//            if(width == 0){
+//                print("restrict w: \(Double(currentLoc.width)*Double(scale)*1.5)")
+//            }
+            var displacex = Float(HandleBook.getActualLen(oriLen: Double(currentLoc.top-rootLoc.top), isW: true))*scale
+            var displacey = Float(HandleBook.getActualLen(oriLen: Double(currentLoc.left-rootLoc.left), isW: false))*scale
+            if(i==0){displacex = 0;}
+            else{displacex = Float(i)*0.05*scale;}
+            
+            print("displacex:\(displacex),displacey:\(displacey)")
+//            displacex = 0
+            displacex = displacex-width/2.0 - min.x
+            displacey = displacey-height/2.0 - min.y
             let position = SCNVector3Make(displacex/scale, displacey/scale, (-length/2.0 - min.z)/scale)
             
             let material = SCNMaterial()

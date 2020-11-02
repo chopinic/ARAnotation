@@ -50,9 +50,9 @@ open class HandleBook{
     
     static var imageH: Double  = 5760
     
-    static var xOffset: Float = -0.055
+    static var xOffset: Float = -0.005
     
-    static var yOffset: Float = 0.06
+    static var yOffset: Float = 0.00
     
     public static func findMax(x:Double,y:Double)->Double{
         if x>y{
@@ -153,12 +153,12 @@ open class HandleBook{
         let z  = Float(-1*HandleBook.itemDis)
         let w = HandleBook.getActualLen(oriLen: width, isW: true)
         let h = HandleBook.getActualLen(oriLen:height, isW: false)
-        x += Float(w/2)+HandleBook.xOffset //-:up
+        x += Float(w/2)+HandleBook.xOffset //-:left
         y += Float(h/2)+HandleBook.yOffset //+:ri
         var translation = matrix_identity_float4x4
         translation.columns.3.z = z
-        translation.columns.3.x = x
-        translation.columns.3.y = y
+        translation.columns.3.x = y
+        translation.columns.3.y = x
         print("x:\(x),y:\(y),z:\(z),w:\(w),h\(h)")
         print()
         let transform = trans * translation
