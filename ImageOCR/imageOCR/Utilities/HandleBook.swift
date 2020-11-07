@@ -28,7 +28,7 @@ import ARKit
 
 
 
-open class HandleBook{
+class HandleBook{
     
 //    public var prevFrame : ARFrame?
     var prevTrans: simd_float4x4?
