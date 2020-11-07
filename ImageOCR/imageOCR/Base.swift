@@ -16,10 +16,12 @@ public struct Location{
     var left = Int();
 
 }
-
-public struct Book{
+// book struct
+public struct BookSt{
+    var bookLoc = Location()
     var words = [String]()
     var locations = [Location]()
+    var kinds = [String]()
     var cros_pic: Int!=0
     var isDisplay: Bool!=false
 }

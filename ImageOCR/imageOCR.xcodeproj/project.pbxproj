@@ -9,8 +9,10 @@
 /* Begin PBXBuildFile section */
 		091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091F13B82541DCB400FA31B3 /* ImageProcess.swift */; };
 		091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091F13BB2541DE6400FA31B3 /* BookAnchor.swift */; };
+		0942A39025553D7500ECC38C /* Controller+UIText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0942A38F25553D7500ECC38C /* Controller+UIText.swift */; };
 		094C0D67253DC318006B381D /* Internet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D66253DC318006B381D /* Internet.swift */; };
 		094C0D6A253E7002006B381D /* HandleBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D69253E7001006B381D /* HandleBook.swift */; };
+		0958D5F72550E72F00F6105A /* BookNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0958D5F62550E72F00F6105A /* BookNode.swift */; };
 		09A33C8A252091CB001F97A4 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C87252091CB001F97A4 /* Utilities.swift */; };
 		09A33C8B252091CB001F97A4 /* VisualizationNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C88252091CB001F97A4 /* VisualizationNode.swift */; };
 		09A33C8C252091CB001F97A4 /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 09A33C89252091CB001F97A4 /* test.png */; };
@@ -27,8 +29,10 @@
 /* Begin PBXFileReference section */
 		091F13B82541DCB400FA31B3 /* ImageProcess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcess.swift; sourceTree = "<group>"; };
 		091F13BB2541DE6400FA31B3 /* BookAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAnchor.swift; sourceTree = "<group>"; };
+		0942A38F25553D7500ECC38C /* Controller+UIText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Controller+UIText.swift"; sourceTree = "<group>"; };
 		094C0D66253DC318006B381D /* Internet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet.swift; sourceTree = "<group>"; };
 		094C0D69253E7001006B381D /* HandleBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleBook.swift; sourceTree = "<group>"; };
+		0958D5F62550E72F00F6105A /* BookNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNode.swift; sourceTree = "<group>"; };
 		09A33C87252091CB001F97A4 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		09A33C88252091CB001F97A4 /* VisualizationNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizationNode.swift; sourceTree = "<group>"; };
 		09A33C89252091CB001F97A4 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
@@ -55,6 +59,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0942A38E25553D4C00ECC38C /* Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				0942A38F25553D7500ECC38C /* Controller+UIText.swift */,
+			);
+			path = Delegate;
+			sourceTree = "<group>";
+		};
 		E49C2DF220BC53F700D6C6F3 = {
 			isa = PBXGroup;
 			children = (
@@ -74,6 +86,7 @@
 		E49C2DFD20BC53F700D6C6F3 /* imageOCR */ = {
 			isa = PBXGroup;
 			children = (
+				0942A38E25553D4C00ECC38C /* Delegate */,
 				091F13B82541DCB400FA31B3 /* ImageProcess.swift */,
 				09A33C89252091CB001F97A4 /* test.png */,
 				09A33C87252091CB001F97A4 /* Utilities.swift */,
@@ -90,6 +103,7 @@
 				094C0D69253E7001006B381D /* HandleBook.swift */,
 				091F13BB2541DE6400FA31B3 /* BookAnchor.swift */,
 				09FFD2F0254BE8FF003E55B1 /* Base.swift */,
+				0958D5F62550E72F00F6105A /* BookNode.swift */,
 			);
 			path = imageOCR;
 			sourceTree = "<group>";
@@ -167,6 +181,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0942A39025553D7500ECC38C /* Controller+UIText.swift in Sources */,
 				094C0D67253DC318006B381D /* Internet.swift in Sources */,
 				09A33C8B252091CB001F97A4 /* VisualizationNode.swift in Sources */,
 				09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */,
@@ -176,6 +191,7 @@
 				09A33C8A252091CB001F97A4 /* Utilities.swift in Sources */,
 				091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */,
 				E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */,
+				0958D5F72550E72F00F6105A /* BookNode.swift in Sources */,
 				091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

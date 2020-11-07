@@ -10,7 +10,6 @@ import Foundation
 import ARKit
 
 class BookAnchor: ARAnchor{
-    var rootLoc: Location?
     open var id:Int?
     
     required init(anchor: ARAnchor) {
@@ -20,10 +19,9 @@ class BookAnchor: ARAnchor{
         super.init(coder: coder)
     }
     
-    init(bookId:Int,loc:Location,transform:simd_float4x4) {
+    init(bookId:Int,transform:simd_float4x4) {
         super.init(transform: transform)
         id = bookId
-        rootLoc = loc
     }
     
     

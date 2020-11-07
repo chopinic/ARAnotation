@@ -24,7 +24,11 @@ struct Internet {
     }
     
     static func upload(request :URLRequest, data: Data, isVisit: Bool, controller: ViewController?) -> String? {
+        print("uploadTask")
         let task = URLSession.shared.uploadTask(with: request, from: data) { data, response, error in
+            print("received")
+            print(data)
+            print(response)
             if let error = error {
                 print ("error: \(error)")
                 return
@@ -38,16 +42,20 @@ struct Internet {
 
                 return
             }
+            let mydata = data!
+            if let responseData = String(data: mydata, encoding: .utf8) {
+            print ("got data \(responseData)")
+            controller?.setResult(receive: String(data: mydata, encoding: .utf8) ?? "")
+            }
+
             if let mimeType = response.mimeType,
                 mimeType == "application/json",
                 let data = data,
                 let responseData = String(data: data, encoding: .utf8) {
                 //                print ("got data: \(responseS)")
-                print ("got data")
-                if isVisit{
-                    controller?.buttonTapVisit()
-                }
-
+                print ("got data \(responseData)")
+                controller?.setResult(receive: String(data: data, encoding: .utf8) ?? "")
+                
             }
         }
         task.resume()
@@ -77,7 +85,8 @@ struct Internet {
     
 
     static func uploadImage(imageData: Data, controller: ViewController?)-> String?{
-        let url = URL(string: "http://172.20.10.2:8080/uploadTest")!
+//        let url = URL(string: "http://172.20.10.2:8080/uploadTest")!
+        let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

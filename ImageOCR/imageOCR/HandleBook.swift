@@ -132,22 +132,13 @@ open class HandleBook{
 //        view.session.add(anchor: anchor)
     }
     
-    public func addBookAnchor(view: ARSCNView,id:Int,book:Book){
+    public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
         guard let trans = prevTrans
         else { return }
-        var picW : Double = 1e10;
-        var picH : Double = 1e10;
-        var picWm : Double = 0;
-        var picHm : Double = 0;
-        for loc in book.locations{
-            picW = HandleBook.findMin(x: picW, y: Double(loc.left))
-            picH = HandleBook.findMin(x: picH, y: Double(loc.top))
-            picWm = HandleBook.findMax(x: picWm, y: Double(loc.left)+Double(loc.width))
-            picHm = HandleBook.findMax(x: picHm, y: Double(loc.height)+Double(loc.top))
-        }
-        let width = picWm-picW;
-        let height = picHm-picH;
-        print("picw:\(picW),picH:\(picH)")
+        let picW : Double = Double(book.bookLoc.left);
+        let picH : Double = Double(book.bookLoc.top);
+        let width = Double(book.bookLoc.width);
+        let height = Double(book.bookLoc.height);
         var x = Float(HandleBook.getActualOffset(offset: picW,isW: true))
         var y = Float(HandleBook.getActualOffset(offset: picH,isW: false))
         let z  = Float(-1*HandleBook.itemDis)
@@ -159,15 +150,10 @@ open class HandleBook{
         translation.columns.3.z = z
         translation.columns.3.x = y
         translation.columns.3.y = x
-        print("x:\(x),y:\(y),z:\(z),w:\(w),h\(h)")
+        print("book: x:\(x),y:\(y),z:\(z),w:\(w),h\(h)")
         print()
         let transform = trans * translation
-        var rootLoc = Location()
-        rootLoc.height = Int(height)
-        rootLoc.width = Int(width)
-        rootLoc.left = Int(picW)
-        rootLoc.top = Int(picH)
-        let anchor = BookAnchor(bookId:id, loc:rootLoc, transform: transform)
+        let anchor = BookAnchor(bookId:id, transform: transform)
         view.session.add(anchor: anchor)
     }
 }
