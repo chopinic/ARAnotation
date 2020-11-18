@@ -27,6 +27,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
     private var result: NSDictionary!
     private var DealBook = [HandleBook]()
     private var books = [BookSt]()
+    private var bookInfo = [BookInfo]()
     private var imageH = CGFloat()
     private var imageW = CGFloat()
     private var timer: Timer?
@@ -66,11 +67,15 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         ButtonCreate.createButton(control:self, title: "Start", negY: 100, action: #selector(ViewController.buttonTapUpload))
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
         ButtonCreate.createButton(control:self, title: "debug", negY: 200, action: #selector(ViewController.buttonTapDebug))
-        ButtonCreate.createButton(control:self, title: "resize", negY: 300, action: #selector(ViewController.resize))
-//        ButtonCreate.createDirectionButton(control:self)
+        
+        ButtonCreate.createButton(control:self, title: "debug2", negY: 300, action: #selector(ViewController.buttonAddInfo))
+//        ButtonCreate.createButton(control:self, title: "resize", negY: 300, action: #selector(ViewController.resize))
+        //ButtonCreate.createDirectionButton(control:self)
     }
 
-    
+    @objc func buttonAddInfo(){
+        
+    }
     
     @objc func timerAction(){
         buttonTapUpload()
@@ -113,9 +118,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
             print("no such node")
             return;
         }
-        let appearanceAction = SCNAction.scale(to: CGFloat(2), duration: 0.4)
-        appearanceAction.timingMode = .easeOut
-        childNode.runAction(appearanceAction)
+        let closer = SCNAction.moveBy(x: 0, y: 0, z: 0.01, duration: 0.4)
+        let scale = SCNAction.scale(to: CGFloat(2), duration: 0.4)
+        scale.timingMode = .easeOut
+        let enhance = SCNAction.group([closer,scale])
+        childNode.runAction(enhance)
 
     }
     
@@ -185,9 +192,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
 
             //            let data = tempUiImage.pngData()
             if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
+//            if let data = UIImagePNGRepresentation(tempUiImage){
                 let url:NSURL = NSURL(string : "urlHere")!
                 //Now use image to create into NSData format
                 let imageData = data.base64EncodedString()
+                print(imageData)
                 print("Start uploading!")
                 Internet.uploadImage(imageData: imageData.data(using: .utf8)!,controller:self);
             }
@@ -201,10 +210,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
     
     func setLocation(locDic: NSDictionary)->Location{
         var loc = Location()
-        loc.height = locDic["height"] as! Int
-        loc.width = locDic["width"] as! Int
-        loc.top = locDic["top"] as! Int
-        loc.left = locDic["left"] as! Int
+        loc.height = locDic["width"] as! Int
+        loc.width = locDic["height"] as! Int
+        loc.top = locDic["left"] as! Int
+        loc.left = locDic["top"] as! Int
         return loc;
     }
     
@@ -219,10 +228,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
                     var nowbook = BookSt()
                     let bookloc = nowtempbook["location"] as! NSDictionary
                     nowbook.bookLoc = setLocation(locDic: bookloc)
-                    let strBase64 = nowtempbook["base64"] as! String
-                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                    bookPics.append(UIImage(data: dataDecoded)!)
-//                    bookPics.append(UIImage(named: "test.png")!)
+//                    let strBase64 = nowtempbook["base64"] as! String
+//                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+//                    bookPics.append(UIImage(data: dataDecoded)!)
+                    bookPics.append(UIImage(named: "test2.png")!)
                     let parts = nowtempbook["part"] as! NSArray
                     for wordforlocs in parts {
                         let wordlocs = wordforlocs as! NSDictionary
@@ -298,12 +307,16 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
             return
         }
         let id = bookAnchor.id!;
-        print("bookid: \(id)")
 //        let content = UIColor.white
         let currentBook = books[id]
         let rootLoc = currentBook.bookLoc
         let picContents = bookPics[id]
         let size = CGSize(width: HandleBook.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: HandleBook.getActualLen(oriLen:Double(rootLoc.width),isW: false))
+        print("bookid: \(id)")
+        for str in currentBook.words {
+            print(" words: \(str)")
+        }
+        
         let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
         book.name = "book@\(id)"
         book.transform = SCNMatrix4(anchor.transform)

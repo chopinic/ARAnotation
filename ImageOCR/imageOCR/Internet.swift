@@ -27,8 +27,8 @@ struct Internet {
         print("uploadTask")
         let task = URLSession.shared.uploadTask(with: request, from: data) { data, response, error in
             print("received")
-            print(data)
-            print(response)
+            //print(data)
+            //print(response)
             if let error = error {
                 print ("error: \(error)")
                 return
@@ -44,7 +44,7 @@ struct Internet {
             }
             let mydata = data!
             if let responseData = String(data: mydata, encoding: .utf8) {
-            print ("got data \(responseData)")
+            print ("got data")
             controller?.setResult(receive: String(data: mydata, encoding: .utf8) ?? "")
             }
 

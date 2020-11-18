@@ -110,7 +110,7 @@ class HandleBook{
         actualPicH = 2*itemDis*tan(camHAngle * Double.pi / 180)
 
         if(isW){
-            let midOffset = offset-imageW/2
+            let midOffset = -offset+imageW/2
             return actualPicW*(midOffset/imageW)
         }
         else{
