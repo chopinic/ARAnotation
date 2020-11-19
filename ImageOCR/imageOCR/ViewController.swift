@@ -20,20 +20,21 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
     @IBOutlet var wholeView: UIView!
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet var inputText: UITextField!
-    private var planeNode: SCNNode?
-    private var imageNode: SCNNode?
     private var animationInfo: AnimationInfo?
     private var imageBuffer: UIImage?
     private var result: NSDictionary!
-    private var DealBook = [HandleBook]()
-    private var books = [BookSt]()
-    private var bookInfo = [BookInfo]()
-    private var imageH = CGFloat()
-    private var imageW = CGFloat()
-    private var timer: Timer?
-    private var cot: Int! = 0
-    private var radio: Float = 1
-    private var bookPics = [UIImage]()
+    var DealBook = [HandleBook]()
+    var books = [BookSt]()
+    //var bookInfo = [BookInfo]()
+    var bookSCNNode = [SCNNode]()
+    var imageH = CGFloat()
+    var imageW = CGFloat()
+    var timer: Timer?
+    var cot: Int! = 0
+    var radio: Float = 1
+    var bookPics = [UIImage]()
+    var focusId : Int?
+    var bookInfo : BookInfo?
     
     
     override func viewDidLoad() {
@@ -64,35 +65,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
         sceneView.session.run(configuration)
-        ButtonCreate.createButton(control:self, title: "Start", negY: 100, action: #selector(ViewController.buttonTapUpload))
+        createButton( title: "Start", negY: 100, action: #selector(ViewController.buttonTapUpload))
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
-        ButtonCreate.createButton(control:self, title: "debug", negY: 200, action: #selector(ViewController.buttonTapDebug))
+        createButton(title: "debug", negY: 200, action: #selector(ViewController.buttonTapDebug))
         
-        ButtonCreate.createButton(control:self, title: "debug2", negY: 300, action: #selector(ViewController.buttonAddInfo))
-//        ButtonCreate.createButton(control:self, title: "resize", negY: 300, action: #selector(ViewController.resize))
-        //ButtonCreate.createDirectionButton(control:self)
+        createButton(title: "debug2", negY: 300, action: #selector(ViewController.buttonAddInfo))
+//        ButtonCreate.createButton( title: "resize", negY: 300, action: #selector(ViewController.resize))
+        //ButtonCreate.createDirectionButton()
     }
 
-    @objc func buttonAddInfo(){
-        
-    }
     
-    @objc func timerAction(){
-        buttonTapUpload()
-    }
-    
-    @objc func buttonTapTimer(){
-        if let nowTimer = timer{
-            if nowTimer.isValid{
-                nowTimer.invalidate()
-                return
-            }
-        }
-        timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
-    }
     
     public func findString(lookFor: String){
         print("start find")
+        focusId = nil
         var id = -1 as Int
         for i in stride(from: 0, to: books.count ,by: 1){
             let singlebook = books[i]
@@ -110,6 +96,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
             return;
         }
         print("find A book, id: \(id)")
+        focusId = id;
         enhance(id: id)
     }
     
@@ -126,87 +113,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
 
     }
     
-    @objc func resize(){
-        var id = -1 as Int
-        for i in stride(from: 0, to: books.count ,by: 1){
-            let singlebook = books[i]
-            for j in stride(from: 0, to: singlebook.kinds.count ,by: 1){
-                if singlebook.kinds[j] == "author"{
-                    if singlebook.words[j] == "Sam Harris"{
-                        id = i
-                        break;
-                    }
-                }
-            }
-            if(id != -1){break};
-        }
-        if(id == -1){
-            print("no such book")
-            return;
-        }
-        enhance(id: id)
-        
-    }
     
-    
-    @objc func buttonTapDebug(){
-        let nowBookDeal = HandleBook()
-        nowBookDeal.saveCurrentTrans(view: sceneView)
-        DealBook.append(nowBookDeal)
-        
-        setResult(receive: DebugString.jsonString);
-        return
-    }
-    
-    @objc func buttonTapaddx(){
-        HandleBook.addxOffSet()
-        resetAndAddAnchor(isReset: true)
-    }
-    
-    @objc func buttonTapdecx(){
-        HandleBook.decxOffSet()
-        resetAndAddAnchor(isReset: true)
-    }
-    
-    @objc func buttonTapaddy(){
-        HandleBook.addyOffSet()
-        resetAndAddAnchor(isReset: true)
-    }
-    
-    @objc func buttonTapdecy(){
-        HandleBook.decyOffSet()
-        resetAndAddAnchor(isReset: true)
-    }
-    
-    
-    @objc func buttonTapUpload(){
-        if let capturedImage = sceneView.session.currentFrame?.capturedImage{
-            let nowBookDeal = HandleBook()
-            nowBookDeal.saveCurrentTrans(view: sceneView)
-            DealBook.append(nowBookDeal)
-            
-            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
-            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
-            let tempUiImage = UIImage(ciImage: cI)
-
-            //            let data = tempUiImage.pngData()
-            if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
-//            if let data = UIImagePNGRepresentation(tempUiImage){
-                let url:NSURL = NSURL(string : "urlHere")!
-                //Now use image to create into NSData format
-                let imageData = data.base64EncodedString()
-                print(imageData)
-                print("Start uploading!")
-                Internet.uploadImage(imageData: imageData.data(using: .utf8)!,controller:self);
-            }
-        }
-    }
-    
-    @objc func buttonTapVisit(){
-        let url = URL(string: "http://172.20.10.2:8080/ocrtest")!
-        Internet.visit(from: url, controller: self)
-    }
     
     func setLocation(locDic: NSDictionary)->Location{
         var loc = Location()
@@ -242,6 +149,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
                     }
                     nowbook.cros_pic = cot;
                     books.append(nowbook);
+//                    DispatchQueue.main.async{
+//                        self.bookInfo.append(BookInfo(id: self.cot))
+//                    }
                 }
             }
             self.resetAndAddAnchor()
@@ -321,46 +231,62 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         book.name = "book@\(id)"
         book.transform = SCNMatrix4(anchor.transform)
         sceneView.scene.rootNode.addChildNode(book)
+        
+        var translation = matrix_identity_float4x4
+        translation.columns.3.x = -Float(size.width/2)
+        translation.columns.3.y = -Float(size.height/2)
+        let bookTopPos = anchor.transform*translation
+        books[id].bookTopPos = SCNMatrix4(bookTopPos)
+        let bookTop = SCNNode();
+        bookTop.transform = SCNMatrix4(bookTopPos)
+//        let pos = sceneView.projectPoint(bookTop.position)
+//        var pos2d = CGPoint()
+//        let textWidth = 200,textHeight = 100;
+//        pos2d.x = CGFloat(pos.x-Float(textWidth/2))
+//        pos2d.y = CGFloat(pos.y-Float(textHeight))
+//        DispatchQueue.main.async{
+//            let info = BookInfo(name: currentBook.words[0], info: "info\(id)", id: id, frame: CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(textWidth), height: CGFloat(textHeight)))
+//            self.sceneView.addSubview(info)
+//        }
+
     }
     
     
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        guard let imageNode = imageNode, let planeNode = planeNode else {
-            return
-        }
-        
-        // 1. Unwrap animationInfo. Calculate animationInfo if it is nil.
-        guard let animationInfo = animationInfo else {
-            refreshAnimationVariables(startTime: time,
-                                      initialPosition: planeNode.simdWorldPosition,
-                                      finalPosition: imageNode.simdWorldPosition,
-                                      initialOrientation: planeNode.simdWorldOrientation,
-                                      finalOrientation: imageNode.simdWorldOrientation)
-            return
-        }
-        
-        // 2. Calculate new animationInfo if image position or orientation changed.
-        if !simd_equal(animationInfo.finalModelPosition, imageNode.simdWorldPosition) || animationInfo.finalModelOrientation != imageNode.simdWorldOrientation {
             
-            refreshAnimationVariables(startTime: time,
-                                      initialPosition: planeNode.simdWorldPosition,
-                                      finalPosition: imageNode.simdWorldPosition,
-                                      initialOrientation: planeNode.simdWorldOrientation,
-                                      finalOrientation: imageNode.simdWorldOrientation)
+        let childNodes = sceneView.scene.rootNode.childNodes
+        guard let nowinfo = bookInfo else{
+            return;
         }
-        
-        // 3. Calculate interpolation based on passedTime/totalTime ratio.
-        let passedTime = time - animationInfo.startTime
-        var t = min(Float(passedTime/animationInfo.duration), 1)
-        // Applying curve function to time parameter to achieve "ease out" timing
-        t = sin(t * .pi * 0.5)
-        
-        // 4. Calculate and set new model position and orientation.
-        let f3t = simd_make_float3(t, t, t)
-        planeNode.simdWorldPosition = simd_mix(animationInfo.initialModelPosition, animationInfo.finalModelPosition, f3t)
-        planeNode.simdWorldOrientation = simd_slerp(animationInfo.initialModelOrientation, animationInfo.finalModelOrientation, t)
-        //planeNode.simdWorldOrientation = imageNode.simdWorldOrientation
+
+        for node in childNodes {
+            guard let name = node.name else {
+                continue
+            }
+            if name.hasPrefix("book@") {
+//                return;
+                let i = name.index(after: name.firstIndex(of: "@")!)
+//                print("getid:\(name.suffix(from: i))")
+                let bookid = Int(name.suffix(from: i))!
+//                let bookid = 0
+                
+                let bookTop = SCNNode();
+                bookTop.transform = books[bookid].bookTopPos!
+                let pos = sceneView.projectPoint(bookTop.position)
+                var pos2d = CGPoint()
+                let textWidth = 200,textHeight = 100;
+                pos2d.x = CGFloat(pos.x-Float(textWidth/2))
+                pos2d.y = CGFloat(pos.y-Float(textHeight))
+                
+                DispatchQueue.main.async{
+                    nowinfo.undatePosition(position: pos2d)
+                    nowinfo.text = "info"
+                }
+            }else{
+                continue;
+            }
+        }
     }
     
     func refreshAnimationVariables(startTime: TimeInterval, initialPosition: float3, finalPosition: float3, initialOrientation: simd_quatf, finalOrientation: simd_quatf) {

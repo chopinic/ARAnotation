@@ -18,6 +18,8 @@
 		0958D5F72550E72F00F6105A /* BookNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0958D5F62550E72F00F6105A /* BookNode.swift */; };
 		09626B75255B7EFC0013D22B /* test2.png in Resources */ = {isa = PBXBuildFile; fileRef = 09626B74255B7EFC0013D22B /* test2.png */; };
 		0976B01A2564CB5100315782 /* Viewcontroller+BookInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B0192564CB5100315782 /* Viewcontroller+BookInfo.swift */; };
+		0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B01D2564CE3000315782 /* ViewController+Button.swift */; };
+		0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B0202564D03B00315782 /* ViewController+BtAction.swift */; };
 		09A33C8A252091CB001F97A4 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C87252091CB001F97A4 /* Utilities.swift */; };
 		09A33C8B252091CB001F97A4 /* VisualizationNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C88252091CB001F97A4 /* VisualizationNode.swift */; };
 		09A33C8C252091CB001F97A4 /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 09A33C89252091CB001F97A4 /* test.png */; };
@@ -44,6 +46,8 @@
 		0958D5F62550E72F00F6105A /* BookNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNode.swift; sourceTree = "<group>"; };
 		09626B74255B7EFC0013D22B /* test2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test2.png; sourceTree = "<group>"; };
 		0976B0192564CB5100315782 /* Viewcontroller+BookInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+BookInfo.swift"; sourceTree = "<group>"; };
+		0976B01D2564CE3000315782 /* ViewController+Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+Button.swift"; sourceTree = "<group>"; };
+		0976B0202564D03B00315782 /* ViewController+BtAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+BtAction.swift"; sourceTree = "<group>"; };
 		09A33C87252091CB001F97A4 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		09A33C88252091CB001F97A4 /* VisualizationNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizationNode.swift; sourceTree = "<group>"; };
 		09A33C89252091CB001F97A4 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
@@ -130,6 +134,8 @@
 				E49C2E0920BC53F800D6C6F3 /* LaunchScreen.storyboard */,
 				E49C2E0420BC53F700D6C6F3 /* Main.storyboard */,
 				094C0D66253DC318006B381D /* Internet.swift */,
+				0976B01D2564CE3000315782 /* ViewController+Button.swift */,
+				0976B0202564D03B00315782 /* ViewController+BtAction.swift */,
 			);
 			path = imageOCR;
 			sourceTree = "<group>";
@@ -211,6 +217,8 @@
 			files = (
 				09C0D3532562A6E50038F473 /* BookInfo.swift in Sources */,
 				094C0D67253DC318006B381D /* Internet.swift in Sources */,
+				0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */,
+				0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */,
 				0942A3A12556581D00ECC38C /* AddButton.swift in Sources */,
 				09A33C8B252091CB001F97A4 /* VisualizationNode.swift in Sources */,
 				09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */,

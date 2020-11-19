@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import ARKit
 
 
 public struct Location{
@@ -24,5 +25,6 @@ public struct BookSt{
     var kinds = [String]()
     var cros_pic: Int!=0
     var isDisplay: Bool!=false
+    var bookTopPos: SCNMatrix4?
 }
 

@@ -43,7 +43,7 @@ struct Internet {
                 return
             }
             let mydata = data!
-            if let responseData = String(data: mydata, encoding: .utf8) {
+            if String(data: mydata, encoding: .utf8) != nil {
             print ("got data")
             controller?.setResult(receive: String(data: mydata, encoding: .utf8) ?? "")
             }
@@ -64,7 +64,7 @@ struct Internet {
     static func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
         URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
     }
-    static func visit(from url: URL, controller: ViewController?) -> String?{
+    static func visit(from url: URL, controller: ViewController?){
         getData(from: url) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error: \(String(describing: error))")
@@ -80,20 +80,20 @@ struct Internet {
                 }
             }
         }
-        return responseBuffer;
+        return;
     }
     
 
-    static func uploadImage(imageData: Data, controller: ViewController?)-> String?{
+    static func uploadImage(imageData: Data, controller: ViewController?){
 //        let url = URL(string: "http://172.20.10.2:8080/uploadTest")!
         let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        if let response = upload(request: request, data: imageData,isVisit: true, controller: controller){
-            return response
+        if upload(request: request, data: imageData,isVisit: true, controller: controller) != nil{
+            return
         }
-        return nil;
+        return;
     }
 }

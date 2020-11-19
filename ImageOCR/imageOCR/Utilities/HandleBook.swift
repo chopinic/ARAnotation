@@ -89,9 +89,9 @@ class HandleBook{
         print("now yOffset:\(yOffset)")
     }
     
-    public func saveCurrentTrans(view: ARSCNView) -> simd_float4x4?{
+    public func saveCurrentTrans(view: ARSCNView){
         prevTrans = view.session.currentFrame?.camera.transform
-        return prevTrans
+        return
     }
     
     public static func getActualLen(oriLen: Double, isW: Bool) -> Double{
@@ -127,8 +127,8 @@ class HandleBook{
         translation.columns.3.z = -0.4
         translation.columns.3.x = -0.027525755
         translation.columns.3.y = -0.03317832
-        let transform = trans * translation
-//        let anchor = BookAnchor(bookId: 0,w:0.03,h:0.06, transform: transform)
+        _ = trans * translation
+//        let anchor = BookAnch123or(bookId: 0,w:0.03,h:0.06, transform: transform)
 //        view.session.add(anchor: anchor)
     }
     
