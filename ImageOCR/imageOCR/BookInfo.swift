@@ -25,10 +25,10 @@ class BookInfo: UITextView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    init(id:Int){
+    init(){
         self.bookname = "";
         self.detail = "";
-        self.bookId = id;
+        self.bookId = -1;
         super.init(frame: CGRect(), textContainer: nil)
         self.text = self.detail;
     }
@@ -41,9 +41,9 @@ class BookInfo: UITextView {
     }
     
     
-    public func setFrame(frame:CGRect){
-        
-    }
+//    public func setFrame(frame:CGRect){
+//        
+//    }
     
     public func undatePosition(position: CGPoint){
 //        let centerPoint = getCenterPoint(position)

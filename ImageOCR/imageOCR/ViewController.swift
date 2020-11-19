@@ -15,7 +15,7 @@ import ARKit
 
 
 
-class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet var wholeView: UIView!
     @IBOutlet var sceneView: ARSCNView!
@@ -26,15 +26,18 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
     var DealBook = [HandleBook]()
     var books = [BookSt]()
     //var bookInfo = [BookInfo]()
-    var bookSCNNode = [SCNNode]()
+    //var bookSCNNode = [SCNNode]()
     var imageH = CGFloat()
     var imageW = CGFloat()
     var timer: Timer?
     var cot: Int! = 0
     var radio: Float = 1
     var bookPics = [UIImage]()
-    var focusId : Int?
-    var bookInfo : BookInfo?
+    var focusId = -1
+    var bookInfo = BookInfo()
+    var nowEnhanceNodes = [SCNNode]()
+    var textWidth = 200,textHeight = 100;
+
     
     
     override func viewDidLoad() {
@@ -46,9 +49,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         inputText.delegate = self
         inputText.bounds.size.width = wholewidth-100
         inputText.center.x = wholeView.center.x
-        inputText.text = "Showing!"
+        inputText.text = ""
         
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
+        bookInfo = BookInfo()
+        bookInfo.isHidden = true
+        bookInfo.isEditable = false
+        self.sceneView.addSubview(bookInfo)
+
 
         
         sceneView.bounds.size.width = wholewidth
@@ -72,47 +80,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         createButton(title: "debug2", negY: 300, action: #selector(ViewController.buttonAddInfo))
 //        ButtonCreate.createButton( title: "resize", negY: 300, action: #selector(ViewController.resize))
         //ButtonCreate.createDirectionButton()
-    }
-
-    
-    
-    public func findString(lookFor: String){
-        print("start find")
-        focusId = nil
-        var id = -1 as Int
-        for i in stride(from: 0, to: books.count ,by: 1){
-            let singlebook = books[i]
-            for j in stride(from: 0, to: singlebook.kinds.count ,by: 1){
-//                if singlebook.kinds[j] == "author"{
-                if singlebook.words[j].contains(lookFor){
-                    id = i
-                    break;
-                }
-            }
-            if(id != -1){break};
-        }
-        if(id == -1){
-            print("no such book")
-            return;
-        }
-        print("find A book, id: \(id)")
-        focusId = id;
-        enhance(id: id)
-    }
-    
-    public func enhance(id: Int){
-        guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false) else{
-            print("no such node")
-            return;
-        }
-        let closer = SCNAction.moveBy(x: 0, y: 0, z: 0.01, duration: 0.4)
-        let scale = SCNAction.scale(to: CGFloat(2), duration: 0.4)
-        scale.timingMode = .easeOut
-        let enhance = SCNAction.group([closer,scale])
-        childNode.runAction(enhance)
-
-    }
-    
+    }    
     
     
     func setLocation(locDic: NSDictionary)->Location{
@@ -135,10 +103,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
                     var nowbook = BookSt()
                     let bookloc = nowtempbook["location"] as! NSDictionary
                     nowbook.bookLoc = setLocation(locDic: bookloc)
-//                    let strBase64 = nowtempbook["base64"] as! String
-//                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-//                    bookPics.append(UIImage(data: dataDecoded)!)
-                    bookPics.append(UIImage(named: "test2.png")!)
+                    let strBase64 = nowtempbook["base64"] as! String
+                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                    bookPics.append(UIImage(data: dataDecoded)!)
+//                    bookPics.append(UIImage(named: "test2.png")!)
                     let parts = nowtempbook["part"] as! NSArray
                     for wordforlocs in parts {
                         let wordlocs = wordforlocs as! NSDictionary
@@ -148,10 +116,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
                         nowbook.locations.append(setLocation(locDic: resloc));
                     }
                     nowbook.cros_pic = cot;
+                    print(cot)
                     books.append(nowbook);
-//                    DispatchQueue.main.async{
-//                        self.bookInfo.append(BookInfo(id: self.cot))
-//                    }
                 }
             }
             self.resetAndAddAnchor()
@@ -159,15 +125,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         }
     }
     
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool{
-        let text = textField.text ?? ""
-        if text != ""{
-            findString(lookFor:text)
-        }
-        textField.resignFirstResponder()
-        return true
-    }
-
 
     
     public func resetAndAddAnchor(isReset: Bool = false){
@@ -177,8 +134,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
                 var singlebook = books[i]
                 singlebook.isDisplay = false
             }
-            
-
             if let anchorlist = sceneView.session.currentFrame?.anchors {
                 for anchor in anchorlist {
                     if let imanchor = anchor as? BookAnchor{
@@ -212,6 +167,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
     
         
     
+    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         guard let bookAnchor = anchor as? BookAnchor else{
             return
@@ -230,24 +186,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
         let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
         book.name = "book@\(id)"
         book.transform = SCNMatrix4(anchor.transform)
+        books[id].bookOriVec = book.position
         sceneView.scene.rootNode.addChildNode(book)
         
         var translation = matrix_identity_float4x4
         translation.columns.3.x = -Float(size.width/2)
         translation.columns.3.y = -Float(size.height/2)
         let bookTopPos = anchor.transform*translation
-        books[id].bookTopPos = SCNMatrix4(bookTopPos)
         let bookTop = SCNNode();
         bookTop.transform = SCNMatrix4(bookTopPos)
-//        let pos = sceneView.projectPoint(bookTop.position)
-//        var pos2d = CGPoint()
-//        let textWidth = 200,textHeight = 100;
-//        pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-//        pos2d.y = CGFloat(pos.y-Float(textHeight))
-//        DispatchQueue.main.async{
-//            let info = BookInfo(name: currentBook.words[0], info: "info\(id)", id: id, frame: CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(textWidth), height: CGFloat(textHeight)))
-//            self.sceneView.addSubview(info)
-//        }
+        books[id].bookTopPos = bookTop
+        
 
     }
     
@@ -255,38 +204,18 @@ class ViewController: UIViewController, ARSCNViewDelegate, UITextFieldDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
             
-        let childNodes = sceneView.scene.rootNode.childNodes
-        guard let nowinfo = bookInfo else{
-            return;
+        if(focusId == -1){return}
+        
+        let bookTop = books[focusId].bookTopPos!
+        let pos = sceneView.projectPoint(bookTop.position)
+        var pos2d = CGPoint()
+        pos2d.x = CGFloat(pos.x-Float(textWidth/2))
+        pos2d.y = CGFloat(pos.y-Float(textHeight))
+        
+        DispatchQueue.main.async{
+            self.bookInfo.undatePosition(position: pos2d)
         }
-
-        for node in childNodes {
-            guard let name = node.name else {
-                continue
-            }
-            if name.hasPrefix("book@") {
-//                return;
-                let i = name.index(after: name.firstIndex(of: "@")!)
-//                print("getid:\(name.suffix(from: i))")
-                let bookid = Int(name.suffix(from: i))!
-//                let bookid = 0
-                
-                let bookTop = SCNNode();
-                bookTop.transform = books[bookid].bookTopPos!
-                let pos = sceneView.projectPoint(bookTop.position)
-                var pos2d = CGPoint()
-                let textWidth = 200,textHeight = 100;
-                pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-                pos2d.y = CGFloat(pos.y-Float(textHeight))
-                
-                DispatchQueue.main.async{
-                    nowinfo.undatePosition(position: pos2d)
-                    nowinfo.text = "info"
-                }
-            }else{
-                continue;
-            }
-        }
+        
     }
     
     func refreshAnimationVariables(startTime: TimeInterval, initialPosition: float3, finalPosition: float3, initialOrientation: simd_quatf, finalOrientation: simd_quatf) {

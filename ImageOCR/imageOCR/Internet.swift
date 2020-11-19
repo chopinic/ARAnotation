@@ -24,7 +24,6 @@ struct Internet {
     }
     
     static func upload(request :URLRequest, data: Data, isVisit: Bool, controller: ViewController?) -> String? {
-        print("uploadTask")
         let task = URLSession.shared.uploadTask(with: request, from: data) { data, response, error in
             print("received")
             //print(data)

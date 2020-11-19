@@ -26,27 +26,6 @@ extension ViewController{
         timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
     }
     
-    @objc func resize(){
-        var id = -1 as Int
-        for i in stride(from: 0, to: books.count ,by: 1){
-            let singlebook = books[i]
-            for j in stride(from: 0, to: singlebook.kinds.count ,by: 1){
-                if singlebook.kinds[j] == "author"{
-                    if singlebook.words[j] == "Sam Harris"{
-                        id = i
-                        break;
-                    }
-                }
-            }
-            if(id != -1){break};
-        }
-        if(id == -1){
-            print("no such book")
-            return;
-        }
-        enhance(id: id)
-        
-    }
     
     
     @objc func buttonTapDebug(){

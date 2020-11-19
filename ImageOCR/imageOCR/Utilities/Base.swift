@@ -20,11 +20,12 @@ public struct Location{
 // book struct
 public struct BookSt{
     var bookLoc = Location()
+    var bookOriVec = SCNVector3()
     var words = [String]()
     var locations = [Location]()
     var kinds = [String]()
     var cros_pic: Int!=0
     var isDisplay: Bool!=false
-    var bookTopPos: SCNMatrix4?
+    var bookTopPos: SCNNode?
 }
 
