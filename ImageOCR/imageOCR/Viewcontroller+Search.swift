@@ -48,7 +48,7 @@ extension ViewController: UITextFieldDelegate{
     }
     
     public func enhance(ids: [Int]){
-        let disscale = SCNAction.scale(by: 0.5, duration: 0.04)
+        let disscale = SCNAction.scale(by: 0.5, duration: 0.4)
 
         let closer = SCNAction.moveBy(x: 0, y: 0, z: 0.01, duration: 0.4)
         let scale = SCNAction.scale(to: CGFloat(2), duration: 0.4)
@@ -88,15 +88,15 @@ extension ViewController: UITextFieldDelegate{
         pos2d.x = CGFloat(pos.x-Float(textWidth/2))
         pos2d.y = CGFloat(pos.y-Float(textHeight))
         DispatchQueue.main.async{
-            self.bookInfo.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
-            self.bookInfo.text = "info\(id)"
-            self.bookInfo.isHidden = false
+            self.bookInfoUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
+            self.bookInfoUI.text = "info\(id)"
+            self.bookInfoUI.isHidden = false
         }
     }
     
     public func resetSearch(){
         focusId = -1
         nowEnhanceNodes.removeAll()
-        self.bookInfo.isHidden = true
+        self.bookInfoUI.isHidden = true
     }
 }

@@ -8,8 +8,8 @@
 
 import UIKit
 extension ViewController{
-    @objc func buttonAddInfo(){
-        //addBookInfo()
+    @objc func buttonSort(){
+        
     }
     
     @objc func timerAction(){
@@ -33,7 +33,7 @@ extension ViewController{
         nowBookDeal.saveCurrentTrans(view: sceneView)
         DealBook.append(nowBookDeal)
         
-        setResult(receive: DebugString.jsonString);
+        setResult(receive: DebugString.jsonString ,isDebug: true);
         return
     }
     
@@ -69,11 +69,8 @@ extension ViewController{
             let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
             let tempUiImage = UIImage(ciImage: cI)
 
-            //            let data = tempUiImage.pngData()
             if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
-//            if let data = UIImagePNGRepresentation(tempUiImage){
                 let _:NSURL = NSURL(string : "urlHere")!
-                //Now use image to create into NSData format
                 let imageData = data.base64EncodedString()
                 print(imageData)
                 print("Start uploading!")

@@ -34,9 +34,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var radio: Float = 1
     var bookPics = [UIImage]()
     var focusId = -1
-    var bookInfo = BookInfo()
+    var bookInfoUI = BookInfo()
     var nowEnhanceNodes = [SCNNode]()
-    var textWidth = 200,textHeight = 100;
+    var textWidth = 300,textHeight = 200;
 
     
     
@@ -52,10 +52,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         inputText.text = ""
         
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
-        bookInfo = BookInfo()
-        bookInfo.isHidden = true
-        bookInfo.isEditable = false
-        self.sceneView.addSubview(bookInfo)
+        bookInfoUI = BookInfo()
+        bookInfoUI.isHidden = true
+        bookInfoUI.isEditable = false
+        bookInfoUI.layer.cornerRadius = 15.0
+        bookInfoUI.layer.borderWidth = 2.0
+        bookInfoUI.layer.borderColor = UIColor.red.cgColor
+
+        self.sceneView.addSubview(bookInfoUI)
 
 
         
@@ -75,9 +79,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.run(configuration)
         createButton( title: "Start", negY: 100, action: #selector(ViewController.buttonTapUpload))
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
-        createButton(title: "debug", negY: 200, action: #selector(ViewController.buttonTapDebug))
+        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
         
-        createButton(title: "debug2", negY: 300, action: #selector(ViewController.buttonAddInfo))
+        createButton(title: "sort", negY: 200, action: #selector(ViewController.buttonSort))
 //        ButtonCreate.createButton( title: "resize", negY: 300, action: #selector(ViewController.resize))
         //ButtonCreate.createDirectionButton()
     }    
@@ -92,7 +96,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return loc;
     }
     
-    func setResult(receive: String){
+    func setResult(receive: String, isDebug: Bool = false){
         result = Internet.getDictionaryFromJSONString(jsonString: receive)
         print("visit returns")
         if let hasResult = result {
@@ -103,10 +107,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     var nowbook = BookSt()
                     let bookloc = nowtempbook["location"] as! NSDictionary
                     nowbook.bookLoc = setLocation(locDic: bookloc)
-                    let strBase64 = nowtempbook["base64"] as! String
-                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                    bookPics.append(UIImage(data: dataDecoded)!)
-//                    bookPics.append(UIImage(named: "test2.png")!)
+                    if(isDebug){
+                        bookPics.append(UIImage(named: "test2.png")!)
+                    }else{
+                        let strBase64 = nowtempbook["base64"] as! String
+                        let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                        bookPics.append(UIImage(data: dataDecoded)!)
+                    }
                     let parts = nowtempbook["part"] as! NSArray
                     for wordforlocs in parts {
                         let wordlocs = wordforlocs as! NSDictionary
@@ -188,10 +195,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         book.transform = SCNMatrix4(anchor.transform)
         books[id].bookOriVec = book.position
         sceneView.scene.rootNode.addChildNode(book)
+        print(book.position)
         
         var translation = matrix_identity_float4x4
-        translation.columns.3.x = -Float(size.width/2)
-        translation.columns.3.y = -Float(size.height/2)
+        translation.columns.3.x = -Float(size.width)
+        translation.columns.3.y = -Float(size.height)
         let bookTopPos = anchor.transform*translation
         let bookTop = SCNNode();
         bookTop.transform = SCNMatrix4(bookTopPos)
@@ -213,7 +221,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         pos2d.y = CGFloat(pos.y-Float(textHeight))
         
         DispatchQueue.main.async{
-            self.bookInfo.undatePosition(position: pos2d)
+            self.bookInfoUI.undatePosition(position: pos2d)
         }
         
     }

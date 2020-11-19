@@ -38,7 +38,6 @@ struct Internet {
                 if isVisit{
                     controller?.buttonTapVisit()
                 }
-
                 return
             }
             let mydata = data!
