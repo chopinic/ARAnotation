@@ -8,18 +8,10 @@
 
 import UIKit
 
-class BookInfo: UITextView {
-
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
-    }
-    */
+class UIBookAbstract: UITextView {
     
     private var bookname: String ;
-    private var detail: String ;
+    private var abstract: String ;
     private var bookId: Int;
 
     required init?(coder: NSCoder) {
@@ -27,17 +19,17 @@ class BookInfo: UITextView {
     }
     init(){
         self.bookname = "";
-        self.detail = "";
+        self.abstract = "";
         self.bookId = -1;
         super.init(frame: CGRect(), textContainer: nil)
-        self.text = self.detail;
+        self.text = self.abstract;
     }
     init(name: String, info: String, id:Int , frame: CGRect){
         self.bookname = name;
-        self.detail = info;
+        self.abstract = info;
         self.bookId = id;
         super.init(frame: frame, textContainer: nil)
-        self.text = self.detail;
+        self.text = self.abstract;
     }
     
     
@@ -47,7 +39,7 @@ class BookInfo: UITextView {
     
     public func undatePosition(position: CGPoint){
 //        let centerPoint = getCenterPoint(position)
-        frame.origin = CGPoint(x: position.x, y: position.y)    
+        if(isHidden==false){frame.origin = CGPoint(x: position.x, y: position.y)}
     }
     
     func getCenterPoint(_ point: CGPoint) -> CGPoint {

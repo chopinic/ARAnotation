@@ -28,12 +28,12 @@ import ARKit
 
 
 
-class HandleBook{
+class PicMatrix{
     
 //    public var prevFrame : ARFrame?
     var prevTrans: simd_float4x4?
     
-    static var itemDis: Double = 0.4
+    static var itemDis: Double = 0.3
     
 //    var camWAngle: Double = 32.71/2
 //    var camWAngle: Double = 36.71/2 // cal
@@ -118,20 +118,7 @@ class HandleBook{
             return actualPicH*(midOffset/imageH)
         }
     }
-    
-    public func debug(view:ARSCNView){
-        guard let trans = view.session.currentFrame?.camera.transform
-        else { return }
-
-        var translation = matrix_identity_float4x4
-        translation.columns.3.z = -0.4
-        translation.columns.3.x = -0.027525755
-        translation.columns.3.y = -0.03317832
-        _ = trans * translation
-//        let anchor = BookAnch123or(bookId: 0,w:0.03,h:0.06, transform: transform)
-//        view.session.add(anchor: anchor)
-    }
-    
+        
     public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
         guard let trans = prevTrans
         else { return }
@@ -139,15 +126,21 @@ class HandleBook{
         let picH : Double = Double(book.bookLoc.top);
         let width = Double(book.bookLoc.width);
         let height = Double(book.bookLoc.height);
-        var x = Float(HandleBook.getActualOffset(offset: picW,isW: true))
-        var y = Float(HandleBook.getActualOffset(offset: picH,isW: false))
-        let z  = Float(-1*HandleBook.itemDis)
-        let w = HandleBook.getActualLen(oriLen: width, isW: true)
-        let h = HandleBook.getActualLen(oriLen:height, isW: false)
-        x += Float(w/2)+HandleBook.xOffset //-:left
-        y += Float(h/2)+HandleBook.yOffset //+:ri
+        var x = Float(PicMatrix.getActualOffset(offset: picW,isW: true))
+        var y = Float(PicMatrix.getActualOffset(offset: picH,isW: false))
+        let z  = Float(-1*PicMatrix.itemDis)
+        let w = PicMatrix.getActualLen(oriLen: width, isW: true)
+        let h = PicMatrix.getActualLen(oriLen:height, isW: false)
+        x += Float(w/2)+PicMatrix.xOffset //-:left
+        y += Float(h/2)+PicMatrix.yOffset //+:ri
+        var zz = z
+        if(id%3==0){
+            zz+=0.005
+        }else if(id%3==1){
+            zz+=0.003
+        }
         var translation = matrix_identity_float4x4
-        translation.columns.3.z = z
+        translation.columns.3.z = zz
         translation.columns.3.x = y
         translation.columns.3.y = x
         print("book: x:\(x),y:\(y),z:\(z),w:\(w),h\(h)")

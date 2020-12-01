@@ -14,16 +14,15 @@
 		0942A39D2556556700ECC38C /* UITextUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0942A39C2556556700ECC38C /* UITextUtilities.swift */; };
 		0942A3A12556581D00ECC38C /* AddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0942A3A02556581D00ECC38C /* AddButton.swift */; };
 		094C0D67253DC318006B381D /* Internet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D66253DC318006B381D /* Internet.swift */; };
-		094C0D6A253E7002006B381D /* HandleBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D69253E7001006B381D /* HandleBook.swift */; };
+		094C0D6A253E7002006B381D /* PicMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D69253E7001006B381D /* PicMatrix.swift */; };
 		0958D5F72550E72F00F6105A /* BookNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0958D5F62550E72F00F6105A /* BookNode.swift */; };
 		09626B75255B7EFC0013D22B /* test2.png in Resources */ = {isa = PBXBuildFile; fileRef = 09626B74255B7EFC0013D22B /* test2.png */; };
-		0976B01A2564CB5100315782 /* Viewcontroller+BookInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B0192564CB5100315782 /* Viewcontroller+BookInfo.swift */; };
 		0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B01D2564CE3000315782 /* ViewController+Button.swift */; };
 		0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B0202564D03B00315782 /* ViewController+BtAction.swift */; };
 		09A33C8A252091CB001F97A4 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C87252091CB001F97A4 /* Utilities.swift */; };
-		09A33C8B252091CB001F97A4 /* VisualizationNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C88252091CB001F97A4 /* VisualizationNode.swift */; };
 		09A33C8C252091CB001F97A4 /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 09A33C89252091CB001F97A4 /* test.png */; };
-		09C0D3532562A6E50038F473 /* BookInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C0D3522562A6E50038F473 /* BookInfo.swift */; };
+		09C0D3532562A6E50038F473 /* UIBookAbstract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C0D3522562A6E50038F473 /* UIBookAbstract.swift */; };
+		09CA03972574757B006CF8FE /* ViewComtroller+Gesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */; };
 		09DF337925663FA500FEEB5E /* Viewcontroller+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */; };
 		09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FFD2F0254BE8FF003E55B1 /* Base.swift */; };
 		E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49C2DFE20BC53F700D6C6F3 /* AppDelegate.swift */; };
@@ -43,16 +42,15 @@
 		0942A39C2556556700ECC38C /* UITextUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITextUtilities.swift; sourceTree = "<group>"; };
 		0942A3A02556581D00ECC38C /* AddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddButton.swift; sourceTree = "<group>"; };
 		094C0D66253DC318006B381D /* Internet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet.swift; sourceTree = "<group>"; };
-		094C0D69253E7001006B381D /* HandleBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleBook.swift; sourceTree = "<group>"; };
+		094C0D69253E7001006B381D /* PicMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicMatrix.swift; sourceTree = "<group>"; };
 		0958D5F62550E72F00F6105A /* BookNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNode.swift; sourceTree = "<group>"; };
 		09626B74255B7EFC0013D22B /* test2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test2.png; sourceTree = "<group>"; };
-		0976B0192564CB5100315782 /* Viewcontroller+BookInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+BookInfo.swift"; sourceTree = "<group>"; };
 		0976B01D2564CE3000315782 /* ViewController+Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+Button.swift"; sourceTree = "<group>"; };
 		0976B0202564D03B00315782 /* ViewController+BtAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+BtAction.swift"; sourceTree = "<group>"; };
 		09A33C87252091CB001F97A4 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
-		09A33C88252091CB001F97A4 /* VisualizationNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizationNode.swift; sourceTree = "<group>"; };
 		09A33C89252091CB001F97A4 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
-		09C0D3522562A6E50038F473 /* BookInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookInfo.swift; sourceTree = "<group>"; };
+		09C0D3522562A6E50038F473 /* UIBookAbstract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIBookAbstract.swift; sourceTree = "<group>"; };
+		09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewComtroller+Gesture.swift"; sourceTree = "<group>"; };
 		09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+Search.swift"; sourceTree = "<group>"; };
 		09FFD2F0254BE8FF003E55B1 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		E49C2DFB20BC53F700D6C6F3 /* imageOCR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imageOCR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,9 +78,12 @@
 		0942A39B2556556700ECC38C /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				091F13B82541DCB400FA31B3 /* ImageProcess.swift */,
+				09A33C87252091CB001F97A4 /* Utilities.swift */,
 				09FFD2F0254BE8FF003E55B1 /* Base.swift */,
 				0942A397255654B300ECC38C /* DebugString.swift */,
-				094C0D69253E7001006B381D /* HandleBook.swift */,
+				094C0D69253E7001006B381D /* PicMatrix.swift */,
+				094C0D66253DC318006B381D /* Internet.swift */,
 				091F13BB2541DE6400FA31B3 /* BookAnchor.swift */,
 				0958D5F62550E72F00F6105A /* BookNode.swift */,
 				0942A39C2556556700ECC38C /* UITextUtilities.swift */,
@@ -94,7 +95,6 @@
 		0976B0182564CB0A00315782 /* InfoUpdate */ = {
 			isa = PBXGroup;
 			children = (
-				0976B0192564CB5100315782 /* Viewcontroller+BookInfo.swift */,
 			);
 			path = InfoUpdate;
 			sourceTree = "<group>";
@@ -120,25 +120,22 @@
 			children = (
 				0976B0182564CB0A00315782 /* InfoUpdate */,
 				0942A39B2556556700ECC38C /* Utilities */,
-				091F13B82541DCB400FA31B3 /* ImageProcess.swift */,
 				09A33C89252091CB001F97A4 /* test.png */,
 				09626B74255B7EFC0013D22B /* test2.png */,
 				0942A393255652B800ECC38C /* json.txt */,
-				09A33C87252091CB001F97A4 /* Utilities.swift */,
-				09A33C88252091CB001F97A4 /* VisualizationNode.swift */,
 				E49C2E0C20BC53F800D6C6F3 /* Info.plist */,
 				E49C2E0020BC53F700D6C6F3 /* art.scnassets */,
 				E4CBE4C620C58002004450ED /* AnimationInfo.swift */,
 				E49C2DFE20BC53F700D6C6F3 /* AppDelegate.swift */,
-				E49C2E0220BC53F700D6C6F3 /* ViewController.swift */,
-				09C0D3522562A6E50038F473 /* BookInfo.swift */,
 				E49C2E0720BC53F800D6C6F3 /* Assets.xcassets */,
 				E49C2E0920BC53F800D6C6F3 /* LaunchScreen.storyboard */,
 				E49C2E0420BC53F700D6C6F3 /* Main.storyboard */,
-				094C0D66253DC318006B381D /* Internet.swift */,
+				09C0D3522562A6E50038F473 /* UIBookAbstract.swift */,
+				E49C2E0220BC53F700D6C6F3 /* ViewController.swift */,
 				0976B01D2564CE3000315782 /* ViewController+Button.swift */,
 				0976B0202564D03B00315782 /* ViewController+BtAction.swift */,
 				09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */,
+				09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */,
 			);
 			path = imageOCR;
 			sourceTree = "<group>";
@@ -218,19 +215,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09C0D3532562A6E50038F473 /* BookInfo.swift in Sources */,
+				09C0D3532562A6E50038F473 /* UIBookAbstract.swift in Sources */,
 				094C0D67253DC318006B381D /* Internet.swift in Sources */,
 				0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */,
 				0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */,
 				0942A3A12556581D00ECC38C /* AddButton.swift in Sources */,
-				09A33C8B252091CB001F97A4 /* VisualizationNode.swift in Sources */,
 				09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */,
+				09CA03972574757B006CF8FE /* ViewComtroller+Gesture.swift in Sources */,
 				E4CBE4C720C58002004450ED /* AnimationInfo.swift in Sources */,
-				094C0D6A253E7002006B381D /* HandleBook.swift in Sources */,
+				094C0D6A253E7002006B381D /* PicMatrix.swift in Sources */,
 				E49C2E0320BC53F700D6C6F3 /* ViewController.swift in Sources */,
 				09A33C8A252091CB001F97A4 /* Utilities.swift in Sources */,
 				09DF337925663FA500FEEB5E /* Viewcontroller+Search.swift in Sources */,
-				0976B01A2564CB5100315782 /* Viewcontroller+BookInfo.swift in Sources */,
 				091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */,
 				E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */,
 				0958D5F72550E72F00F6105A /* BookNode.swift in Sources */,
@@ -380,6 +376,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RUFTS93346;
 				INFOPLIST_FILE = imageOCR/Info.plist;
@@ -390,6 +387,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ImageOcr.chopinic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -399,6 +397,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RUFTS93346;
 				INFOPLIST_FILE = imageOCR/Info.plist;
@@ -409,6 +408,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ImageOcr.chopinic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

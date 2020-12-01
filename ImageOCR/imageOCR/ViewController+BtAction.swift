@@ -7,10 +7,9 @@
 //
 
 import UIKit
+import ARKit
 extension ViewController{
-    @objc func buttonSort(){
-        
-    }
+
     
     @objc func timerAction(){
         buttonTapUpload()
@@ -29,40 +28,40 @@ extension ViewController{
     
     
     @objc func buttonTapDebug(){
-        let nowBookDeal = HandleBook()
+        let nowBookDeal = PicMatrix()
         nowBookDeal.saveCurrentTrans(view: sceneView)
-        DealBook.append(nowBookDeal)
+        picMatrix.append(nowBookDeal)
         
-        setResult(receive: DebugString.jsonString ,isDebug: true);
+        setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
         return
     }
     
     @objc func buttonTapaddx(){
-        HandleBook.addxOffSet()
+        PicMatrix.addxOffSet()
         resetAndAddAnchor(isReset: true)
     }
     
     @objc func buttonTapdecx(){
-        HandleBook.decxOffSet()
+        PicMatrix.decxOffSet()
         resetAndAddAnchor(isReset: true)
     }
     
     @objc func buttonTapaddy(){
-        HandleBook.addyOffSet()
+        PicMatrix.addyOffSet()
         resetAndAddAnchor(isReset: true)
     }
     
     @objc func buttonTapdecy(){
-        HandleBook.decyOffSet()
+        PicMatrix.decyOffSet()
         resetAndAddAnchor(isReset: true)
     }
     
     
     @objc func buttonTapUpload(){
         if let capturedImage = sceneView.session.currentFrame?.capturedImage{
-            let nowBookDeal = HandleBook()
-            nowBookDeal.saveCurrentTrans(view: sceneView)
-            DealBook.append(nowBookDeal)
+            let nowMatrix = PicMatrix()
+            nowMatrix.saveCurrentTrans(view: sceneView)
+            picMatrix.append(nowMatrix)
             
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
@@ -72,16 +71,23 @@ extension ViewController{
             if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
                 let _:NSURL = NSURL(string : "urlHere")!
                 let imageData = data.base64EncodedString()
-                print(imageData)
                 print("Start uploading!")
-                Internet.uploadImage(imageData: imageData.data(using: .utf8)!,controller:self);
+                let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
+                Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
             }
+            
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(5760),isW: true), height: PicMatrix.getActualLen(oriLen:Double(4320),isW: false))
+            let transTip = createPlaneNode(size: size, rotation: 0, contents: UIColor(red: 1, green: 1, blue: 1, alpha: 0.75))
+            transTip.name = "trans@"
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-1*PicMatrix.itemDis-0.01)
+            transTip.transform = SCNMatrix4(nowMatrix.prevTrans!*translation)
+            sceneView.scene.rootNode.addChildNode(transTip)
+ 
         }
+        
     }
     
-    @objc func buttonTapVisit(){
-        let url = URL(string: "http://172.20.10.2:8080/ocrtest")!
-        Internet.visit(from: url, controller: self)
-    }
+    
 }
 

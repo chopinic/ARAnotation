@@ -23,21 +23,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private var animationInfo: AnimationInfo?
     private var imageBuffer: UIImage?
     private var result: NSDictionary!
-    var DealBook = [HandleBook]()
+    var picMatrix = [PicMatrix]()
     var books = [BookSt]()
     //var bookInfo = [BookInfo]()
     //var bookSCNNode = [SCNNode]()
+    var bookweights = [BookWeight]()
     var imageH = CGFloat()
     var imageW = CGFloat()
     var timer: Timer?
-    var cot: Int! = 0
     var radio: Float = 1
     var bookPics = [UIImage]()
     var focusId = -1
-    var bookInfoUI = BookInfo()
+    var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
-    var textWidth = 300,textHeight = 200;
-
+    var textWidth = 300,textHeight = 200
+    var nowTrans: simd_float4x4?
     
     
     override func viewDidLoad() {
@@ -50,16 +50,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         inputText.bounds.size.width = wholewidth-100
         inputText.center.x = wholeView.center.x
         inputText.text = ""
-        
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
-        bookInfoUI = BookInfo()
-        bookInfoUI.isHidden = true
-        bookInfoUI.isEditable = false
-        bookInfoUI.layer.cornerRadius = 15.0
-        bookInfoUI.layer.borderWidth = 2.0
-        bookInfoUI.layer.borderColor = UIColor.red.cgColor
-
-        self.sceneView.addSubview(bookInfoUI)
+        bookAbstractUI = UIBookAbstract()
+        bookAbstractUI.isHidden = true
+        bookAbstractUI.isEditable = false
+        bookAbstractUI.layer.cornerRadius = 15.0
+        bookAbstractUI.layer.borderWidth = 2.0
+        bookAbstractUI.layer.borderColor = UIColor.red.cgColor
+        self.sceneView.addSubview(bookAbstractUI)
 
 
         
@@ -71,19 +69,28 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let scene = SCNScene()
         sceneView.scene = scene
         sceneView.delegate = self
+        
+        arViewGestureSetup()
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
         sceneView.session.run(configuration)
-        createButton( title: "Start", negY: 100, action: #selector(ViewController.buttonTapUpload))
+        createButton( title: "Start",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
+        
+        
         createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
         
-        createButton(title: "sort", negY: 200, action: #selector(ViewController.buttonSort))
-//        ButtonCreate.createButton( title: "resize", negY: 300, action: #selector(ViewController.resize))
-        //ButtonCreate.createDirectionButton()
+        createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
+        
+        createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
+        
+        createButton(title: "Ant",negX: 100, negY: 150, action: #selector(ViewController.changeToAntEyeDisplay))
+
+        createDirectionButton()
     }    
     
     
@@ -96,12 +103,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return loc;
     }
     
-    func setResult(receive: String, isDebug: Bool = false){
+    func setResult(cot:Int, receive: String, isDebug: Bool = false){
         result = Internet.getDictionaryFromJSONString(jsonString: receive)
         print("visit returns")
         if let hasResult = result {
             if let resultbooks = hasResult["words_result"] {
                 let bookarray = resultbooks as! NSArray
+                print("Found \(bookarray.count) books")
                 for nowforbook in bookarray{
                     let nowtempbook = nowforbook as! NSDictionary
                     var nowbook = BookSt()
@@ -112,7 +120,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     }else{
                         let strBase64 = nowtempbook["base64"] as! String
                         let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                        bookPics.append(UIImage(data: dataDecoded)!)
+                        if let pic = UIImage(data: dataDecoded){
+                            bookPics.append(pic)
+                        }else{
+                            bookPics.append(UIImage(named: "test2.png")!)
+                        }
                     }
                     let parts = nowtempbook["part"] as! NSArray
                     for wordforlocs in parts {
@@ -122,24 +134,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         nowbook.words.append(wordlocs["words"] as! String)
                         nowbook.locations.append(setLocation(locDic: resloc));
                     }
-                    nowbook.cros_pic = cot;
-                    print(cot)
+                    nowbook.matrixId = cot;
                     books.append(nowbook);
+                    bookweights.append(BookWeight())
                 }
             }
             self.resetAndAddAnchor()
-            cot+=1;
         }
     }
     
 
     
     public func resetAndAddAnchor(isReset: Bool = false){
-        // Drawing code
         if isReset{
             for i in stride(from: 0, to: books.count ,by: 1){
-                var singlebook = books[i]
-                singlebook.isDisplay = false
+                books[i].isDisplay = false
             }
             if let anchorlist = sceneView.session.currentFrame?.anchors {
                 for anchor in anchorlist {
@@ -162,13 +171,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         for i in stride(from: 0, to: books.count ,by: 1){
-            var singlebook = books[i]
-            if singlebook.isDisplay{
-                    continue;
+//            print(books[i].isDisplay)
+            if books[i].isDisplay{
+                continue;
             }
-            let nowpic = singlebook.cros_pic
-            singlebook.isDisplay = true;
-            DealBook[nowpic!].addBookAnchor(view:sceneView, id:i,book:singlebook)
+            let nowMatrix = books[i].matrixId!-1
+            books[i].isDisplay = true;
+            picMatrix[nowMatrix].addBookAnchor(view:sceneView, id:i,book:books[i])
         }
     }
     
@@ -184,7 +193,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let currentBook = books[id]
         let rootLoc = currentBook.bookLoc
         let picContents = bookPics[id]
-        let size = CGSize(width: HandleBook.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: HandleBook.getActualLen(oriLen:Double(rootLoc.width),isW: false))
+        let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
         print("bookid: \(id)")
         for str in currentBook.words {
             print(" words: \(str)")
@@ -193,7 +202,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
         book.name = "book@\(id)"
         book.transform = SCNMatrix4(anchor.transform)
-        books[id].bookOriVec = book.position
+        books[id].bookOriTrans = book.transform
         sceneView.scene.rootNode.addChildNode(book)
         print(book.position)
         
@@ -203,43 +212,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let bookTopPos = anchor.transform*translation
         let bookTop = SCNNode();
         bookTop.transform = SCNMatrix4(bookTopPos)
-        books[id].bookTopPos = bookTop
-        
+        books[id].bookTopVec = bookTop.position-book.position
 
     }
     
     
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-            
+        
         if(focusId == -1){return}
         
-        let bookTop = books[focusId].bookTopPos!
-        let pos = sceneView.projectPoint(bookTop.position)
+//        if(bookInfoUI.isHidden==true){return}
+        guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(focusId)", recursively: false) else{
+            print("renderer: no such node \(focusId)")
+            return
+        }
+        let bookTopPos = childNode.position+books[focusId].bookTopVec!
+        let pos = sceneView.projectPoint(bookTopPos)
         var pos2d = CGPoint()
         pos2d.x = CGFloat(pos.x-Float(textWidth/2))
         pos2d.y = CGFloat(pos.y-Float(textHeight))
         
         DispatchQueue.main.async{
-            self.bookInfoUI.undatePosition(position: pos2d)
+            self.bookAbstractUI.undatePosition(position: pos2d)
         }
         
     }
     
-    func refreshAnimationVariables(startTime: TimeInterval, initialPosition: float3, finalPosition: float3, initialOrientation: simd_quatf, finalOrientation: simd_quatf) {
-        let distance = simd_distance(initialPosition, finalPosition)
-        // Average speed of movement is 0.15 m/s.
-        let speed = Float(0.15)
-        // Total time is calculated as distance/speed. Min time is set to 0.1s and max is set to 2s.
-        let animationDuration = Double(min(max(0.1, distance/speed), 2))
-        // Store animation information for later usage.
-        animationInfo = AnimationInfo(startTime: startTime,
-                                      duration: animationDuration,
-                                      initialModelPosition: initialPosition,
-                                      finalModelPosition: finalPosition,
-                                      initialModelOrientation: initialOrientation,
-                                      finalModelOrientation: finalOrientation)
-    }
+    
+    
     
 }
 

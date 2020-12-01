@@ -11,6 +11,11 @@ import UIKit
 
 extension ViewController: UITextFieldDelegate{
     
+    func getIdFromName(_ name: String) -> Int {
+        let i = name.index(after: name.firstIndex(of: "@")!)
+        return Int(name.suffix(from: i))!
+    }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool{
         let text = textField.text ?? ""
         if text != ""{
@@ -19,7 +24,7 @@ extension ViewController: UITextFieldDelegate{
         textField.resignFirstResponder()
         return true
     }
-    
+        
 
     public func findString(lookFor: String){
         print("start find")
@@ -27,43 +32,47 @@ extension ViewController: UITextFieldDelegate{
         var findResult = [Int]()
         for i in stride(from: 0, to: books.count ,by: 1){
             let singlebook = books[i]
+            bookweights[i].id = i;
+            bookweights[i].weight = 0;
+
             for j in stride(from: 0, to: singlebook.kinds.count ,by: 1){
 //                if singlebook.kinds[j] == "author"{
                 if singlebook.words[j].contains(lookFor){
                     focusId = i
                     findResult.append(i)
-                    continue;
+                    bookweights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
+                    print("\(i): \(singlebook.words[j]): \(bookweights[i].weight)")
+
+                }else{
+                    bookweights[i].update(w: 0);
                 }
             }
         }
         if(findResult.count == 0){
             print("no such book")
-            enhance(ids: findResult)
             resetSearch()
             return;
         }
         print("find \(findResult.count) book")
-        enhance(ids: findResult)
-        showBookInfo(id: focusId)
+        scaleNodes(ids: findResult)
+        showBookAbstract(id: focusId)
     }
     
-    public func enhance(ids: [Int]){
-        let disscale = SCNAction.scale(by: 0.5, duration: 0.4)
-
+    public func scaleNodes(ids: [Int]){
         let closer = SCNAction.moveBy(x: 0, y: 0, z: 0.01, duration: 0.4)
         let scale = SCNAction.scale(to: CGFloat(2), duration: 0.4)
         let enhance = SCNAction.group([closer,scale])
         enhance.timingMode = .easeOut
 
         for prevNode in nowEnhanceNodes {
-            let name = prevNode.name!
-            let i = name.index(after: name.firstIndex(of: "@")!)
-            let bookid = Int(name.suffix(from: i))!
+            let bookid = getIdFromName(prevNode.name!)
             if ids.firstIndex(of: bookid) != nil{
                 continue
             }
-            let further = SCNAction.move(to: books[bookid].bookOriVec, duration: 0.4)
-            let disenhance = SCNAction.group([disscale,further])
+//            let further = SCNAction.move(to: books[bookid].bookOriTrans, duration: 0.4)
+            let disenhance = SCNAction.scale(by: CGFloat(Double(1)/books[bookid].nowScale), duration: 0.4)
+//            let disenhance = SCNAction.group([disscale,further])
+            books[bookid].nowScale = 1
             disenhance.timingMode = .easeOut
             prevNode.runAction(disenhance)
         }
@@ -71,32 +80,133 @@ extension ViewController: UITextFieldDelegate{
         
         for id in ids {
             guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false) else{
-                print("no such node \(id)")
+                print("search: no such node \(id)")
                 continue;
             }
             
             childNode.runAction(enhance)
+            books[id].nowScale*=2
             nowEnhanceNodes.append(childNode)
 
         }
     }
     
-    func showBookInfo(id: Int){
+    
+    func showBookAbstract(id: Int){
+//        for sb in sceneView.scene.rootNode.childNodes {
+//            print(sb.name)
+//        }
         let currentBook = books[id]
-        let pos = sceneView.projectPoint(currentBook.bookTopPos!.position)
+        let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false)!
+        focus(nowBookNode: nowBookNode, currentBook: currentBook)
+    }
+    
+    func focus(nowBookNode: SCNNode, currentBook: BookSt) {
+        focusId = getIdFromName(nowBookNode.name!)
+        let pos = sceneView.projectPoint(currentBook.bookTopVec!+nowBookNode.position)
         var pos2d = CGPoint()
         pos2d.x = CGFloat(pos.x-Float(textWidth/2))
         pos2d.y = CGFloat(pos.y-Float(textHeight))
-        DispatchQueue.main.async{
-            self.bookInfoUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
-            self.bookInfoUI.text = "info\(id)"
-            self.bookInfoUI.isHidden = false
+        var abstract = "⭐️\n"
+        for bookStr in currentBook.words {
+            abstract+=bookStr
+            abstract+="\n"
         }
+        DispatchQueue.main.async{
+            self.bookAbstractUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
+            self.bookAbstractUI.text = abstract+"book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail "
+            self.bookAbstractUI.isHidden = false
+        }
+
     }
     
     public func resetSearch(){
         focusId = -1
-        nowEnhanceNodes.removeAll()
-        self.bookInfoUI.isHidden = true
+        scaleNodes(ids: [])
+        self.bookAbstractUI.isHidden = true
     }
+    
+    @objc func changeToSortDisplay(){
+//        for node in sceneView.scene.rootNode.childNodes {
+//            print(node.name)
+//        }
+        resetSearch();
+        let z = -1*PicMatrix.itemDis
+        var y = -0.1
+        let x =  0
+        nowTrans = sceneView.session.currentFrame!.camera.transform
+        bookweights.sort(by: {$0.weight > $1.weight})
+        for i in stride(from: 0, to: bookweights.count ,by: 1){
+            let nowBookWeight = bookweights[i]
+            let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowBookWeight.id)", recursively: false)!
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(z)
+            translation.columns.3.x = Float(x)
+            translation.columns.3.y = Float(y)
+            y += 0.03
+            let bookSortNode = SCNNode()
+            bookSortNode.transform = SCNMatrix4(nowTrans!*translation)
+            let nowPosVec = bookSortNode.position
+            let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
+            SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
+                nowBookNode.transform = SCNMatrix4(self.nowTrans!*translation)
+            }
+            nowBookNode.runAction(trans)
+        }
+    }
+    
+    @objc func changeToAntEyeDisplay(){
+        resetSearch()
+        var z = -1*PicMatrix.itemDis
+        var y = 0.0
+        var x = 0.0
+        var l = 0.0
+        let angle = 140.0 * Double.pi / 180
+        nowTrans = sceneView.session.currentFrame!.camera.transform
+        bookweights.sort(by: {$0.weight > $1.weight})
+        for i in stride(from: 0, to: bookweights.count ,by: 1){
+            x = l * sin(angle*Double(i))
+            y = l * cos(angle*Double(i))
+            let nowBookWeight = bookweights[i]
+            let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowBookWeight.id)", recursively: false)!
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(z)
+            translation.columns.3.x = Float(x)
+            translation.columns.3.y = Float(y)
+            let bookSortNode = SCNNode();
+            bookSortNode.transform = SCNMatrix4(nowTrans!*translation)
+            let nowPosVec = bookSortNode.position
+            let tans = SCNAction.move(to: nowPosVec, duration: 0.4);
+//            nowBookNode.constraints = [SCNBillboardConstraint()]
+            nowBookNode.runAction(tans)
+//            if(i==0){l += 0.1}
+            z -= 0.1/pow(Double(i+3),0.5)
+            l += 0.05/pow(Double(i+1),0.5)
+        }
+    }
+    
+    @objc func restoreDisplay(){
+        resetSearch()
+        let childNodes = sceneView.scene.rootNode.childNodes
+        for node in childNodes {
+            guard let name = node.name else {
+                continue
+            }
+            if name.hasPrefix("book@") {
+                let bookid = getIdFromName(name)
+//                let restore = SCNAction.move(to: books[bookid].bookOriTrans, duration: 0.4)
+                let restore = SCNAction.customAction(duration: 0.4){(node,time) in
+                    node.transform = self.books[bookid].bookOriTrans
+                }
+                restore.timingMode = .easeOut
+//                node.constraints = []
+                node.runAction(restore)
+            }else{
+                continue;
+            }
+        }
+
+        
+    }
+    
 }

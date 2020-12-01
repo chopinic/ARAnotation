@@ -20,12 +20,39 @@ public struct Location{
 // book struct
 public struct BookSt{
     var bookLoc = Location()
-    var bookOriVec = SCNVector3()
+    var bookOriTrans = SCNMatrix4()
     var words = [String]()
     var locations = [Location]()
     var kinds = [String]()
-    var cros_pic: Int!=0
+    var matrixId: Int!=0
     var isDisplay: Bool!=false
-    var bookTopPos: SCNNode?
+    var bookTopVec: SCNVector3?
+    var nowScale: Double = 1
+    //var weight : Double=0
 }
 
+public struct BookWeight{
+    var id : Int = 0
+    var weight : Double = 0
+    init(){
+        
+    }
+    init(i:Int,w:Double) {
+        id = i;
+        weight = w;
+    }
+    public mutating func update(w:Double){
+        if(w > weight){weight = w;}
+    }
+}
+
+
+extension SCNVector3 {
+    static func +(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
+        return SCNVector3(left.x+right.x,left.y+right.y,left.z+right.z)
+    }
+    static func -(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
+        return SCNVector3(left.x-right.x,left.y-right.y,left.z-right.z)
+    }
+
+}

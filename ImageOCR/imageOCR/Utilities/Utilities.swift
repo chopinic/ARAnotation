@@ -67,10 +67,18 @@ extension MLMultiArray {
     }
 }
 
+
+//func createTransPlaneNode(size: CGSize, geometry:SCNGeometry){
+//    let plane = SCNPlane(width: size.width, height: size.height)
+//    
+//    return createPlaneNode(size: size, geometry)
+//}
+
 /// Creates a SceneKit node with plane geometry, to the argument size, rotation, and material contents.
 func createPlaneNode(size: CGSize, rotation: Float, contents: Any?) -> SCNNode {
     let plane = SCNPlane(width: size.width, height: size.height)
     plane.cornerRadius = size.width/CGFloat(50)
+//    plane.b
     plane.firstMaterial?.diffuse.contents = contents
     let planeNode = SCNNode(geometry: plane)
     
