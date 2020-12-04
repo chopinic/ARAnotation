@@ -115,6 +115,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     var nowbook = BookSt()
                     let bookloc = nowtempbook["location"] as! NSDictionary
                     nowbook.bookLoc = setLocation(locDic: bookloc)
+                    nowbook.title = nowtempbook["title"] as! String
+                    nowbook.author = nowtempbook["author"] as! String
+                    nowbook.publisher = nowtempbook["publisher"] as! String
+                    nowbook.relatedBook = nowtempbook["relatebooks"] as! String
+                    nowbook.score = Int((nowtempbook["score"] as! Double)*5)
+                    nowbook.remark = nowtempbook["remark"] as! String
                     if(isDebug){
                         bookPics.append(UIImage(named: "test2.png")!)
                     }else{

@@ -35,7 +35,7 @@ extension ViewController: UITextFieldDelegate{
             bookweights[i].id = i;
             bookweights[i].weight = 0;
 
-            for j in stride(from: 0, to: singlebook.kinds.count ,by: 1){
+            for j in stride(from: 0, to: singlebook.words.count ,by: 1){
 //                if singlebook.kinds[j] == "author"{
                 if singlebook.words[j].contains(lookFor){
                     focusId = i
@@ -83,7 +83,6 @@ extension ViewController: UITextFieldDelegate{
                 print("search: no such node \(id)")
                 continue;
             }
-            
             childNode.runAction(enhance)
             books[id].nowScale*=2
             nowEnhanceNodes.append(childNode)
@@ -101,23 +100,33 @@ extension ViewController: UITextFieldDelegate{
         focus(nowBookNode: nowBookNode, currentBook: currentBook)
     }
     
+    func generateAbstract(currentBook: BookSt)-> String{
+        var abstractscore = ""
+        for _ in stride(from: 0, to: currentBook.score ,by: 1){
+            abstractscore+="⭐️"
+        }
+        var abstract = ""
+        for bookStr in currentBook.words {
+            abstract+=bookStr
+            abstract+="\n"
+        }
+        abstract+="Rating: "+abstractscore+"\n\n"
+        abstract+="Reviewer's words:\n  "+currentBook.remark
+        return abstract
+    }
+    
     func focus(nowBookNode: SCNNode, currentBook: BookSt) {
         focusId = getIdFromName(nowBookNode.name!)
         let pos = sceneView.projectPoint(currentBook.bookTopVec!+nowBookNode.position)
         var pos2d = CGPoint()
         pos2d.x = CGFloat(pos.x-Float(textWidth/2))
         pos2d.y = CGFloat(pos.y-Float(textHeight))
-        var abstract = "⭐️\n"
-        for bookStr in currentBook.words {
-            abstract+=bookStr
-            abstract+="\n"
-        }
+        let abstract = generateAbstract(currentBook: currentBook)
         DispatchQueue.main.async{
             self.bookAbstractUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
-            self.bookAbstractUI.text = abstract+"book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail book detail "
+            self.bookAbstractUI.text = abstract
             self.bookAbstractUI.isHidden = false
         }
-
     }
     
     public func resetSearch(){
@@ -149,6 +158,7 @@ extension ViewController: UITextFieldDelegate{
             let nowPosVec = bookSortNode.position
             let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
             SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
+//                let dist = nowBookNode.transform - SCNMatrix4(self.nowTrans!*translation)
                 nowBookNode.transform = SCNMatrix4(self.nowTrans!*translation)
             }
             nowBookNode.runAction(trans)
@@ -157,31 +167,31 @@ extension ViewController: UITextFieldDelegate{
     
     @objc func changeToAntEyeDisplay(){
         resetSearch()
-        var z = -1*PicMatrix.itemDis
-        var y = 0.0
-        var x = 0.0
-        var l = 0.0
-        let angle = 140.0 * Double.pi / 180
+        var z = -0.5*PicMatrix.itemDis
+        var absy = 0.0
         nowTrans = sceneView.session.currentFrame!.camera.transform
         bookweights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: bookweights.count ,by: 1){
-            x = l * sin(angle*Double(i))
-            y = l * cos(angle*Double(i))
             let nowBookWeight = bookweights[i]
             let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowBookWeight.id)", recursively: false)!
             var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(z)
-            translation.columns.3.x = Float(x)
-            translation.columns.3.y = Float(y)
+            translation.columns.3.x = 0
+            if i%2==1{
+                translation.columns.3.y = Float(absy)
+            }
+            else{
+                translation.columns.3.y = Float(-1.0*absy)
+            }
             let bookSortNode = SCNNode();
             bookSortNode.transform = SCNMatrix4(nowTrans!*translation)
             let nowPosVec = bookSortNode.position
             let tans = SCNAction.move(to: nowPosVec, duration: 0.4);
-//            nowBookNode.constraints = [SCNBillboardConstraint()]
             nowBookNode.runAction(tans)
-//            if(i==0){l += 0.1}
-            z -= 0.1/pow(Double(i+3),0.5)
-            l += 0.05/pow(Double(i+1),0.5)
+            if i%2==1{
+                absy+=0.02
+            }
+            z -= 0.1/pow(Double(i+4),1)
         }
     }
     

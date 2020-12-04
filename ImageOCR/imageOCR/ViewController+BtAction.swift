@@ -62,7 +62,6 @@ extension ViewController{
             let nowMatrix = PicMatrix()
             nowMatrix.saveCurrentTrans(view: sceneView)
             picMatrix.append(nowMatrix)
-            
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
             let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
@@ -71,6 +70,7 @@ extension ViewController{
             if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
                 let _:NSURL = NSURL(string : "urlHere")!
                 let imageData = data.base64EncodedString()
+                print(imageData)
                 print("Start uploading!")
                 let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
                 Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
