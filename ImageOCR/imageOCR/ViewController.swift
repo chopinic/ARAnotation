@@ -113,12 +113,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        createButton(title: "regrouping", negY: 200, action: #selector(ViewController.displayGroups))
         createButton(title: "back", negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
     }
-    
-    public func setMessage(_ text: String){
-        DispatchQueue.main.async{
-            self.message.text = text
-        }
-    }
 
     
     func setLocation(locDic: NSDictionary)->Location{

@@ -10,23 +10,6 @@ import Foundation
 import UIKit
 import SceneKit
 import ARKit
-//import Math
-
-//{
-//    dis=0.6
-//    xoff = -0.075
-//    yoff = 0.08
-//}
-//
-//{
-//    dis = 0.4
-//    xoff = -0.055
-//    yoff = 0.06
-//}
-
-
-
-
 
 class PicMatrix{
     

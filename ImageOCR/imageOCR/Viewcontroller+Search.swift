@@ -11,6 +11,14 @@ import UIKit
 
 extension ViewController: UITextFieldDelegate{
     
+    
+    public func setMessage(_ text: String){
+        DispatchQueue.main.async{
+            self.message.text = text
+        }
+    }
+
+    
     func getIdFromName(_ name: String) -> Int {
         let i = name.index(after: name.firstIndex(of: "@")!)
         return Int(name.suffix(from: i))!

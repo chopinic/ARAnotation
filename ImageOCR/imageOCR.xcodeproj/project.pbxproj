@@ -25,7 +25,6 @@
 		09CA03972574757B006CF8FE /* ViewComtroller+Gesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */; };
 		09DC14FC257B86AC006F195D /* Viewcontroller+Regrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DC14FB257B86AC006F195D /* Viewcontroller+Regrouping.swift */; };
 		09DC14FF257C0B8B006F195D /* VC+Picker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DC14FE257C0B8B006F195D /* VC+Picker.swift */; };
-		09DC1502257C23BD006F195D /* VC+Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DC1501257C23BD006F195D /* VC+Message.swift */; };
 		09DF337925663FA500FEEB5E /* Viewcontroller+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */; };
 		09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FFD2F0254BE8FF003E55B1 /* Base.swift */; };
 		E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49C2DFE20BC53F700D6C6F3 /* AppDelegate.swift */; };
@@ -56,7 +55,6 @@
 		09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewComtroller+Gesture.swift"; sourceTree = "<group>"; };
 		09DC14FB257B86AC006F195D /* Viewcontroller+Regrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+Regrouping.swift"; sourceTree = "<group>"; };
 		09DC14FE257C0B8B006F195D /* VC+Picker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+Picker.swift"; sourceTree = "<group>"; };
-		09DC1501257C23BD006F195D /* VC+Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+Message.swift"; sourceTree = "<group>"; };
 		09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+Search.swift"; sourceTree = "<group>"; };
 		09FFD2F0254BE8FF003E55B1 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		E49C2DFB20BC53F700D6C6F3 /* imageOCR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imageOCR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,7 +142,6 @@
 				09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */,
 				09DC14FB257B86AC006F195D /* Viewcontroller+Regrouping.swift */,
 				09DC14FE257C0B8B006F195D /* VC+Picker.swift */,
-				09DC1501257C23BD006F195D /* VC+Message.swift */,
 			);
 			path = imageOCR;
 			sourceTree = "<group>";
@@ -241,7 +238,6 @@
 				091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */,
 				E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */,
 				0958D5F72550E72F00F6105A /* BookNode.swift in Sources */,
-				09DC1502257C23BD006F195D /* VC+Message.swift in Sources */,
 				0942A39D2556556700ECC38C /* UITextUtilities.swift in Sources */,
 				091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */,
 				0942A398255654B300ECC38C /* DebugString.swift in Sources */,
