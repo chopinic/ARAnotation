@@ -23,6 +23,9 @@
 		09A33C8C252091CB001F97A4 /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 09A33C89252091CB001F97A4 /* test.png */; };
 		09C0D3532562A6E50038F473 /* UIBookAbstract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C0D3522562A6E50038F473 /* UIBookAbstract.swift */; };
 		09CA03972574757B006CF8FE /* ViewComtroller+Gesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */; };
+		09DC14FC257B86AC006F195D /* Viewcontroller+Regrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DC14FB257B86AC006F195D /* Viewcontroller+Regrouping.swift */; };
+		09DC14FF257C0B8B006F195D /* VC+Picker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DC14FE257C0B8B006F195D /* VC+Picker.swift */; };
+		09DC1502257C23BD006F195D /* VC+Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DC1501257C23BD006F195D /* VC+Message.swift */; };
 		09DF337925663FA500FEEB5E /* Viewcontroller+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */; };
 		09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FFD2F0254BE8FF003E55B1 /* Base.swift */; };
 		E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49C2DFE20BC53F700D6C6F3 /* AppDelegate.swift */; };
@@ -51,6 +54,9 @@
 		09A33C89252091CB001F97A4 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		09C0D3522562A6E50038F473 /* UIBookAbstract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIBookAbstract.swift; sourceTree = "<group>"; };
 		09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewComtroller+Gesture.swift"; sourceTree = "<group>"; };
+		09DC14FB257B86AC006F195D /* Viewcontroller+Regrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+Regrouping.swift"; sourceTree = "<group>"; };
+		09DC14FE257C0B8B006F195D /* VC+Picker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+Picker.swift"; sourceTree = "<group>"; };
+		09DC1501257C23BD006F195D /* VC+Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+Message.swift"; sourceTree = "<group>"; };
 		09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Viewcontroller+Search.swift"; sourceTree = "<group>"; };
 		09FFD2F0254BE8FF003E55B1 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		E49C2DFB20BC53F700D6C6F3 /* imageOCR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imageOCR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -136,6 +142,9 @@
 				0976B0202564D03B00315782 /* ViewController+BtAction.swift */,
 				09DF337825663FA500FEEB5E /* Viewcontroller+Search.swift */,
 				09CA03962574757B006CF8FE /* ViewComtroller+Gesture.swift */,
+				09DC14FB257B86AC006F195D /* Viewcontroller+Regrouping.swift */,
+				09DC14FE257C0B8B006F195D /* VC+Picker.swift */,
+				09DC1501257C23BD006F195D /* VC+Message.swift */,
 			);
 			path = imageOCR;
 			sourceTree = "<group>";
@@ -217,6 +226,7 @@
 			files = (
 				09C0D3532562A6E50038F473 /* UIBookAbstract.swift in Sources */,
 				094C0D67253DC318006B381D /* Internet.swift in Sources */,
+				09DC14FC257B86AC006F195D /* Viewcontroller+Regrouping.swift in Sources */,
 				0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */,
 				0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */,
 				0942A3A12556581D00ECC38C /* AddButton.swift in Sources */,
@@ -226,10 +236,12 @@
 				094C0D6A253E7002006B381D /* PicMatrix.swift in Sources */,
 				E49C2E0320BC53F700D6C6F3 /* ViewController.swift in Sources */,
 				09A33C8A252091CB001F97A4 /* Utilities.swift in Sources */,
+				09DC14FF257C0B8B006F195D /* VC+Picker.swift in Sources */,
 				09DF337925663FA500FEEB5E /* Viewcontroller+Search.swift in Sources */,
 				091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */,
 				E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */,
 				0958D5F72550E72F00F6105A /* BookNode.swift in Sources */,
+				09DC1502257C23BD006F195D /* VC+Message.swift in Sources */,
 				0942A39D2556556700ECC38C /* UITextUtilities.swift in Sources */,
 				091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */,
 				0942A398255654B300ECC38C /* DebugString.swift in Sources */,

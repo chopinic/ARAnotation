@@ -20,7 +20,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet var wholeView: UIView!
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet var inputText: UITextField!
-    private var animationInfo: AnimationInfo?
+    @IBOutlet var attrSelect: UIPickerView!
+    @IBOutlet var message: UITextField!
+    var nowSelection: Int = 0
+    var bookAttr = [String]()
+//    private var animationInfo: AnimationInfo?
     private var imageBuffer: UIImage?
     private var result: NSDictionary!
     var picMatrix = [PicMatrix]()
@@ -36,8 +40,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var focusId = -1
     var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
+    var nowGroup = [Int]()
     var textWidth = 300,textHeight = 200
-    var nowTrans: simd_float4x4?
     
     
     override func viewDidLoad() {
@@ -47,9 +51,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        inputText.ret
         inputText.addDismissButton()
         inputText.delegate = self
-        inputText.bounds.size.width = wholewidth-100
-        inputText.center.x = wholeView.center.x
+        inputText.bounds.size.width = wholewidth-130
+        inputText.center.x = wholeView.center.x+50
         inputText.text = ""
+        
+        message.bounds.size.width = wholewidth-100
+        message.center.x = wholeView.center.x
+        message.text = "Start scanning a book by press \"start\"!"
+        message.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+        message.delegate = self
+
+        attrSelect.delegate = self
+        attrSelect.bounds.size.width = 120
+        attrSelect.center.x = 55
+        attrSelect.center.y = inputText.center.y
+        attrSelect.dataSource = self
+        bookAttr = ["Title", "Publisher", "Author", "Score", "Relate"]
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
         bookAbstractUI = UIBookAbstract()
         bookAbstractUI.isHidden = true
@@ -57,6 +74,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         bookAbstractUI.layer.cornerRadius = 15.0
         bookAbstractUI.layer.borderWidth = 2.0
         bookAbstractUI.layer.borderColor = UIColor.red.cgColor
+        bookAbstractUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
         self.sceneView.addSubview(bookAbstractUI)
 
 
@@ -90,9 +108,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         createButton(title: "Ant",negX: 100, negY: 150, action: #selector(ViewController.changeToAntEyeDisplay))
 
-        createDirectionButton()
-    }    
+//        createDirectionButton()
+        
+//        createButton(title: "regrouping", negY: 200, action: #selector(ViewController.displayGroups))
+        createButton(title: "back", negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
+    }
     
+    public func setMessage(_ text: String){
+        DispatchQueue.main.async{
+            self.message.text = text
+        }
+    }
+
     
     func setLocation(locDic: NSDictionary)->Location{
         var loc = Location()
@@ -226,21 +253,29 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
-        if(focusId == -1){return}
-        
-//        if(bookInfoUI.isHidden==true){return}
-        guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(focusId)", recursively: false) else{
-            print("renderer: no such node \(focusId)")
-            return
+        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
+            let trans = sceneView.session.currentFrame!.camera.transform
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-10*PicMatrix.itemDis-0.01)
+            backnode.transform = SCNMatrix4(trans*translation)
+
         }
-        let bookTopPos = childNode.position+books[focusId].bookTopVec!
-        let pos = sceneView.projectPoint(bookTopPos)
-        var pos2d = CGPoint()
-        pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-        pos2d.y = CGFloat(pos.y-Float(textHeight))
         
-        DispatchQueue.main.async{
-            self.bookAbstractUI.undatePosition(position: pos2d)
+        if(focusId != -1){
+    //        if(bookInfoUI.isHidden==true){return}
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(focusId)", recursively: false) else{
+                print("renderer: no such node \(focusId)")
+                return
+            }
+            let bookTopPos = childNode.position+books[focusId].bookTopVec!
+            let pos = sceneView.projectPoint(bookTopPos)
+            var pos2d = CGPoint()
+            pos2d.x = CGFloat(pos.x-Float(textWidth/2))
+            pos2d.y = CGFloat(pos.y-Float(textHeight))
+            
+            DispatchQueue.main.async{
+                self.bookAbstractUI.undatePosition(position: pos2d)
+            }
         }
         
     }

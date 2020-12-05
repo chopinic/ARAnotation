@@ -70,24 +70,36 @@ extension ViewController{
             if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
                 let _:NSURL = NSURL(string : "urlHere")!
                 let imageData = data.base64EncodedString()
-                print(imageData)
+//                print(imageData)
                 print("Start uploading!")
                 let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
                 Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
             }
-            
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(5760),isW: true), height: PicMatrix.getActualLen(oriLen:Double(4320),isW: false))
-            let transTip = createPlaneNode(size: size, rotation: 0, contents: UIColor(red: 1, green: 1, blue: 1, alpha: 0.75))
-            transTip.name = "trans@"
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-1*PicMatrix.itemDis-0.01)
-            transTip.transform = SCNMatrix4(nowMatrix.prevTrans!*translation)
-            sceneView.scene.rootNode.addChildNode(transTip)
  
         }
         
     }
-    
+    @objc func buttonTapCreateBigPlane(){
+        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
+            backnode.name = "trans@0"
+            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0)
+        }
+        else if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@0", recursively: false){
+            backnode.name = "trans@1"
+            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8)
+        }
+        else{
+            let nowTrans = sceneView.session.currentFrame!.camera.transform
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(43200),isW: true), height: PicMatrix.getActualLen(oriLen:Double(57600),isW: false))
+            let transTip = createPlaneNode(size: size, rotation: 0, contents: UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8))
+            transTip.name = "trans@1"
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-10*PicMatrix.itemDis-0.01)
+            transTip.transform = SCNMatrix4(nowTrans*translation)
+            transTip.constraints = [SCNBillboardConstraint()]
+            sceneView.scene.rootNode.addChildNode(transTip)
+        }
+    }
     
 }
 

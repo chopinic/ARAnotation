@@ -16,10 +16,22 @@ extension ViewController: UITextFieldDelegate{
         return Int(name.suffix(from: i))!
     }
     
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+//        print(textField.text)
+        if(textField == message) {return false}
+        return true
+    }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool{
+//        if(textField.na == message) {return false}
         let text = textField.text ?? ""
-        if text != ""{
-            findString(lookFor:text)
+        if(nowSelection == 0)
+        {
+            if(text != "")
+            {findString(lookFor:text)}
+        }
+        else{
+            displayGroups(kind: nowSelection, finding: text)
         }
         textField.resignFirstResponder()
         return true
@@ -36,13 +48,11 @@ extension ViewController: UITextFieldDelegate{
             bookweights[i].weight = 0;
 
             for j in stride(from: 0, to: singlebook.words.count ,by: 1){
-//                if singlebook.kinds[j] == "author"{
                 if singlebook.words[j].contains(lookFor){
                     focusId = i
                     findResult.append(i)
                     bookweights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
-                    print("\(i): \(singlebook.words[j]): \(bookweights[i].weight)")
-
+                    break
                 }else{
                     bookweights[i].update(w: 0);
                 }
@@ -53,9 +63,11 @@ extension ViewController: UITextFieldDelegate{
             resetSearch()
             return;
         }
+        nowGroup = findResult
         print("find \(findResult.count) book")
+        setMessage("Find \(findResult.count) related books")
         scaleNodes(ids: findResult)
-        showBookAbstract(id: focusId)
+        //showBookAbstract(id: focusId)
     }
     
     public func scaleNodes(ids: [Int]){
@@ -70,9 +82,7 @@ extension ViewController: UITextFieldDelegate{
                 continue
             }
 //            let further = SCNAction.move(to: books[bookid].bookOriTrans, duration: 0.4)
-            let disenhance = SCNAction.scale(by: CGFloat(Double(1)/books[bookid].nowScale), duration: 0.4)
-//            let disenhance = SCNAction.group([disscale,further])
-            books[bookid].nowScale = 1
+            let disenhance = SCNAction.scale(to: 1, duration: 0.4)
             disenhance.timingMode = .easeOut
             prevNode.runAction(disenhance)
         }
@@ -84,7 +94,6 @@ extension ViewController: UITextFieldDelegate{
                 continue;
             }
             childNode.runAction(enhance)
-            books[id].nowScale*=2
             nowEnhanceNodes.append(childNode)
 
         }
@@ -128,22 +137,30 @@ extension ViewController: UITextFieldDelegate{
             self.bookAbstractUI.isHidden = false
         }
     }
-    
+        
     public func resetSearch(){
+        setMessage("")
         focusId = -1
         scaleNodes(ids: [])
+        nowGroup = [Int](repeating: 0, count:books.count )
+        for i in stride(from: 0, to: nowGroup.count, by: 1){
+            nowGroup[i] = i
+        }
         self.bookAbstractUI.isHidden = true
     }
     
     @objc func changeToSortDisplay(){
-//        for node in sceneView.scene.rootNode.childNodes {
-//            print(node.name)
-//        }
-        resetSearch();
+        if(nowGroup.count==books.count)
+        {scaleNodes(ids: [])}
+        else{
+            scaleNodes(ids: nowGroup)
+        }
+        focusId = -1
+        self.bookAbstractUI.isHidden = true
         let z = -1*PicMatrix.itemDis
-        var y = -0.1
+        var y = -0.08
         let x =  0
-        nowTrans = sceneView.session.currentFrame!.camera.transform
+        let nowTrans = sceneView.session.currentFrame!.camera.transform
         bookweights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: bookweights.count ,by: 1){
             let nowBookWeight = bookweights[i]
@@ -154,12 +171,12 @@ extension ViewController: UITextFieldDelegate{
             translation.columns.3.y = Float(y)
             y += 0.03
             let bookSortNode = SCNNode()
-            bookSortNode.transform = SCNMatrix4(nowTrans!*translation)
+            bookSortNode.transform = SCNMatrix4(nowTrans*translation)
             let nowPosVec = bookSortNode.position
             let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
             SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
 //                let dist = nowBookNode.transform - SCNMatrix4(self.nowTrans!*translation)
-                nowBookNode.transform = SCNMatrix4(self.nowTrans!*translation)
+                nowBookNode.transform = SCNMatrix4(nowTrans*translation)
             }
             nowBookNode.runAction(trans)
         }
@@ -167,9 +184,9 @@ extension ViewController: UITextFieldDelegate{
     
     @objc func changeToAntEyeDisplay(){
         resetSearch()
-        var z = -0.5*PicMatrix.itemDis
+        var z = -0.8*PicMatrix.itemDis
         var absy = 0.0
-        nowTrans = sceneView.session.currentFrame!.camera.transform
+        let nowTrans = sceneView.session.currentFrame!.camera.transform
         bookweights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: bookweights.count ,by: 1){
             let nowBookWeight = bookweights[i]
@@ -184,10 +201,16 @@ extension ViewController: UITextFieldDelegate{
                 translation.columns.3.y = Float(-1.0*absy)
             }
             let bookSortNode = SCNNode();
-            bookSortNode.transform = SCNMatrix4(nowTrans!*translation)
+            bookSortNode.transform = SCNMatrix4(nowTrans*translation)
             let nowPosVec = bookSortNode.position
             let tans = SCNAction.move(to: nowPosVec, duration: 0.4);
             nowBookNode.runAction(tans)
+            if(i==0){
+                absy+=0.01
+            }
+            if(i==1){
+                absy-=0.01
+            }
             if i%2==1{
                 absy+=0.02
             }
@@ -204,19 +227,18 @@ extension ViewController: UITextFieldDelegate{
             }
             if name.hasPrefix("book@") {
                 let bookid = getIdFromName(name)
-//                let restore = SCNAction.move(to: books[bookid].bookOriTrans, duration: 0.4)
                 let restore = SCNAction.customAction(duration: 0.4){(node,time) in
                     node.transform = self.books[bookid].bookOriTrans
                 }
                 restore.timingMode = .easeOut
-//                node.constraints = []
                 node.runAction(restore)
             }else{
                 continue;
             }
         }
-
-        
     }
-    
+
+
+
+
 }
