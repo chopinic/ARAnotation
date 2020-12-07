@@ -25,7 +25,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var nowSelection: Int = 0
     var bookAttr = [String]()
 //    private var animationInfo: AnimationInfo?
-    private var imageBuffer: UIImage?
     private var result: NSDictionary!
     var picMatrix = [PicMatrix]()
     var books = [BookSt]()
@@ -37,11 +36,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var timer: Timer?
     var radio: Float = 1
     var bookPics = [UIImage]()
-    var focusId = -1
     var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
     var nowGroup = [Int]()
     var textWidth = 300,textHeight = 200
+    var isAntUpdate = false
+    var isAntUpdateCot = 0
+    var shouldBeInPlace = false
     
     
     override func viewDidLoad() {
@@ -108,10 +109,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         createButton(title: "Ant",negX: 100, negY: 150, action: #selector(ViewController.changeToAntEyeDisplay))
 
-//        createDirectionButton()
+        createDirectionButton()
         
 //        createButton(title: "regrouping", negY: 200, action: #selector(ViewController.displayGroups))
-        createButton(title: "back", negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
+        createButton(title: "back",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
     }
 
     
@@ -156,10 +157,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     let parts = nowtempbook["part"] as! NSArray
                     for wordforlocs in parts {
                         let wordlocs = wordforlocs as! NSDictionary
-                        let resloc = wordlocs["location"] as! NSDictionary
+//                        let resloc = wordlocs["location"] as! NSDictionary
                         nowbook.kinds.append(wordlocs["type"] as! String)
                         nowbook.words.append(wordlocs["words"] as! String)
-                        nowbook.locations.append(setLocation(locDic: resloc));
+//                        nowbook.locations.append(setLocation(locDic: resloc));
                     }
                     nowbook.matrixId = cot;
                     books.append(nowbook);
@@ -198,7 +199,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         for i in stride(from: 0, to: books.count ,by: 1){
-//            print(books[i].isDisplay)
             if books[i].isDisplay{
                 continue;
             }
@@ -247,6 +247,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
+        var centerPoint = CGPoint()
+        var isHidden = true
+        var nowShowAbsId = -1
+
+        DispatchQueue.main.async{
+            centerPoint = self.sceneView.center
+            isHidden = self.bookAbstractUI.isHidden
+            nowShowAbsId = self.bookAbstractUI.bookId
+        }
+
+        
         if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
             let trans = sceneView.session.currentFrame!.camera.transform
             var translation = matrix_identity_float4x4
@@ -254,21 +265,58 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             backnode.transform = SCNMatrix4(trans*translation)
 
         }
-        
-        if(focusId != -1){
-    //        if(bookInfoUI.isHidden==true){return}
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(focusId)", recursively: false) else{
-                print("renderer: no such node \(focusId)")
+
+        if(isHidden == false){
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(bookAbstractUI.bookId)", recursively: false) else{
+                print("renderer: no such node \(bookAbstractUI.bookId)")
                 return
             }
-            let bookTopPos = childNode.position+books[focusId].bookTopVec!
+            let bookTopPos = childNode.position+books[bookAbstractUI.bookId].bookTopVec!
             let pos = sceneView.projectPoint(bookTopPos)
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x-Float(textWidth/2))
             pos2d.y = CGFloat(pos.y-Float(textHeight))
             
             DispatchQueue.main.async{
-                self.bookAbstractUI.undatePosition(position: pos2d)
+                self.bookAbstractUI.updatePosition(position: pos2d)
+            }
+        }
+        
+        if(isAntUpdate){
+//            isAntUpdateCot = (isAntUpdateCot+1)%5
+            if isAntUpdateCot==0{
+                var mindis = 1000.0
+                var minid = -1
+                for node in sceneView.scene.rootNode.childNodes {
+                    guard let name = node.name else {
+                        continue
+                    }
+                    if name.hasPrefix("book@") {
+                        let bookid = getIdFromName(name)
+                        let pos = sceneView.projectPoint(node.position)
+                        let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
+                        let dis = calculateScreenDistance(centerPoint,point)
+                        if dis<1000{
+                            let ratio = CGFloat(min(3,(dis+50.0)/dis))
+                            let scale = SCNAction.scale(to: ratio, duration: 0)
+                            node.runAction(scale)
+                            mindis = min(mindis,dis)
+                            if mindis == dis{
+                                minid = bookid
+                            }
+                        }
+                        else if shouldBeInPlace{
+                            node.transform = books[bookid].bookOriTrans
+                        }
+                    }
+                }
+                if minid != -1 && minid != nowShowAbsId{
+                    let node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
+                    let prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false)
+                    node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.005, duration: 0))
+                    prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.005, duration: 0))
+                    showBookAbstract(id: minid)
+                }
             }
         }
         

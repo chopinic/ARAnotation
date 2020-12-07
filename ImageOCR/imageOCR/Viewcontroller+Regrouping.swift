@@ -37,15 +37,13 @@ extension ViewController{
             }
             if isfind == false {
                 result.append([s])
-//                print("now attr: \(getAttri(kind: kind, book: books[s]))")
             }
         }
-//        print("find \(result.count) groups")
         return result
     }
     
     func displayGroups(kind: Int = 1, finding: String = ""){
-//    @objc func displayGroups(){
+        shouldBeInPlace = false
         let nowTrans = sceneView.session.currentFrame!.camera.transform
         var result = generateGroups(kind: kind)
         if(finding != ""){
@@ -75,7 +73,6 @@ extension ViewController{
         var maxy = -0.08;
         var groupStarty = -0.08
         for i in stride(from: 0, to: result.count, by: 1) {
-//            print("now loc: x:\(absx)")
             for j in stride(from: 0, to: result[i].count, by: 1){
                 let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(result[i][j])", recursively: false)!
                 var translation = matrix_identity_float4x4

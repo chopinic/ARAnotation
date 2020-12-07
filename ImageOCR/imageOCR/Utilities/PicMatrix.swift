@@ -33,7 +33,7 @@ class PicMatrix{
     
     static var imageH: Double  = 5760
     
-    static var xOffset: Float = -0.005
+    static var xOffset: Float = -0.03
     
     static var yOffset: Float = 0.00
     
@@ -53,22 +53,22 @@ class PicMatrix{
 
     
     public static func addxOffSet(){
-        xOffset += 0.01;
+        xOffset += 0.002;
         print("now xOffset:\(xOffset)")
     }
     
     public static func decxOffSet(){
-        xOffset -= 0.01;
+        xOffset -= 0.002;
         print("now xOffset:\(xOffset)")
     }
     
     public static func addyOffSet(){
-        yOffset += 0.01;
+        yOffset += 0.002;
         print("now yOffset:\(yOffset)")
     }
     
     public static func decyOffSet(){
-        yOffset -= 0.01;
+        yOffset -= 0.002;
         print("now yOffset:\(yOffset)")
     }
     
@@ -126,8 +126,6 @@ class PicMatrix{
         translation.columns.3.z = zz
         translation.columns.3.x = y
         translation.columns.3.y = x
-        print("book: x:\(x),y:\(y),z:\(z),w:\(w),h\(h)")
-        print()
         let transform = trans * translation
         let anchor = BookAnchor(bookId:id, transform: transform)
         view.session.add(anchor: anchor)

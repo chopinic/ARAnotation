@@ -26,8 +26,7 @@ extension ViewController{
         for result in results {
             if let name = result.node.name{
                 if name.hasPrefix("book@") {
-                    let bookid = getIdFromName(name)
-                    focus(nowBookNode: result.node, currentBook: books[bookid])
+                    showBookAbstract(id: getIdFromName(name))
                 }
             }
         }

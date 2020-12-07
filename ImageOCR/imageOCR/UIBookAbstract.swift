@@ -10,9 +10,9 @@ import UIKit
 
 class UIBookAbstract: UITextView {
     
-    private var bookname: String ;
-    private var abstract: String ;
-    private var bookId: Int;
+    public var bookname: String ;
+    public var abstract: String ;
+    public var bookId: Int;
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -37,7 +37,7 @@ class UIBookAbstract: UITextView {
 //        
 //    }
     
-    public func undatePosition(position: CGPoint){
+    public func updatePosition(position: CGPoint){
 //        let centerPoint = getCenterPoint(position)
         if(isHidden==false){frame.origin = CGPoint(x: position.x, y: position.y)}
     }
