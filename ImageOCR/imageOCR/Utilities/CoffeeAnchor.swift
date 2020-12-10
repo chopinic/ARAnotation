@@ -9,7 +9,7 @@
 import Foundation
 import ARKit
 
-class BookAnchor: ARAnchor{
+class CoffeeAnchor: ARAnchor{
     open var id:Int?
     
     required init(anchor: ARAnchor) {
@@ -23,6 +23,6 @@ class BookAnchor: ARAnchor{
         super.init(transform: transform)
         self.id = id
     }
-
+    
     
 }

@@ -53,16 +53,16 @@ extension ViewController: UITextFieldDelegate{
         var findResult = [Int]()
         for i in stride(from: 0, to: books.count ,by: 1){
             let singlebook = books[i]
-            bookweights[i].id = i;
-            bookweights[i].weight = 0;
+            elementWeights[i].id = i;
+            elementWeights[i].weight = 0;
 
             for j in stride(from: 0, to: singlebook.words.count ,by: 1){
                 if singlebook.words[j].contains(lookFor){
                     findResult.append(i)
-                    bookweights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
+                    elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
                     break
                 }else{
-                    bookweights[i].update(w: 0);
+                    elementWeights[i].update(w: 0);
                 }
             }
         }
@@ -105,7 +105,7 @@ extension ViewController: UITextFieldDelegate{
     func showBookAbstract(id: Int){
         let currentBook = books[id]
         let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false)!
-        let pos = sceneView.projectPoint(currentBook.bookTopVec!+nowBookNode.position)
+        let pos = sceneView.projectPoint(currentBook.uiPosVec!+nowBookNode.position)
         var pos2d = CGPoint()
         pos2d.x = CGFloat(pos.x-Float(textWidth/2))
         pos2d.y = CGFloat(pos.y-Float(textHeight))
@@ -157,9 +157,9 @@ extension ViewController: UITextFieldDelegate{
         var y = -0.08
         let x =  0
         let nowTrans = sceneView.session.currentFrame!.camera.transform
-        bookweights.sort(by: {$0.weight > $1.weight})
-        for i in stride(from: 0, to: bookweights.count ,by: 1){
-            let nowBookWeight = bookweights[i]
+        elementWeights.sort(by: {$0.weight > $1.weight})
+        for i in stride(from: 0, to: elementWeights.count ,by: 1){
+            let nowBookWeight = elementWeights[i]
             let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowBookWeight.id)", recursively: false)!
             var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(z)
@@ -240,7 +240,7 @@ extension ViewController: UITextFieldDelegate{
             if name.hasPrefix("book@") {
                 let bookid = getIdFromName(name)
                 let restore = SCNAction.customAction(duration: 0.4){(node,time) in
-                    node.transform = self.books[bookid].bookOriTrans
+                    node.transform = self.books[bookid].oriTrans
                 }
                 restore.timingMode = .easeOut
                 node.runAction(restore)

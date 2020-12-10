@@ -37,6 +37,10 @@ class PicMatrix{
     
     static var yOffset: Float = 0.00
     
+    static var xCoffeeOffset: Float = 0.002
+    
+    static var yCoffeeOffset: Float = 0.002
+
     public static func findMax(x:Double,y:Double)->Double{
         if x>y{
             return x;
@@ -102,20 +106,20 @@ class PicMatrix{
         }
     }
         
-    public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
+    public func addCoffeeAnchor(view: ARSCNView,id:Int,coffee:CoffeeSt){
         guard let trans = prevTrans
         else { return }
-        let picW : Double = Double(book.bookLoc.left);
-        let picH : Double = Double(book.bookLoc.top);
-        let width = Double(book.bookLoc.width);
-        let height = Double(book.bookLoc.height);
+        let picW : Double = PicMatrix.imageW - Double(coffee.loc.left);
+        let picH : Double = Double(coffee.loc.top);
+        let width = Double(coffee.loc.width);
+        let height = Double(coffee.loc.height);
         var x = Float(PicMatrix.getActualOffset(offset: picW,isW: true))
         var y = Float(PicMatrix.getActualOffset(offset: picH,isW: false))
         let z  = Float(-1*PicMatrix.itemDis)
         let w = PicMatrix.getActualLen(oriLen: width, isW: true)
         let h = PicMatrix.getActualLen(oriLen:height, isW: false)
-        x += Float(w/2)+PicMatrix.xOffset //-:left
-        y += Float(h/2)+PicMatrix.yOffset //+:ri
+        x += Float(w/2)+PicMatrix.xCoffeeOffset //-:left
+        y += Float(h/2)+PicMatrix.yCoffeeOffset //+:ri
         var zz = z
         if(id%3==0){
             zz+=0.005
@@ -127,7 +131,37 @@ class PicMatrix{
         translation.columns.3.x = y
         translation.columns.3.y = x
         let transform = trans * translation
-        let anchor = BookAnchor(bookId:id, transform: transform)
+        let anchor = CoffeeAnchor(id:id, transform: transform)
+        view.session.add(anchor: anchor)
+        
+    }
+    public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
+        guard let trans = prevTrans
+        else { return }
+        let picW : Double = Double(book.loc.left);
+        let picH : Double = Double(book.loc.top);
+        let width = Double(book.loc.width);
+        let height = Double(book.loc.height);
+        var x = Float(PicMatrix.getActualOffset(offset: picW,isW: true))
+        var y = Float(PicMatrix.getActualOffset(offset: picH,isW: false))
+        let z  = Float(-1*PicMatrix.itemDis)
+        let w = PicMatrix.getActualLen(oriLen: width, isW: true)
+        let h = PicMatrix.getActualLen(oriLen:height, isW: false)
+        x += Float(w/2)+PicMatrix.xOffset //-:left
+        y += Float(h/2)+PicMatrix.yOffset //+:ri
+        
+        var zz = z
+        if(id%3==0){
+            zz+=0.005
+        }else if(id%3==1){
+            zz+=0.003
+        }
+        var translation = matrix_identity_float4x4
+        translation.columns.3.z = zz
+        translation.columns.3.x = y
+        translation.columns.3.y = x
+        let transform = trans * translation
+        let anchor = BookAnchor(id:id, transform: transform)
         view.session.add(anchor: anchor)
     }
 }

@@ -45,7 +45,6 @@ public struct Internet {
                 mimeType == "application/json",
                 let data = data,
                 let responseData = String(data: data, encoding: .utf8) {
-                //                print ("got data: \(responseS)")
                 print ("got data \(responseData)")
                 controller?.setResult(cot: cot, receive: String(data: data, encoding: .utf8) ?? "")
             }

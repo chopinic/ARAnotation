@@ -17,16 +17,18 @@ public struct Location{
     var left = Int();
 
 }
+
 // book struct
 public struct BookSt{
-    var bookLoc = Location()
-    var bookOriTrans = SCNMatrix4()
+    var loc = Location()
+    var oriTrans = SCNMatrix4()
     var words = [String]()
     var locations = [Location]()
     var kinds = [String]()
     var matrixId: Int!=0
+    var picid = -1
     var isDisplay: Bool!=false
-    var bookTopVec: SCNVector3?
+    var uiPosVec: SCNVector3?
     var nowScale: Double = 1
     var title = ""
     var author = ""
@@ -36,7 +38,29 @@ public struct BookSt{
     var remark = ""
 }
 
-public struct BookWeight{
+//coffee struct
+public struct CoffeeSt{
+    var loc = Location()
+    var oriTrans = SCNMatrix4()
+    var coffeeOriTrans = SCNMatrix4()
+    var matrixId: Int!=0
+    var picid = -1
+    var desPicid = -1
+    var isDisplay: Bool!=false
+    var uiPosVec: SCNVector3?
+    var name = ""
+    var fragrance = ""
+    var aroma = ""
+    var acidity = ""
+    var body = ""
+    var aftertaste = ""
+    var flavor = ""
+    var balance = ""
+    var score: Int = 0
+    var remark = ""
+}
+
+public struct ElementWeight{
     var id : Int = 0
     var weight : Double = 0
     init(){
@@ -59,5 +83,4 @@ extension SCNVector3 {
     static func -(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
         return SCNVector3(left.x-right.x,left.y-right.y,left.z-right.z)
     }
-
 }

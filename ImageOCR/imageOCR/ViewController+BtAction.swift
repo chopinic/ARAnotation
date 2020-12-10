@@ -77,8 +77,40 @@ extension ViewController{
             }
  
         }
+    }
+    
+    
+    @objc func buttonTapUploadCoffee(){
+        if let capturedImage = sceneView.session.currentFrame?.capturedImage{
+            let nowMatrix = PicMatrix()
+            nowMatrix.saveCurrentTrans(view: sceneView)
+            picMatrix.append(nowMatrix)
+            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
+            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
+            let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
+            let tempUiImage = UIImage(ciImage: cI)
+
+            if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
+                let imageData = data.base64EncodedString()
+                print(imageData)
+                print("Start uploading coffee!")
+                let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
+                Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
+            }
+ 
+        }
         
     }
+    
+    @objc func buttonShowCoffeeAbs(){
+        if coffeeDes.isHidden{
+            coffeeAbstractUI.coffeeId = 1
+            coffeeDes.image = elementPics[coffees[1].desPicid]
+            coffeeDes.isHidden = false
+        }
+        else{coffeeDes.isHidden =  true}
+    }
+    
     @objc func buttonTapCreateBigPlane(){
         if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
             backnode.name = "trans@0"

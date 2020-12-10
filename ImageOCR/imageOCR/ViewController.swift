@@ -28,15 +28,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private var result: NSDictionary!
     var picMatrix = [PicMatrix]()
     var books = [BookSt]()
+    var coffees = [CoffeeSt]()
     //var bookInfo = [BookInfo]()
     //var bookSCNNode = [SCNNode]()
-    var bookweights = [BookWeight]()
+    var elementWeights = [ElementWeight]()
     var imageH = CGFloat()
     var imageW = CGFloat()
     var timer: Timer?
     var radio: Float = 1
-    var bookPics = [UIImage]()
+    var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
+    var coffeeAbstractUI = UICoffeeAbstract()
+    @IBOutlet var coffeeDes: UIImageView!
     var nowEnhanceNodes = [SCNNode]()
     var nowGroup = [Int]()
     var textWidth = 300,textHeight = 200
@@ -78,8 +81,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         bookAbstractUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
         self.sceneView.addSubview(bookAbstractUI)
 
+        coffeeAbstractUI.ui = coffeeDes
+        coffeeDes.isHidden = true
+//        coffeeDes.isHidden = true
+//        coffeeDes.image
+//        coffeeAbstractUI.isHidden = true
+//        self.sceneView.addSubview(coffeeAbstractUI)
 
-        
         sceneView.bounds.size.width = wholewidth
         sceneView.bounds.size.height = wholeHeight
         sceneView.center = wholeView.center
@@ -97,7 +105,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
         sceneView.session.run(configuration)
-        createButton( title: "Start",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
+        createButton( title: "book",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
         
         
@@ -110,77 +118,150 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         createButton(title: "Ant",negX: 100, negY: 150, action: #selector(ViewController.changeToAntEyeDisplay))
 
         createDirectionButton()
-        
+        createButton(title: "coffee",negX: 100, negY: 250, action: #selector(ViewController.buttonTapUploadCoffee))
+        createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
 //        createButton(title: "regrouping", negY: 200, action: #selector(ViewController.displayGroups))
         createButton(title: "back",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
     }
 
     
-    func setLocation(locDic: NSDictionary)->Location{
+    func setLocation(locDic: NSDictionary, isBook: Bool = true)->Location{
         var loc = Location()
-        loc.height = locDic["width"] as! Int
-        loc.width = locDic["height"] as! Int
-        loc.top = locDic["left"] as! Int
-        loc.left = locDic["top"] as! Int
+        if(isBook){
+            loc.height = locDic["width"] as! Int
+            loc.width = locDic["height"] as! Int
+            loc.top = locDic["left"] as! Int
+            loc.left = locDic["top"] as! Int
+        }
+        else{
+            loc.height = locDic["height"] as! Int
+            loc.width = locDic["width"] as! Int
+            loc.top = locDic["top"] as! Int
+            loc.left = locDic["left"] as! Int
+        }
         return loc;
     }
     
     func setResult(cot:Int, receive: String, isDebug: Bool = false){
-        result = Internet.getDictionaryFromJSONString(jsonString: receive)
-        print("visit returns")
-        if let hasResult = result {
-            if let resultbooks = hasResult["words_result"] {
-                let bookarray = resultbooks as! NSArray
-                print("Found \(bookarray.count) books")
-                for nowforbook in bookarray{
-                    let nowtempbook = nowforbook as! NSDictionary
-                    var nowbook = BookSt()
-                    let bookloc = nowtempbook["location"] as! NSDictionary
-                    nowbook.bookLoc = setLocation(locDic: bookloc)
-                    nowbook.title = nowtempbook["title"] as! String
-                    nowbook.author = nowtempbook["author"] as! String
-                    nowbook.publisher = nowtempbook["publisher"] as! String
-                    nowbook.relatedBook = nowtempbook["relatebooks"] as! String
-                    nowbook.score = Int((nowtempbook["score"] as! Double)*5)
-                    nowbook.remark = nowtempbook["remark"] as! String
-                    if(isDebug){
-                        bookPics.append(UIImage(named: "test2.png")!)
-                    }else{
-                        let strBase64 = nowtempbook["base64"] as! String
-                        let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                        if let pic = UIImage(data: dataDecoded){
-                            bookPics.append(pic)
-                        }else{
-                            bookPics.append(UIImage(named: "test2.png")!)
-                        }
-                    }
-                    let parts = nowtempbook["part"] as! NSArray
-                    for wordforlocs in parts {
-                        let wordlocs = wordforlocs as! NSDictionary
-//                        let resloc = wordlocs["location"] as! NSDictionary
-                        nowbook.kinds.append(wordlocs["type"] as! String)
-                        nowbook.words.append(wordlocs["words"] as! String)
-//                        nowbook.locations.append(setLocation(locDic: resloc));
-                    }
-                    nowbook.matrixId = cot;
-                    books.append(nowbook);
-                    bookweights.append(BookWeight())
+            result = Internet.getDictionaryFromJSONString(jsonString: receive)
+            print("visit returns")
+            if let hasResult = result {
+                if let _ = hasResult["books_result_num"]{
+                    setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
                 }
-            }
-            self.resetAndAddAnchor()
+                else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
         }
     }
     
-
+    public func setForCoffee(cot:Int, hasResult: NSDictionary, isDebug: Bool){
+        if let resultbooks = hasResult["words_result"] {
+            let coffeeArray = resultbooks as! NSArray
+            print("Found \(coffeeArray.count) coffees")
+            for nowforCoffee in coffeeArray{
+                let nowCoffeeDic = nowforCoffee as! NSDictionary
+                var nowCoffee = CoffeeSt()
+                let coffeeloc = nowCoffeeDic["location"] as! NSDictionary
+                nowCoffee.loc = setLocation(locDic: coffeeloc ,isBook: false)
+                nowCoffee.name = "no name"
+                nowCoffee.fragrance = nowCoffeeDic["fragrance"] as! String
+                nowCoffee.aroma = nowCoffeeDic["aroma"] as! String
+                nowCoffee.acidity = nowCoffeeDic["acidity"] as! String
+                nowCoffee.body = nowCoffeeDic["body"] as! String
+                nowCoffee.aftertaste = nowCoffeeDic["aftertaste"] as! String
+                nowCoffee.flavor = nowCoffeeDic["flavor"] as! String
+                nowCoffee.balance = nowCoffeeDic["balance"] as! String
+                nowCoffee.score = Int((nowCoffeeDic["score"] as! Double)*5)
+                nowCoffee.remark = nowCoffeeDic["remark"] as! String
+                if(isDebug){
+                    elementPics.append(UIImage(named: "test2.png")!)
+                    elementPics.append(UIImage(named: "test2.png")!)
+                }else{
+                    var strBase64 = nowCoffeeDic["base64"] as! String
+                    var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                    if let pic = UIImage(data: dataDecoded){
+                        let temppic = pic.rotate(radians: -.pi/2)
+                        elementPics.append(temppic)
+                    }else{
+                        elementPics.append(UIImage(named: "test2.png")!)
+                    }
+                    
+                    strBase64 = nowCoffeeDic["desbase64"] as! String
+                    dataDecoded = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                    if let despic = UIImage(data: dataDecoded){
+                        elementPics.append(despic)
+                    }else{
+                        elementPics.append(UIImage(named: "test2.png")!)
+                    }
+                }
+                nowCoffee.picid = elementPics.count-2
+                nowCoffee.desPicid = elementPics.count-1
+                nowCoffee.matrixId = cot;
+                coffees.append(nowCoffee);
+                elementWeights.append(ElementWeight())
+            }
+        }
+        self.resetAndAddAnchor()
+    }
+    
+    public func setForBooks(cot:Int, hasResult: NSDictionary, isDebug: Bool){
+        if let resultbooks = hasResult["words_result"] {
+            let bookarray = resultbooks as! NSArray
+            print("Found \(bookarray.count) books")
+            for nowforbook in bookarray{
+                let nowtempbook = nowforbook as! NSDictionary
+                var nowbook = BookSt()
+                let bookloc = nowtempbook["location"] as! NSDictionary
+                nowbook.loc = setLocation(locDic: bookloc)
+                nowbook.title = nowtempbook["title"] as! String
+                nowbook.author = nowtempbook["author"] as! String
+                nowbook.publisher = nowtempbook["publisher"] as! String
+                nowbook.relatedBook = nowtempbook["relatebooks"] as! String
+                nowbook.score = Int((nowtempbook["score"] as! Double)*5)
+                nowbook.remark = nowtempbook["remark"] as! String
+                if(isDebug){
+                    elementPics.append(UIImage(named: "test2.png")!)
+                }else{
+                    let strBase64 = nowtempbook["base64"] as! String
+                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                    if let pic = UIImage(data: dataDecoded){
+                        elementPics.append(pic)
+                    }else{
+                        elementPics.append(UIImage(named: "test2.png")!)
+                    }
+                }
+                nowbook.picid = elementPics.count-1
+                let parts = nowtempbook["part"] as! NSArray
+                for wordforlocs in parts {
+                    let wordlocs = wordforlocs as! NSDictionary
+//                        let resloc = wordlocs["location"] as! NSDictionary
+                    nowbook.kinds.append(wordlocs["type"] as! String)
+                    nowbook.words.append(wordlocs["words"] as! String)
+                }
+                nowbook.matrixId = cot;
+                books.append(nowbook);
+                elementWeights.append(ElementWeight())
+            }
+        }
+        self.resetAndAddAnchor()
+    }
+    
     
     public func resetAndAddAnchor(isReset: Bool = false){
         if isReset{
             for i in stride(from: 0, to: books.count ,by: 1){
                 books[i].isDisplay = false
             }
+            
+            for i in stride(from: 0, to: coffees.count ,by: 1){
+                coffees[i].isDisplay = false
+            }
+            
             if let anchorlist = sceneView.session.currentFrame?.anchors {
                 for anchor in anchorlist {
                     if let imanchor = anchor as? BookAnchor{
+                        sceneView.session.remove(anchor: imanchor)
+                    }
+                    else if let imanchor = anchor as? CoffeeAnchor{
                         sceneView.session.remove(anchor: imanchor)
                     }
                 }
@@ -191,6 +272,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     continue
                 }
                 if name.hasPrefix("book@") {
+                    node.removeFromParentNode()
+                }else if name.hasPrefix("coffee@"){
                     node.removeFromParentNode()
                 }else{
                     continue;
@@ -206,41 +289,69 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             books[i].isDisplay = true;
             picMatrix[nowMatrix].addBookAnchor(view:sceneView, id:i,book:books[i])
         }
+        
+        for i in stride(from: 0, to: coffees.count ,by: 1){
+            if coffees[i].isDisplay{
+                continue;
+            }
+            let nowMatrix = coffees[i].matrixId!-1
+            coffees[i].isDisplay = true;
+            picMatrix[nowMatrix].addCoffeeAnchor(view:sceneView, id:i,coffee:coffees[i])
+        }
     }
     
         
     
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        guard let bookAnchor = anchor as? BookAnchor else{
-            return
+        if let bookAnchor = anchor as? BookAnchor{
+            let id = bookAnchor.id!;
+            let currentBook = books[id]
+            let rootLoc = currentBook.loc
+            let picContents = elementPics[currentBook.picid]
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
+            print("bookid: \(id)")
+            for str in currentBook.words {
+                print(" words: \(str)")
+            }
+            
+            let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
+            book.name = "book@\(id)"
+            book.transform = SCNMatrix4(anchor.transform)
+            books[id].oriTrans = book.transform
+            sceneView.scene.rootNode.addChildNode(book)
+            print(book.position)
+            
+            var translation = matrix_identity_float4x4
+            translation.columns.3.x = -Float(size.width)
+            translation.columns.3.y = -Float(size.height)
+            let topPos = anchor.transform*translation
+            let top = SCNNode();
+            top.transform = SCNMatrix4(topPos)
+            books[id].uiPosVec = top.position-book.position
+        }else if let coffeeAnchor = anchor as? CoffeeAnchor{
+            let id = coffeeAnchor.id!;
+            let currentCoffee = coffees[id]
+            let rootLoc = currentCoffee.loc
+            let picContents = elementPics[currentCoffee.picid]
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
+            print("coffeeid: \(id)")
+            
+            let coffee = createPlaneNode(size: size, rotation: 0, contents: picContents)
+            coffee.name = "coffee@\(id)"
+            coffee.transform = SCNMatrix4(anchor.transform)
+            coffees[id].oriTrans = coffee.transform
+            sceneView.scene.rootNode.addChildNode(coffee)
+            print(coffee.position)
+            
+            var translation = matrix_identity_float4x4
+            translation.columns.3.x = -Float(size.width)
+            translation.columns.3.y = -Float(size.height)
+            let topPos = anchor.transform*translation
+            let top = SCNNode();
+            top.transform = SCNMatrix4(topPos)
+            coffees[id].uiPosVec = top.position-coffee.position
         }
-        let id = bookAnchor.id!;
-//        let content = UIColor.white
-        let currentBook = books[id]
-        let rootLoc = currentBook.bookLoc
-        let picContents = bookPics[id]
-        let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
-        print("bookid: \(id)")
-        for str in currentBook.words {
-            print(" words: \(str)")
-        }
-        
-        let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
-        book.name = "book@\(id)"
-        book.transform = SCNMatrix4(anchor.transform)
-        books[id].bookOriTrans = book.transform
-        sceneView.scene.rootNode.addChildNode(book)
-        print(book.position)
-        
-        var translation = matrix_identity_float4x4
-        translation.columns.3.x = -Float(size.width)
-        translation.columns.3.y = -Float(size.height)
-        let bookTopPos = anchor.transform*translation
-        let bookTop = SCNNode();
-        bookTop.transform = SCNMatrix4(bookTopPos)
-        books[id].bookTopVec = bookTop.position-book.position
-
     }
     
     
@@ -248,13 +359,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
         var centerPoint = CGPoint()
-        var isHidden = true
+        var isBookHidden = true
         var nowShowAbsId = -1
+        var nowShowCoffeeAbsId = -1
+        var isCoffeeHidden = true
+        
 
         DispatchQueue.main.async{
             centerPoint = self.sceneView.center
-            isHidden = self.bookAbstractUI.isHidden
+            isBookHidden = self.bookAbstractUI.isHidden
             nowShowAbsId = self.bookAbstractUI.bookId
+            isCoffeeHidden = self.coffeeDes.isHidden
+            nowShowCoffeeAbsId = self.coffeeAbstractUI.coffeeId
         }
 
         
@@ -266,12 +382,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         }
 
-        if(isHidden == false){
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(bookAbstractUI.bookId)", recursively: false) else{
-                print("renderer: no such node \(bookAbstractUI.bookId)")
+        if(isBookHidden == false){
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false) else{
+                print("renderer: no such node \(nowShowAbsId)")
                 return
             }
-            let bookTopPos = childNode.position+books[bookAbstractUI.bookId].bookTopVec!
+            let bookTopPos = childNode.position+books[nowShowAbsId].uiPosVec!
             let pos = sceneView.projectPoint(bookTopPos)
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x-Float(textWidth/2))
@@ -279,6 +395,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             DispatchQueue.main.async{
                 self.bookAbstractUI.updatePosition(position: pos2d)
+            }
+        }
+        
+        if(isCoffeeHidden == false){
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(nowShowCoffeeAbsId)", recursively: false) else{
+                print("renderer: no such node \(nowShowCoffeeAbsId)")
+                return
+            }
+            print("renderer: show id \(nowShowCoffeeAbsId)")
+            let topPos = childNode.position+coffees[nowShowCoffeeAbsId].uiPosVec!
+            let pos = sceneView.projectPoint(topPos)
+            var pos2d = CGPoint()
+            pos2d.x = CGFloat(pos.x-Float(textWidth/2))
+            pos2d.y = CGFloat(pos.y-Float(textHeight))
+            print(pos2d)
+            DispatchQueue.main.async{
+                self.coffeeAbstractUI.updatePosition(position: pos2d)
             }
         }
         
@@ -306,7 +439,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                             }
                         }
                         else if shouldBeInPlace{
-                            node.transform = books[bookid].bookOriTrans
+                            node.transform = books[bookid].oriTrans
                         }
                     }
                 }

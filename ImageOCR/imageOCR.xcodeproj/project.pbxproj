@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091F13B82541DCB400FA31B3 /* ImageProcess.swift */; };
 		091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091F13BB2541DE6400FA31B3 /* BookAnchor.swift */; };
+		093B158B25805C3B0079B707 /* CoffeeAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093B158A25805C3B0079B707 /* CoffeeAnchor.swift */; };
+		093B158E2580735E0079B707 /* UICoffeeAbstract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093B158D2580735E0079B707 /* UICoffeeAbstract.swift */; };
 		0942A394255652B800ECC38C /* json.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0942A393255652B800ECC38C /* json.txt */; };
 		0942A398255654B300ECC38C /* DebugString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0942A397255654B300ECC38C /* DebugString.swift */; };
 		0942A39D2556556700ECC38C /* UITextUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0942A39C2556556700ECC38C /* UITextUtilities.swift */; };
@@ -39,6 +41,8 @@
 /* Begin PBXFileReference section */
 		091F13B82541DCB400FA31B3 /* ImageProcess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcess.swift; sourceTree = "<group>"; };
 		091F13BB2541DE6400FA31B3 /* BookAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAnchor.swift; sourceTree = "<group>"; };
+		093B158A25805C3B0079B707 /* CoffeeAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoffeeAnchor.swift; sourceTree = "<group>"; };
+		093B158D2580735E0079B707 /* UICoffeeAbstract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICoffeeAbstract.swift; sourceTree = "<group>"; };
 		0942A393255652B800ECC38C /* json.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = json.txt; sourceTree = "<group>"; };
 		0942A397255654B300ECC38C /* DebugString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugString.swift; sourceTree = "<group>"; };
 		0942A39C2556556700ECC38C /* UITextUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITextUtilities.swift; sourceTree = "<group>"; };
@@ -92,6 +96,7 @@
 				0958D5F62550E72F00F6105A /* BookNode.swift */,
 				0942A39C2556556700ECC38C /* UITextUtilities.swift */,
 				0942A3A02556581D00ECC38C /* AddButton.swift */,
+				093B158A25805C3B0079B707 /* CoffeeAnchor.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -135,6 +140,7 @@
 				E49C2E0920BC53F800D6C6F3 /* LaunchScreen.storyboard */,
 				E49C2E0420BC53F700D6C6F3 /* Main.storyboard */,
 				09C0D3522562A6E50038F473 /* UIBookAbstract.swift */,
+				093B158D2580735E0079B707 /* UICoffeeAbstract.swift */,
 				E49C2E0220BC53F700D6C6F3 /* ViewController.swift */,
 				0976B01D2564CE3000315782 /* ViewController+Button.swift */,
 				0976B0202564D03B00315782 /* ViewController+BtAction.swift */,
@@ -229,6 +235,7 @@
 				0942A3A12556581D00ECC38C /* AddButton.swift in Sources */,
 				09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */,
 				09CA03972574757B006CF8FE /* ViewComtroller+Gesture.swift in Sources */,
+				093B158B25805C3B0079B707 /* CoffeeAnchor.swift in Sources */,
 				E4CBE4C720C58002004450ED /* AnimationInfo.swift in Sources */,
 				094C0D6A253E7002006B381D /* PicMatrix.swift in Sources */,
 				E49C2E0320BC53F700D6C6F3 /* ViewController.swift in Sources */,
@@ -241,6 +248,7 @@
 				0942A39D2556556700ECC38C /* UITextUtilities.swift in Sources */,
 				091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */,
 				0942A398255654B300ECC38C /* DebugString.swift in Sources */,
+				093B158E2580735E0079B707 /* UICoffeeAbstract.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
