@@ -103,12 +103,18 @@ extension ViewController{
     }
     
     @objc func buttonShowCoffeeAbs(){
-        if coffeeDes.isHidden{
-            coffeeAbstractUI.coffeeId = 1
-            coffeeDes.image = elementPics[coffees[1].desPicid]
+
+        if isCoffeeHidden{
+            coffeeAbstractUI.coffeeId = 0
+            nowShowCoffeeAbsId = 0
+            coffeeDes.image = elementPics[coffees[0].desPicid]
             coffeeDes.isHidden = false
+            isCoffeeHidden = false
         }
-        else{coffeeDes.isHidden =  true}
+        else{
+            coffeeDes.isHidden =  true
+            isCoffeeHidden = true
+        }
     }
     
     @objc func buttonTapCreateBigPlane(){

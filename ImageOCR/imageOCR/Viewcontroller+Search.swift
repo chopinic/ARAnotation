@@ -112,14 +112,19 @@ extension ViewController: UITextFieldDelegate{
         let abstract = generateAbstract(currentBook: currentBook)
         DispatchQueue.main.async{
             self.bookAbstractUI.bookId = id
+            self.nowShowAbsId = id
             self.bookAbstractUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
             self.bookAbstractUI.text = abstract
             self.bookAbstractUI.isHidden = false
+            self.isBookHidden = false
         }
     }
     
     func hideBookAbstract(){
-        self.bookAbstractUI.isHidden = true
+        DispatchQueue.main.async{
+            self.bookAbstractUI.isHidden = true
+            self.isBookHidden = false
+        }
     }
     
     func generateAbstract(currentBook: BookSt)-> String{

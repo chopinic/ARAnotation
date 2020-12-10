@@ -31,6 +31,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var coffees = [CoffeeSt]()
     //var bookInfo = [BookInfo]()
     //var bookSCNNode = [SCNNode]()
+    var viewCenterPoint = CGPoint()
     var elementWeights = [ElementWeight]()
     var imageH = CGFloat()
     var imageW = CGFloat()
@@ -46,6 +47,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var isAntUpdate = false
     var isAntUpdateCot = 0
     var shouldBeInPlace = false
+    
+    // ui
+    var isBookHidden = true
+    var nowShowAbsId = -1
+    var nowShowCoffeeAbsId = -1
+    var isCoffeeHidden = true
+
     
     
     override func viewDidLoad() {
@@ -92,7 +100,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.bounds.size.height = wholeHeight
         sceneView.center = wholeView.center
         
-        
+        viewCenterPoint = sceneView.center
         let scene = SCNScene()
         sceneView.scene = scene
         sceneView.delegate = self
@@ -345,8 +353,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             print(coffee.position)
             
             var translation = matrix_identity_float4x4
-            translation.columns.3.x = -Float(size.width)
-            translation.columns.3.y = -Float(size.height)
+//            translation.columns.3.x = 2*Float(size.width)
+            translation.columns.3.y = Float(size.height)
             let topPos = anchor.transform*translation
             let top = SCNNode();
             top.transform = SCNMatrix4(topPos)
@@ -358,20 +366,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
-        var centerPoint = CGPoint()
-        var isBookHidden = true
-        var nowShowAbsId = -1
-        var nowShowCoffeeAbsId = -1
-        var isCoffeeHidden = true
-        
+//        var centerPoint = CGPoint()
 
-        DispatchQueue.main.async{
-            centerPoint = self.sceneView.center
-            isBookHidden = self.bookAbstractUI.isHidden
-            nowShowAbsId = self.bookAbstractUI.bookId
-            isCoffeeHidden = self.coffeeDes.isHidden
-            nowShowCoffeeAbsId = self.coffeeAbstractUI.coffeeId
-        }
+//        DispatchQueue.main.async{
+//            centerPoint = self.sceneView.center
+//            isBookHidden = self.bookAbstractUI.isHidden
+//            nowShowAbsId = self.bookAbstractUI.bookId
+//            isCoffeeHidden = self.coffeeDes.isHidden
+//            nowShowCoffeeAbsId = self.coffeeAbstractUI.coffeeId
+//        }
 
         
         if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
@@ -416,7 +419,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         if(isAntUpdate){
-//            isAntUpdateCot = (isAntUpdateCot+1)%5
             if isAntUpdateCot==0{
                 var mindis = 1000.0
                 var minid = -1
@@ -428,7 +430,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         let bookid = getIdFromName(name)
                         let pos = sceneView.projectPoint(node.position)
                         let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
-                        let dis = calculateScreenDistance(centerPoint,point)
+                        let dis = calculateScreenDistance(viewCenterPoint,point)
                         if dis<1000{
                             let ratio = CGFloat(min(3,(dis+50.0)/dis))
                             let scale = SCNAction.scale(to: ratio, duration: 0)
