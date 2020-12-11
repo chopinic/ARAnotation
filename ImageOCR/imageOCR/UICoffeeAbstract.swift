@@ -13,9 +13,8 @@ class UICoffeeAbstract {
     public var coffeeName: String ;
     public var abstract: String ;
     public var coffeeId: Int;
-    public var imageW: CGFloat;
-    public var textW: CGFloat = 600;
-    public var textH: CGFloat = 300;
+    public var imageW: CGFloat = 150;
+    public var textW: CGFloat = 300;
     public var ui: UIImageView;
     public var textUI : UITextView;
     private var isHidden = true;
@@ -28,7 +27,6 @@ class UICoffeeAbstract {
         self.coffeeName = "";
         self.abstract = "";
         self.coffeeId = -1;
-        imageW = 600
         self.ui = UIImageView()
         self.textUI = UITextView()
         DispatchQueue.main.async{
@@ -36,8 +34,9 @@ class UICoffeeAbstract {
             self.textUI.layer.borderWidth = 2.0
             self.textUI.layer.borderColor = UIColor.red.cgColor
             self.textUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
-            self.textUI.frame = CGRect(x: 10, y: 10, width: CGFloat(self.textW), height: CGFloat(self.textW))
+            self.textUI.frame = CGRect(x: 10, y: 10, width: CGFloat(self.textW), height: CGFloat(self.imageW))
             self.textUI.isHidden = self.isHidden
+            self.ui.frame = CGRect(x: 10, y: 10, width: CGFloat(self.imageW), height: CGFloat(self.imageW))
             self.ui.isHidden = self.isHidden
 
         }
@@ -71,7 +70,7 @@ class UICoffeeAbstract {
         if(isHidden==false){
             DispatchQueue.main.async{
                 self.ui.frame.origin = CGPoint(x: position.x, y: position.y)
-                self.textUI.frame.origin = CGPoint(x: (position.x+self.imageW), y: position.y)
+                self.textUI.frame.origin = CGPoint(x: position.x+self.imageW, y: position.y)
             }
         }
     }

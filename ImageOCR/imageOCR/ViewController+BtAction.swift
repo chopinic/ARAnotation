@@ -32,7 +32,7 @@ extension ViewController{
         nowBookDeal.saveCurrentTrans(view: sceneView)
         picMatrix.append(nowBookDeal)
         
-        setResult(cot: picMatrix.count, receive: DebugString.jsonString1 ,isDebug: true);
+        setResult(cot: picMatrix.count, receive: DebugString.jsonStringCoffee ,isDebug: true);
         return
     }
     

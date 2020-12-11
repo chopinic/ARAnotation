@@ -177,8 +177,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 nowCoffee.score = Int((nowCoffeeDic["score"] as! Double)*5)
                 nowCoffee.remark = nowCoffeeDic["remark"] as! String
                 if(isDebug){
-                    elementPics.append(UIImage(named: "test2.png")!)
-                    elementPics.append(UIImage(named: "test2.png")!)
+                    elementPics.append(UIImage(named: "coffee1.jpg")!)
+                    elementPics.append(UIImage(named: "component.jpg")!)
                 }else{
                     var strBase64 = nowCoffeeDic["base64"] as! String
                     var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
@@ -186,7 +186,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         let temppic = pic.rotate(radians: -.pi/2)
                         elementPics.append(temppic)
                     }else{
-                        elementPics.append(UIImage(named: "test2.png")!)
+                        elementPics.append(UIImage(named: "coffee1.jpg")!.rotate(radians: -.pi/2))
                     }
                     
                     strBase64 = nowCoffeeDic["desbase64"] as! String
@@ -194,7 +194,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     if let despic = UIImage(data: dataDecoded){
                         elementPics.append(despic)
                     }else{
-                        elementPics.append(UIImage(named: "test2.png")!)
+                        elementPics.append(UIImage(named: "component.jpg")!)
                     }
                 }
                 nowCoffee.picid = elementPics.count-2
@@ -349,8 +349,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             print(coffee.position)
             
             var translation = matrix_identity_float4x4
-//            translation.columns.3.x = 2*Float(size.width)
-            translation.columns.3.y = Float(size.height)
+//            translation.columns.3.x = Float(size.width)
+            translation.columns.3.y = Float(size.height/2)
             let topPos = anchor.transform*translation
             let top = SCNNode();
             top.transform = SCNMatrix4(topPos)
@@ -402,13 +402,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 print("renderer: no such node \(coffeeAbstractUI.coffeeId)")
                 return
             }
-            print("renderer: show id \(coffeeAbstractUI.coffeeId)")
             let topPos = childNode.position+coffees[coffeeAbstractUI.coffeeId].uiPosVec!
             let pos = sceneView.projectPoint(topPos)
             var pos2d = CGPoint()
-            pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-            pos2d.y = CGFloat(pos.y-Float(textHeight))
-            print(pos2d)
+            pos2d.x = CGFloat(pos.x)
+            pos2d.y = CGFloat(pos.y-Float(coffeeAbstractUI.imageW/2))
             DispatchQueue.main.async{
                 self.coffeeAbstractUI.updatePosition(position: pos2d)
             }
