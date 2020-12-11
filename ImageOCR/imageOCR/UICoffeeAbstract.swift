@@ -13,7 +13,13 @@ class UICoffeeAbstract {
     public var coffeeName: String ;
     public var abstract: String ;
     public var coffeeId: Int;
+    public var imageW: CGFloat;
+    public var textW: CGFloat = 600;
+    public var textH: CGFloat = 300;
     public var ui: UIImageView;
+    public var textUI : UITextView;
+    private var isHidden = true;
+//    public var isHidden
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -22,31 +28,51 @@ class UICoffeeAbstract {
         self.coffeeName = "";
         self.abstract = "";
         self.coffeeId = -1;
+        imageW = 600
         self.ui = UIImageView()
+        self.textUI = UITextView()
+        DispatchQueue.main.async{
+            self.textUI.layer.cornerRadius = 15.0
+            self.textUI.layer.borderWidth = 2.0
+            self.textUI.layer.borderColor = UIColor.red.cgColor
+            self.textUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+            self.textUI.frame = CGRect(x: 10, y: 10, width: CGFloat(self.textW), height: CGFloat(self.textW))
+            self.textUI.isHidden = self.isHidden
+            self.ui.isHidden = self.isHidden
+
+        }
     }
-    init(ui: UIImageView){
-        self.coffeeName = "";
-        self.abstract = "";
-        self.coffeeId = -1;
-        self.ui = ui
+    
+    func getIsHidden()->Bool{
+        return isHidden
     }
     
-//    init(name: String, info: String, id:Int , image: UIImage, framePos: CGPoint){
-//        self.coffeeName = name;
-//        self.abstract = info;
-//        self.coffeeId = id;
-//        updatePosition(position: framePos)
-//    }
+    func setIsHidden(_ hid:Bool){
+        isHidden = hid
+        DispatchQueue.main.async{
+            self.ui.isHidden = hid
+            self.textUI.isHidden = hid
+        }
+    }
     
-    
-//    public func setFrame(frame:CGRect){
-//
-//    }
-    
+    func setImage(_ img: UIImage){
+        DispatchQueue.main.async{
+            self.ui.image = img
+        }
+    }
+    func setText(_ text: String){
+        DispatchQueue.main.async{
+            self.textUI.text = text
+        }
+    }
+
     public func updatePosition(position: CGPoint){
 //        let centerPoint = getCenterPoint(position)
-        DispatchQueue.main.async{
-            if(self.ui.isHidden==false){self.ui.frame.origin = CGPoint(x: position.x, y: position.y)}
+        if(isHidden==false){
+            DispatchQueue.main.async{
+                self.ui.frame.origin = CGPoint(x: position.x, y: position.y)
+                self.textUI.frame.origin = CGPoint(x: (position.x+self.imageW), y: position.y)
+            }
         }
     }
     

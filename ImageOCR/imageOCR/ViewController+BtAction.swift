@@ -32,7 +32,7 @@ extension ViewController{
         nowBookDeal.saveCurrentTrans(view: sceneView)
         picMatrix.append(nowBookDeal)
         
-        setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
+        setResult(cot: picMatrix.count, receive: DebugString.jsonString1 ,isDebug: true);
         return
     }
     
@@ -104,16 +104,14 @@ extension ViewController{
     
     @objc func buttonShowCoffeeAbs(){
 
-        if isCoffeeHidden{
+        if coffeeAbstractUI.getIsHidden(){
             coffeeAbstractUI.coffeeId = 0
-            nowShowCoffeeAbsId = 0
-            coffeeDes.image = elementPics[coffees[0].desPicid]
-            coffeeDes.isHidden = false
-            isCoffeeHidden = false
+            coffeeAbstractUI.setImage(elementPics[coffees[0].desPicid])
+            coffeeAbstractUI.setText(coffees[0].generateText())
+            coffeeAbstractUI.setIsHidden(false)
         }
         else{
-            coffeeDes.isHidden =  true
-            isCoffeeHidden = true
+            coffeeAbstractUI.setIsHidden(false)
         }
     }
     

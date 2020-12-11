@@ -40,7 +40,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
     var coffeeAbstractUI = UICoffeeAbstract()
-    @IBOutlet var coffeeDes: UIImageView!
+//    @IBOutlet var coffeeDes: UIImageView!
     var nowEnhanceNodes = [SCNNode]()
     var nowGroup = [Int]()
     var textWidth = 300,textHeight = 200
@@ -51,8 +51,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // ui
     var isBookHidden = true
     var nowShowAbsId = -1
-    var nowShowCoffeeAbsId = -1
-    var isCoffeeHidden = true
 
     
     
@@ -89,12 +87,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         bookAbstractUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
         self.sceneView.addSubview(bookAbstractUI)
 
-        coffeeAbstractUI.ui = coffeeDes
-        coffeeDes.isHidden = true
-//        coffeeDes.isHidden = true
-//        coffeeDes.image
-//        coffeeAbstractUI.isHidden = true
-//        self.sceneView.addSubview(coffeeAbstractUI)
+        coffeeAbstractUI.setIsHidden(true)
+        self.sceneView.addSubview(coffeeAbstractUI.ui)
+        self.sceneView.addSubview(coffeeAbstractUI.textUI)
+
 
         sceneView.bounds.size.width = wholewidth
         sceneView.bounds.size.height = wholeHeight
@@ -401,13 +397,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
         }
         
-        if(isCoffeeHidden == false){
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(nowShowCoffeeAbsId)", recursively: false) else{
-                print("renderer: no such node \(nowShowCoffeeAbsId)")
+        if(coffeeAbstractUI.getIsHidden() == false){
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.coffeeId)", recursively: false) else{
+                print("renderer: no such node \(coffeeAbstractUI.coffeeId)")
                 return
             }
-            print("renderer: show id \(nowShowCoffeeAbsId)")
-            let topPos = childNode.position+coffees[nowShowCoffeeAbsId].uiPosVec!
+            print("renderer: show id \(coffeeAbstractUI.coffeeId)")
+            let topPos = childNode.position+coffees[coffeeAbstractUI.coffeeId].uiPosVec!
             let pos = sceneView.projectPoint(topPos)
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x-Float(textWidth/2))

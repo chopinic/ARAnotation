@@ -58,6 +58,21 @@ public struct CoffeeSt{
     var balance = ""
     var score: Int = 0
     var remark = ""
+    
+    public func generateText()->String{
+        var abs = name+"\n"
+        for _ in stride(from: 0, to: score, by: 1){
+            abs+="⭐️"
+        }
+        abs = abs + "fragrance: "+fragrance+"\n"
+        abs = abs + "aroma: "+aroma+"\n"
+        abs = abs + "acidity: "+acidity+"\n"
+        abs = abs + "body: "+body+"\n"
+        abs = abs + "aftertaste: "+aftertaste+"\n"
+        abs = abs + "remark: "+remark
+
+        return abs
+    }
 }
 
 public struct ElementWeight{
