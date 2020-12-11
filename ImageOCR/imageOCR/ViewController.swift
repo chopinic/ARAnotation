@@ -119,7 +119,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
         
-        createButton(title: "Ant",negX: 100, negY: 150, action: #selector(ViewController.changeToAntEyeDisplay))
+        let antButton = createButton(title: "Ant",negX: 100, negY: 150, action: nil)
+        
+        antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
+        antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
+
 
         createDirectionButton()
         createButton(title: "coffee",negX: 100, negY: 250, action: #selector(ViewController.buttonTapUploadCoffee))
@@ -383,7 +387,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         if(isBookHidden == false){
             guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false) else{
-                print("renderer: no such node \(nowShowAbsId)")
+                print("renderer: no such book \(nowShowAbsId)")
                 return
             }
             let bookTopPos = childNode.position+books[nowShowAbsId].uiPosVec!
@@ -399,7 +403,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         if(coffeeAbstractUI.getIsHidden() == false){
             guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.coffeeId)", recursively: false) else{
-                print("renderer: no such node \(coffeeAbstractUI.coffeeId)")
+                print("renderer: no such coffee \(coffeeAbstractUI.coffeeId)")
                 return
             }
             let topPos = childNode.position+coffees[coffeeAbstractUI.coffeeId].uiPosVec!
@@ -413,39 +417,39 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         if(isAntUpdate){
-            if isAntUpdateCot==0{
-                var mindis = 1000.0
-                var minid = -1
-                for node in sceneView.scene.rootNode.childNodes {
-                    guard let name = node.name else {
-                        continue
-                    }
-                    if name.hasPrefix("book@") {
-                        let bookid = getIdFromName(name)
-                        let pos = sceneView.projectPoint(node.position)
-                        let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
-                        let dis = calculateScreenDistance(viewCenterPoint,point)
-                        if dis<1000{
-                            let ratio = CGFloat(min(3,(dis+50.0)/dis))
-                            let scale = SCNAction.scale(to: ratio, duration: 0)
-                            node.runAction(scale)
-                            mindis = min(mindis,dis)
-                            if mindis == dis{
-                                minid = bookid
-                            }
-                        }
-                        else if shouldBeInPlace{
-                            node.transform = books[bookid].oriTrans
+            isAntUpdateCot = (isAntUpdateCot+1)%5
+            var mindis = 1000.0
+            var minid = -1
+            for node in sceneView.scene.rootNode.childNodes {
+                guard let name = node.name else {
+                    continue
+                }
+                if name.hasPrefix("book@") {
+                    let bookid = getIdFromName(name)
+                    let pos = sceneView.projectPoint(node.position)
+                    let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
+                    let dis = calculateScreenDistance(viewCenterPoint,point)
+                    if dis<800{
+                        let ratio = CGFloat(min(2.5,(dis+25.0)/dis))
+                        let scale = SCNAction.scale(to: ratio, duration: 0)
+                        node.runAction(scale)
+                        mindis = min(mindis,dis)
+                        if mindis == dis{
+                            if isAntUpdateCot==0
+                            {minid = bookid}
                         }
                     }
+                    else if shouldBeInPlace{
+                        node.transform = books[bookid].oriTrans
+                    }
                 }
-                if minid != -1 && minid != nowShowAbsId{
-                    let node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
-                    let prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false)
-                    node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.005, duration: 0))
-                    prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.005, duration: 0))
-                    showBookAbstract(id: minid)
-                }
+            }
+            if minid != -1 && minid != nowShowAbsId{
+                let node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
+                let prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false)
+                node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.015, duration: 0))
+                prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.015, duration: 0))
+                showBookAbstract(id: minid)
             }
         }
         

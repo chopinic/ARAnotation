@@ -25,9 +25,17 @@ extension ViewController{
         timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
     }
     
-    
-    
     @objc func buttonTapDebug(){
+        let nowBookDeal = PicMatrix()
+        nowBookDeal.saveCurrentTrans(view: sceneView)
+        picMatrix.append(nowBookDeal)
+        
+        setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
+        return
+    }
+
+    
+    @objc func buttonTapDebugCoffee(){
         let nowBookDeal = PicMatrix()
         nowBookDeal.saveCurrentTrans(view: sceneView)
         picMatrix.append(nowBookDeal)

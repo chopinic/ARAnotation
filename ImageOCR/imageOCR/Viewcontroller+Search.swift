@@ -45,8 +45,6 @@ extension ViewController: UITextFieldDelegate{
         return true
     }
         
-
-//    public func sh
     
     public func findString(lookFor: String){
         print("start find")
@@ -159,8 +157,8 @@ extension ViewController: UITextFieldDelegate{
         shouldBeInPlace = false
 
         let z = -1*PicMatrix.itemDis
-        var y = -0.08
-        let x =  0
+        var absy =  0.0
+        let x =  0.0
         let nowTrans = sceneView.session.currentFrame!.camera.transform
         elementWeights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: elementWeights.count ,by: 1){
@@ -169,8 +167,13 @@ extension ViewController: UITextFieldDelegate{
             var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(z)
             translation.columns.3.x = Float(x)
-            translation.columns.3.y = Float(y)
-            y += 0.03
+            if(i%2 != 0){
+                translation.columns.3.y = Float(absy)
+            }
+            else{
+                translation.columns.3.y = Float(-1*absy)
+                absy += 0.03
+            }
             let bookSortNode = SCNNode()
             bookSortNode.transform = SCNMatrix4(nowTrans*translation)
             let nowPosVec = bookSortNode.position
@@ -186,13 +189,14 @@ extension ViewController: UITextFieldDelegate{
         return Double(pow(pow((pos1.x-pos2.x), 2)+pow((pos1.y-pos2.y), 2),0.5))
     }
     
+    @objc func stopAntEyeDisplay(){
+        isAntUpdate = !isAntUpdate
+    }
     
-    @objc func changeToAntEyeDisplay(){
-
+    
+    @objc func startAntEyeDisplay(){
         scaleNodes(ids: [], time: 0.0)
 //        hideBookAbstract()
-
-        
         isAntUpdate = !isAntUpdate
         
         /*

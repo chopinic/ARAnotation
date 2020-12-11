@@ -8,12 +8,16 @@
 import UIKit
 
 extension ViewController{
-    func createButton(title : String,negX: CGFloat = 0, negY : CGFloat, action: Selector){
+    func createButton(title : String,negX: CGFloat = 0, negY : CGFloat, action: Selector?)->UIButton{
         let button = UIButton(frame: CGRect(x: sceneView.bounds.size.width/2-50+negX, y: sceneView.bounds.size.height-negY, width: 100, height: 50))
         button.backgroundColor = UIColor.gray
         button.setTitle(title, for: .normal)
-        button.addTarget(self, action: action, for: UIControlEvents.touchUpInside)
+        if action != nil{
+            button.addTarget(self, action: action!, for: UIControlEvents.touchUpInside)
+        }
         sceneView.addSubview(button)
+        return button
+
     }
 
     func createDirectionButton(){
