@@ -198,42 +198,6 @@ extension ViewController: UITextFieldDelegate{
         scaleNodes(ids: [], time: 0.0)
 //        hideBookAbstract()
         isAntUpdate = !isAntUpdate
-        
-        /*
-        var z = -0.8*PicMatrix.itemDis
-        var absy = 0.0
-        let nowTrans = sceneView.session.currentFrame!.camera.transform
-        bookweights.sort(by: {$0.weight > $1.weight})
-        for i in stride(from: 0, to: bookweights.count ,by: 1){
-            let nowBookWeight = bookweights[i]
-            let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowBookWeight.id)", recursively: false)!
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(z)
-            translation.columns.3.x = 0
-            if i%2==1{
-                translation.columns.3.y = Float(absy)
-            }
-            else{
-                translation.columns.3.y = Float(-1.0*absy)
-            }
-            let bookSortNode = SCNNode();
-            bookSortNode.transform = SCNMatrix4(nowTrans*translation)
-            let nowPosVec = bookSortNode.position
-            let tans = SCNAction.move(to: nowPosVec, duration: 0.4);
-            nowBookNode.runAction(tans)
-            if(i==0){
-                absy+=0.01
-            }
-            if(i==1){
-                absy-=0.01
-            }
-            if i%2==1{
-                absy+=0.02
-            }
-            z -= 0.1/pow(Double(i+4),1)
-        }
- 
- */
     }
     
     @objc func restoreDisplay(){
