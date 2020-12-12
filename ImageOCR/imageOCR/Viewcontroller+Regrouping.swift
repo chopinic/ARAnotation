@@ -74,6 +74,7 @@ extension ViewController{
         var groupStarty = -0.08
         for i in stride(from: 0, to: result.count, by: 1) {
             for j in stride(from: 0, to: result[i].count, by: 1){
+                let id = result[i][j]
                 let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(result[i][j])", recursively: false)!
                 var translation = matrix_identity_float4x4
                 translation.columns.3.z = Float(z)
@@ -84,6 +85,11 @@ extension ViewController{
                 maxy = max(maxy, y)
                 let bookSortNode = SCNNode()
                 bookSortNode.transform = SCNMatrix4(nowTrans*translation)
+                if j==0{
+                    print(getAttri(kind: kind, book:books[id]))
+                    let headAnchor = HeadAnchor(text: getAttri(kind: kind, book:books[id]), transform: nowTrans*translation)
+                    self.sceneView.session.add(anchor:headAnchor)
+                }
                 let nowPosVec = bookSortNode.position
                 let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
                 SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in

@@ -359,6 +359,41 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let top = SCNNode();
             top.transform = SCNMatrix4(topPos)
             coffees[id].uiPosVec = top.position-coffee.position
+            
+            
+        }else if let headAnchor = anchor as? HeadAnchor{
+
+            let nowtext = headAnchor.text
+//            let scale = Float(100.0)
+            let text = SCNText(string: nowtext, extrusionDepth: 0.1)
+            text.font = UIFont.systemFont(ofSize:10)
+            text.alignmentMode = kCAAlignmentLeft
+            text.isWrapped = true
+            text.containerFrame = CGRect(x: 0, y: 0, width: 100, height: 150)
+                
+            let min = text.boundingBox.min
+            let max = text.boundingBox.max
+            let width = max.x - min.x
+            let height = max.y - min.y
+            let length = max.z - min.z
+            
+            let displacex = -width/2.0 - min.x
+            let displacey = -height/2.0 - min.y
+            print("displacex:\(displacex),displacey:\(displacey)")
+
+//            let position = SCNVector3Make(displacex/scale, displacey/scale, (-length/2.0 - min.z)/scale)
+            let material = SCNMaterial()
+            material.diffuse.contents = UIColor.init(red: 0.7, green: 0.2, blue: 0.5, alpha: 1)
+            text.materials = [material]
+            
+            let headNode = SCNNode()
+            headNode.name = "group@"
+            headNode.scale = SCNVector3(x:10 , y:10, z:10)
+            headNode.geometry = text
+            headNode.transform = SCNMatrix4(headAnchor.transform)
+//            headNode.position = position
+            sceneView.scene.rootNode.addChildNode(headNode)
+            print("headnode pos: \(headNode.position)")
         }
     }
     

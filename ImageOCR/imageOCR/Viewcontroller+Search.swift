@@ -121,7 +121,7 @@ extension ViewController: UITextFieldDelegate{
     func hideBookAbstract(){
         DispatchQueue.main.async{
             self.bookAbstractUI.isHidden = true
-            self.isBookHidden = false
+            self.isBookHidden = true
         }
     }
     
