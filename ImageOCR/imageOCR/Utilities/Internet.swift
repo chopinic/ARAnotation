@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import ARKit
 public struct Internet {
     static var responseBuffer: String = "";
     
@@ -70,4 +71,24 @@ public struct Internet {
         }
         return;
     }
+    
+    static func uploadImage(cot:Int, url: URL, capturedImage: CVPixelBuffer, controller: ViewController?){
+        let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
+        let tempUiImage = UIImage(ciImage: cI)
+
+        if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
+            print("uploadImage function is on \(Thread.current)" )
+            let imageData = data.base64EncodedString()
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            if upload(request: request, data: imageData.data(using: .utf8)!, cot: cot, controller: controller) != nil{
+                return
+            }
+        }
+
+        return;
+
+    }
+    
 }

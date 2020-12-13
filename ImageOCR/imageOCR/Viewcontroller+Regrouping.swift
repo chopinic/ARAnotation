@@ -10,6 +10,14 @@ import ARKit
 import UIKit
 extension ViewController{
     
+    func getAttrName(kind: Int)->String{
+        if(kind == 1){return "Publisher"}
+        if(kind == 2){return "Author"}
+        if(kind == 3){return "Score"}
+        if(kind == 4){return "Related"}
+        else{return ""}
+    }
+    
     func getAttri(kind: Int, book: BookSt) -> String {
         if(kind == 1){return book.publisher}
         if(kind == 2){return book.author}
@@ -44,6 +52,8 @@ extension ViewController{
     
     func displayGroups(kind: Int = 1, finding: String = ""){
         shouldBeInPlace = false
+        removeHeadAnchor()
+
         let nowTrans = sceneView.session.currentFrame!.camera.transform
         var result = generateGroups(kind: kind)
         if(finding != ""){
@@ -66,7 +76,7 @@ extension ViewController{
         }else{
             setMessage("Find \(result.count) groups")
         }
-        nowGroup = result[0]
+//        nowGroup = result[0]
         var absx = 0.0
         var y = -0.08
         let z = -1.5*PicMatrix.itemDis
@@ -87,7 +97,10 @@ extension ViewController{
                 bookSortNode.transform = SCNMatrix4(nowTrans*translation)
                 if j==0{
                     print(getAttri(kind: kind, book:books[id]))
-                    let headAnchor = HeadAnchor(text: getAttri(kind: kind, book:books[id]), transform: nowTrans*translation)
+                    translation.columns.3.y -= 0.1
+                    translation.columns.3.x += 0.1
+                    var headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, book:books[id])
+                    let headAnchor = HeadAnchor(text: headString, transform: nowTrans*translation)
                     self.sceneView.session.add(anchor:headAnchor)
                 }
                 let nowPosVec = bookSortNode.position

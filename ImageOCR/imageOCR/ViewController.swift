@@ -40,9 +40,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
     var coffeeAbstractUI = UICoffeeAbstract()
-//    @IBOutlet var coffeeDes: UIImageView!
     var nowEnhanceNodes = [SCNNode]()
-    var nowGroup = [Int]()
     var textWidth = 300,textHeight = 200
     var isAntUpdate = false
     var isAntUpdateCot = 0
@@ -51,6 +49,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // ui
     var isBookHidden = true
     var nowShowAbsId = -1
+    var receiveAnsCot = 0
+    
 
     
     
@@ -151,14 +151,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func setResult(cot:Int, receive: String, isDebug: Bool = false){
-            result = Internet.getDictionaryFromJSONString(jsonString: receive)
-            print("visit returns")
-            if let hasResult = result {
-                if let _ = hasResult["books_result_num"]{
-                    setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
-                }
-                else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
+        result = Internet.getDictionaryFromJSONString(jsonString: receive)
+        print("visit returns")
+        print("setResult function is on \(Thread.current)" )
+        receiveAnsCot+=1
+        if let hasResult = result {
+            if let _ = hasResult["books_result_num"]{
+                setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
+            }
+            else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
         }
+        if(receiveAnsCot != picMatrix.count){
+            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
+        }
+
     }
     
     public func setForCoffee(cot:Int, hasResult: NSDictionary, isDebug: Bool){
@@ -253,6 +259,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.resetAndAddAnchor()
     }
     
+    public func removeHeadAnchor(){
+        if let anchorlist = sceneView.session.currentFrame?.anchors {
+            for anchor in anchorlist {
+                if let hanchor = anchor as? HeadAnchor{
+                    sceneView.session.remove(anchor: hanchor)
+                }
+            }
+        }
+        
+        let childNodes = sceneView.scene.rootNode.childNodes
+        for node in childNodes {
+            guard let name = node.name else {
+                continue
+            }
+            if name.hasPrefix("head@") {
+                node.removeFromParentNode()
+            }
+        }
+    }
     
     public func resetAndAddAnchor(isReset: Bool = false){
         if isReset{
@@ -319,16 +344,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let picContents = elementPics[currentBook.picid]
             let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
             print("bookid: \(id)")
+            var words = ""
             for str in currentBook.words {
-                print(" words: \(str)")
+                words+=str+" "
             }
-            
+            print(" words: \(words)")
             let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
             book.name = "book@\(id)"
             book.transform = SCNMatrix4(anchor.transform)
             books[id].oriTrans = book.transform
             sceneView.scene.rootNode.addChildNode(book)
-            print(book.position)
             
             var translation = matrix_identity_float4x4
             translation.columns.3.x = -Float(size.width)
@@ -343,14 +368,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let rootLoc = currentCoffee.loc
             let picContents = elementPics[currentCoffee.picid]
             let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
-            print("coffeeid: \(id)")
+            print("coffeeid: \(id) \(coffees[id].name)")
             
             let coffee = createPlaneNode(size: size, rotation: 0, contents: picContents)
             coffee.name = "coffee@\(id)"
             coffee.transform = SCNMatrix4(anchor.transform)
             coffees[id].oriTrans = coffee.transform
             sceneView.scene.rootNode.addChildNode(coffee)
-            print(coffee.position)
+//            print(coffee.position)
             
             var translation = matrix_identity_float4x4
 //            translation.columns.3.x = Float(size.width)
@@ -362,38 +387,29 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             
         }else if let headAnchor = anchor as? HeadAnchor{
-
-            let nowtext = headAnchor.text
-//            let scale = Float(100.0)
-            let text = SCNText(string: nowtext, extrusionDepth: 0.1)
-            text.font = UIFont.systemFont(ofSize:10)
-            text.alignmentMode = kCAAlignmentLeft
-            text.isWrapped = true
-            text.containerFrame = CGRect(x: 0, y: 0, width: 100, height: 150)
-                
-            let min = text.boundingBox.min
-            let max = text.boundingBox.max
-            let width = max.x - min.x
-            let height = max.y - min.y
-            let length = max.z - min.z
             
-            let displacex = -width/2.0 - min.x
-            let displacey = -height/2.0 - min.y
-            print("displacex:\(displacex),displacey:\(displacey)")
+            
+            let text = SCNText(string: headAnchor.text, extrusionDepth: 0.1)
+            // 创建2D文字的时候只需要将 extrusionDepth 设置为0即可
+            // 设置字体的大小
+            text.font = UIFont.systemFont(ofSize: 1)
+            text.isWrapped = true
+            text.containerFrame = CGRect(x: 0, y: 0, width: 5, height: 7)
 
-//            let position = SCNVector3Make(displacex/scale, displacey/scale, (-length/2.0 - min.z)/scale)
             let material = SCNMaterial()
-            material.diffuse.contents = UIColor.init(red: 0.7, green: 0.2, blue: 0.5, alpha: 1)
+            material.diffuse.contents = UIColor.init(red: 0, green: 0.5, blue: 0.4, alpha: 1)
             text.materials = [material]
             
-            let headNode = SCNNode()
-            headNode.name = "group@"
-            headNode.scale = SCNVector3(x:10 , y:10, z:10)
-            headNode.geometry = text
-            headNode.transform = SCNMatrix4(headAnchor.transform)
-//            headNode.position = position
-            sceneView.scene.rootNode.addChildNode(headNode)
-            print("headnode pos: \(headNode.position)")
+            let textNode = SCNNode(geometry: text)
+            textNode.name = "head@"
+            textNode.transform = SCNMatrix4(headAnchor.transform)
+            textNode.scale = SCNVector3(x: 0.02, y: 0.02, z: 0.02)
+            textNode.constraints = [SCNBillboardConstraint()]
+            sceneView.scene.rootNode.addChildNode(textNode)
+//            textNode.runAction(rot)
+
+
+//            print("headnode pos: \(headNode.position)")
         }
     }
     
@@ -490,7 +506,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
     }
     
-    
+    override func didReceiveMemoryWarning(){
+        super.didReceiveMemoryWarning()
+        result = nil
+//        picMatrix
+    }
     
     
 }

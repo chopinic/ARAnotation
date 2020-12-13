@@ -69,7 +69,6 @@ extension ViewController: UITextFieldDelegate{
             resetSearch()
             return;
         }
-        nowGroup = findResult
         print("find \(findResult.count) book")
         setMessage("Find \(findResult.count) related books")
         scaleNodes(ids: findResult)
@@ -93,12 +92,32 @@ extension ViewController: UITextFieldDelegate{
                 let bookid = getIdFromName(name)
                 if ids.firstIndex(of: bookid) != nil{
                     node.runAction(enhance)
+                    let material = node.geometry!.firstMaterial!
+                    // highlight it
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+
+                    // on completion - unhighlight
+                    SCNTransaction.completionBlock = {
+                        SCNTransaction.begin()
+                        SCNTransaction.animationDuration = 0.5
+
+                        material.emission.contents = UIColor.black
+
+                        SCNTransaction.commit()
+                    }
+
+                    material.emission.contents = UIColor.yellow
+
+                    SCNTransaction.commit()
                 }
                 else{node.runAction(disenhance)}
             }
         }
     }
     
+    
+//    func
     
     func showBookAbstract(id: Int){
         let currentBook = books[id]
@@ -144,10 +163,10 @@ extension ViewController: UITextFieldDelegate{
 //        setMessage("")
         scaleNodes(ids: [])
         hideBookAbstract()
-        nowGroup = [Int](repeating: 0, count:books.count )
-        for i in stride(from: 0, to: nowGroup.count, by: 1){
-            nowGroup[i] = i
-        }
+//        nowGroup = [Int](repeating: 0, count:books.count )
+//        for i in stride(from: 0, to: nowGroup.count, by: 1){
+//            nowGroup[i] = i
+//        }
     }
     
     @objc func changeToSortDisplay(){
@@ -155,6 +174,8 @@ extension ViewController: UITextFieldDelegate{
         scaleNodes(ids: [])
         hideBookAbstract()
         shouldBeInPlace = false
+        removeHeadAnchor()
+
 
         let z = -1*PicMatrix.itemDis
         var absy =  0.0
@@ -204,6 +225,7 @@ extension ViewController: UITextFieldDelegate{
         shouldBeInPlace = true
         scaleNodes(ids: [])
         hideBookAbstract()
+        removeHeadAnchor()
 
         let childNodes = sceneView.scene.rootNode.childNodes
         for node in childNodes {

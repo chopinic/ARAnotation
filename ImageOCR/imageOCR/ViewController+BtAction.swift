@@ -72,6 +72,11 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
+            let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
+            Internet.uploadImage(cot: picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
+
+            
+            /*
             let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
             let tempUiImage = UIImage(ciImage: cI)
 
@@ -80,10 +85,13 @@ extension ViewController{
                 let imageData = data.base64EncodedString()
 //                print(imageData)
                 print("Start uploading!")
+                setMessage("Waiting for \(picMatrix.count-receiveAnsCot) scan results")
                 let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
                 Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
             }
- 
+ */
+            
+            
         }
     }
     

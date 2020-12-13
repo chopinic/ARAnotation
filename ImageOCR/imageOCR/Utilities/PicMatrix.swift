@@ -16,7 +16,7 @@ class PicMatrix{
 //    public var prevFrame : ARFrame?
     var prevTrans: simd_float4x4?
     
-    static var itemDis: Double = 0.3
+    static var itemDis: Double = 0.4
     
 //    var camWAngle: Double = 32.71/2
 //    var camWAngle: Double = 36.71/2 // cal
@@ -136,6 +136,7 @@ class PicMatrix{
         
     }
     public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
+        print("addBookAnchor function is on \(Thread.current)" )
         guard let trans = prevTrans
         else { return }
         let picW : Double = Double(book.loc.left);
