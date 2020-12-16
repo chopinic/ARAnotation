@@ -9,6 +9,19 @@
 import UIKit
 import ARKit
 extension ViewController{
+    
+    @objc func switchToCoffee(){
+        if isCoffee{
+            isCoffee = false
+            setMessage("Set to book")
+            PicMatrix.itemDis = 0.4
+        }
+        else{
+            isCoffee = true
+            setMessage("Set to coffee")
+            PicMatrix.itemDis = 1.5
+        }
+    }
 
     
     @objc func timerAction(){
@@ -29,21 +42,15 @@ extension ViewController{
         let nowBookDeal = PicMatrix()
         nowBookDeal.saveCurrentTrans(view: sceneView)
         picMatrix.append(nowBookDeal)
-        
-        setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
-        return
+
+        if isCoffee{
+            setResult(cot: picMatrix.count, receive: DebugString.jsonStringCoffee ,isDebug: true);
+        }else{
+            setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
+        }
     }
 
-    
-    @objc func buttonTapDebugCoffee(){
-        let nowBookDeal = PicMatrix()
-        nowBookDeal.saveCurrentTrans(view: sceneView)
-        picMatrix.append(nowBookDeal)
         
-        setResult(cot: picMatrix.count, receive: DebugString.jsonStringCoffee ,isDebug: true);
-        return
-    }
-    
     @objc func buttonTapaddx(){
         PicMatrix.addxOffSet()
         resetAndAddAnchor(isReset: true)
@@ -66,16 +73,24 @@ extension ViewController{
     
     
     @objc func buttonTapUpload(){
+        
         if let capturedImage = sceneView.session.currentFrame?.capturedImage{
             let nowMatrix = PicMatrix()
             nowMatrix.saveCurrentTrans(view: sceneView)
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
-            Internet.uploadImage(cot: picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
-
+            var url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
             
+            if isCoffee{
+                print("Start uploading coffee!")
+                url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
+            }
+            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
+
+            utiQueue.async {
+                Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
+            }
             /*
             let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
             let tempUiImage = UIImage(ciImage: cI)
@@ -90,33 +105,31 @@ extension ViewController{
                 Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
             }
  */
-            
-            
         }
     }
     
     
-    @objc func buttonTapUploadCoffee(){
-        if let capturedImage = sceneView.session.currentFrame?.capturedImage{
-            let nowMatrix = PicMatrix()
-            nowMatrix.saveCurrentTrans(view: sceneView)
-            picMatrix.append(nowMatrix)
-            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
-            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
-            let tempUiImage = UIImage(ciImage: cI)
-
-            if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
-                let imageData = data.base64EncodedString()
-                print(imageData)
-                print("Start uploading coffee!")
-                let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
-                Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
-            }
- 
-        }
-        
-    }
+//    @objc func buttonTapUploadCoffee(){
+//        if let capturedImage = sceneView.session.currentFrame?.capturedImage{
+//            let nowMatrix = PicMatrix()
+//            nowMatrix.saveCurrentTrans(view: sceneView)
+//            picMatrix.append(nowMatrix)
+//            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
+//            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
+//            let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
+//            let tempUiImage = UIImage(ciImage: cI)
+//
+//            if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
+//                let imageData = data.base64EncodedString()
+//                print(imageData)
+//                print("Start uploading coffee!")
+//                let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
+//                Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
+//            }
+// 
+//        }
+//        
+//    }
     
     @objc func buttonShowCoffeeAbs(){
 

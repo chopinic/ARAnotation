@@ -36,6 +36,22 @@ public struct BookSt{
     var relatedBook = ""
     var score: Int = 0
     var remark = ""
+    
+    public func generateAbstract()->String{
+        var abstractscore = ""
+        for _ in stride(from: 0, to: score ,by: 1){
+            abstractscore+="⭐️"
+        }
+        var abstract = ""
+        for bookStr in words {
+            abstract+=bookStr
+            abstract+="\n"
+        }
+        abstract+="Rating: "+abstractscore+"\n\n"
+        abstract+="Reviewer's words:\n  "+remark
+        return abstract
+
+    }
 }
 
 //coffee struct
@@ -73,6 +89,10 @@ public struct CoffeeSt{
 
         return abs
     }
+    
+//    public func findRelated(str: String)->Double{
+//        
+//    }
 }
 
 public struct ElementWeight{

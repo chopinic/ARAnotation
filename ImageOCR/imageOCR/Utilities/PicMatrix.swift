@@ -13,10 +13,11 @@ import ARKit
 
 class PicMatrix{
     
-//    public var prevFrame : ARFrame?
     var prevTrans: simd_float4x4?
     
     static var itemDis: Double = 0.4
+    
+//    static
     
 //    var camWAngle: Double = 32.71/2
 //    var camWAngle: Double = 36.71/2 // cal
@@ -33,13 +34,13 @@ class PicMatrix{
     
     static var imageH: Double  = 5760
     
-    static var xOffset: Float = -0.03
+    static var xOffset: Float = -0.019
     
     static var yOffset: Float = 0.00
     
-    static var xCoffeeOffset: Float = 0.002
+    static var xCoffeeOffset: Float = 0
     
-    static var yCoffeeOffset: Float = 0.002
+    static var yCoffeeOffset: Float = 0
 
     public static func findMax(x:Double,y:Double)->Double{
         if x>y{
@@ -58,21 +59,26 @@ class PicMatrix{
     
     public static func addxOffSet(){
         xOffset += 0.002;
+        xCoffeeOffset += 0.002;
         print("now xOffset:\(xOffset)")
     }
     
     public static func decxOffSet(){
         xOffset -= 0.002;
+        xCoffeeOffset -= 0.002;
         print("now xOffset:\(xOffset)")
     }
     
     public static func addyOffSet(){
         yOffset += 0.002;
+        yCoffeeOffset += 0.002;
+
         print("now yOffset:\(yOffset)")
     }
     
     public static func decyOffSet(){
         yOffset -= 0.002;
+        yCoffeeOffset -= 0.002;
         print("now yOffset:\(yOffset)")
     }
     
@@ -110,6 +116,7 @@ class PicMatrix{
         guard let trans = prevTrans
         else { return }
         let picW : Double = PicMatrix.imageW - Double(coffee.loc.left);
+//        let picW : Double = Double(coffee.loc.left);
         let picH : Double = Double(coffee.loc.top);
         let width = Double(coffee.loc.width);
         let height = Double(coffee.loc.height);
@@ -136,7 +143,7 @@ class PicMatrix{
         
     }
     public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
-        print("addBookAnchor function is on \(Thread.current)" )
+//        print("addBookAnchor function is on \(Thread.current)" )
         guard let trans = prevTrans
         else { return }
         let picW : Double = Double(book.loc.left);

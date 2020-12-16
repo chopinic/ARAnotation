@@ -49,28 +49,44 @@ extension ViewController: UITextFieldDelegate{
     public func findString(lookFor: String){
         print("start find")
         var findResult = [Int]()
-        for i in stride(from: 0, to: books.count ,by: 1){
-            let singlebook = books[i]
-            elementWeights[i].id = i;
-            elementWeights[i].weight = 0;
-
-            for j in stride(from: 0, to: singlebook.words.count ,by: 1){
-                if singlebook.words[j].contains(lookFor){
+        if isCoffee{
+            for i in stride(from: 0, to: coffees.count ,by: 1){
+                let element = coffees[i]
+                elementWeights[i].id = i;
+                if element.name.contains(lookFor)
+                {
+                    elementWeights[i].weight = (Double(lookFor.count)/Double(element.name.count))
                     findResult.append(i)
-                    elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
-                    break
-                }else{
-                    elementWeights[i].update(w: 0);
+                }
+                else{
+                    elementWeights[i].weight = 0
+                }
+            }
+        }else{
+            for i in stride(from: 0, to: books.count ,by: 1){
+                let singlebook = books[i]
+                elementWeights[i].id = i;
+                elementWeights[i].weight = 0;
+
+                for j in stride(from: 0, to: singlebook.words.count ,by: 1){
+                    if singlebook.words[j].contains(lookFor){
+                        findResult.append(i)
+                        elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
+                        break
+                    }else{
+                        elementWeights[i].update(w: 0);
+                    }
                 }
             }
         }
         if(findResult.count == 0){
-            print("no such book")
+            print("no result")
+            setMessage("Find no related result")
             resetSearch()
             return;
         }
-        print("find \(findResult.count) book")
-        setMessage("Find \(findResult.count) related books")
+        print("find \(findResult.count) results")
+        setMessage("Find \(findResult.count) related results")
         scaleNodes(ids: findResult)
         //showBookAbstract(id: focusId)
     }
@@ -88,91 +104,96 @@ extension ViewController: UITextFieldDelegate{
             guard let name = node.name else {
                 continue
             }
-            if name.hasPrefix("book@") {
-                let bookid = getIdFromName(name)
-                if ids.firstIndex(of: bookid) != nil{
-                    node.runAction(enhance)
-                    let material = node.geometry!.firstMaterial!
-                    // highlight it
+            var elementId = -1
+            if isCoffee{guard name.hasPrefix("coffee@") else {return}}
+            else{guard name.hasPrefix("book@") else {return}}
+            elementId = getIdFromName(name)
+
+            if ids.firstIndex(of: elementId) != nil{
+                node.runAction(enhance)
+                let material = node.geometry!.firstMaterial!
+                // highlight it
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+
+                // on completion - unhighlight
+                SCNTransaction.completionBlock = {
                     SCNTransaction.begin()
                     SCNTransaction.animationDuration = 0.5
 
-                    // on completion - unhighlight
-                    SCNTransaction.completionBlock = {
-                        SCNTransaction.begin()
-                        SCNTransaction.animationDuration = 0.5
-
-                        material.emission.contents = UIColor.black
-
-                        SCNTransaction.commit()
-                    }
-
-                    material.emission.contents = UIColor.yellow
+                    material.emission.contents = UIColor.black
 
                     SCNTransaction.commit()
                 }
-                else{node.runAction(disenhance)}
+
+                material.emission.contents = UIColor.yellow
+
+                SCNTransaction.commit()
             }
+            else{node.runAction(disenhance)}
         }
     }
     
     
 //    func
     
-    func showBookAbstract(id: Int){
-        let currentBook = books[id]
-        let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false)!
-        let pos = sceneView.projectPoint(currentBook.uiPosVec!+nowBookNode.position)
-        var pos2d = CGPoint()
-        pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-        pos2d.y = CGFloat(pos.y-Float(textHeight))
-        let abstract = generateAbstract(currentBook: currentBook)
-        DispatchQueue.main.async{
-            self.bookAbstractUI.bookId = id
-            self.nowShowAbsId = id
-            self.bookAbstractUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
-            self.bookAbstractUI.text = abstract
-            self.bookAbstractUI.isHidden = false
-            self.isBookHidden = false
+    func showAbstract(id: Int){
+        if isCoffee{
+            coffeeAbstractUI.coffeeId = id
+            coffeeAbstractUI.setImage(elementPics[coffees[id].desPicid])
+            coffeeAbstractUI.setText(coffees[id].generateText())
+            coffeeAbstractUI.setIsHidden(false)
+            nowShowAbsId = coffeeAbstractUI.coffeeId
+
+        }else{
+            let currentBook = books[id]
+            let abstract = currentBook.generateAbstract()
+            DispatchQueue.main.async{
+                self.bookAbstractUI.bookId = id
+                self.nowShowAbsId = id
+//                self.bookAbstractUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
+                self.bookAbstractUI.text = abstract
+                self.bookAbstractUI.isHidden = false
+                self.isBookHidden = false
+            }
         }
     }
     
-    func hideBookAbstract(){
-        DispatchQueue.main.async{
-            self.bookAbstractUI.isHidden = true
-            self.isBookHidden = true
+    func hideAbstract(){
+        if isCoffee{
+            coffeeAbstractUI.setIsHidden(true)
+        }else{
+            DispatchQueue.main.async{
+                self.bookAbstractUI.isHidden = true
+                self.isBookHidden = true
+            }
         }
     }
     
-    func generateAbstract(currentBook: BookSt)-> String{
-        var abstractscore = ""
-        for _ in stride(from: 0, to: currentBook.score ,by: 1){
-            abstractscore+="⭐️"
-        }
-        var abstract = ""
-        for bookStr in currentBook.words {
-            abstract+=bookStr
-            abstract+="\n"
-        }
-        abstract+="Rating: "+abstractscore+"\n\n"
-        abstract+="Reviewer's words:\n  "+currentBook.remark
-        return abstract
-    }
+//    func generateAbstract(currentBook: BookSt)-> String{
+//        var abstractscore = ""
+//        for _ in stride(from: 0, to: currentBook.score ,by: 1){
+//            abstractscore+="⭐️"
+//        }
+//        var abstract = ""
+//        for bookStr in currentBook.words {
+//            abstract+=bookStr
+//            abstract+="\n"
+//        }
+//        abstract+="Rating: "+abstractscore+"\n\n"
+//        abstract+="Reviewer's words:\n  "+currentBook.remark
+//        return abstract
+//    }
     
     public func resetSearch(){
-//        setMessage("")
         scaleNodes(ids: [])
-        hideBookAbstract()
-//        nowGroup = [Int](repeating: 0, count:books.count )
-//        for i in stride(from: 0, to: nowGroup.count, by: 1){
-//            nowGroup[i] = i
-//        }
+        hideAbstract()
     }
     
     @objc func changeToSortDisplay(){
         
         scaleNodes(ids: [])
-        hideBookAbstract()
+        hideAbstract()
         shouldBeInPlace = false
         removeHeadAnchor()
 
@@ -183,8 +204,13 @@ extension ViewController: UITextFieldDelegate{
         let nowTrans = sceneView.session.currentFrame!.camera.transform
         elementWeights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: elementWeights.count ,by: 1){
-            let nowBookWeight = elementWeights[i]
-            let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowBookWeight.id)", recursively: false)!
+            let elementWeight = elementWeights[i]
+            var nowNode = SCNNode()
+            if isCoffee{
+                nowNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(elementWeight.id)", recursively: false)!
+            }else{
+                nowNode = sceneView.scene.rootNode.childNode(withName: "book@\(elementWeight.id)", recursively: false)!
+            }
             var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(z)
             translation.columns.3.x = Float(x)
@@ -195,14 +221,19 @@ extension ViewController: UITextFieldDelegate{
                 translation.columns.3.y = Float(-1*absy)
                 absy += 0.03
             }
-            let bookSortNode = SCNNode()
-            bookSortNode.transform = SCNMatrix4(nowTrans*translation)
-            let nowPosVec = bookSortNode.position
-            let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
-            SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
-                nowBookNode.transform = SCNMatrix4(nowTrans*translation)
+            if isCoffee{
+                let temp = translation.columns.3.x
+                translation.columns.3.x = translation.columns.3.y*2
+                translation.columns.3.y = temp
             }
-            nowBookNode.runAction(trans)
+            let sortNode = SCNNode()
+            sortNode.transform = SCNMatrix4(nowTrans*translation)
+            let nowPosVec = sortNode.position
+            let trans = SCNAction.move(to: nowPosVec, duration: 0.4)
+            SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
+                nowNode.transform = SCNMatrix4(nowTrans*translation)
+            }
+            nowNode.runAction(trans)
         }
     }
     
@@ -224,7 +255,7 @@ extension ViewController: UITextFieldDelegate{
     @objc func restoreDisplay(){
         shouldBeInPlace = true
         scaleNodes(ids: [])
-        hideBookAbstract()
+        hideAbstract()
         removeHeadAnchor()
 
         let childNodes = sceneView.scene.rootNode.childNodes
@@ -232,20 +263,23 @@ extension ViewController: UITextFieldDelegate{
             guard let name = node.name else {
                 continue
             }
-            if name.hasPrefix("book@") {
-                let bookid = getIdFromName(name)
-                let restore = SCNAction.customAction(duration: 0.4){(node,time) in
-                    node.transform = self.books[bookid].oriTrans
-                }
-                restore.timingMode = .easeOut
-                node.runAction(restore)
-            }else{
-                continue;
+            guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
+                return
             }
+
+            let id = getIdFromName(name)
+            let restore = SCNAction.customAction(duration: 0.4){(node,time) in
+                if self.isCoffee{
+                    node.transform = self.coffees[id].oriTrans
+                }else{
+                    node.transform = self.books[id].oriTrans
+                }
+            }
+            restore.timingMode = .easeOut
+            node.runAction(restore)
         }
+
+
     }
-
-
-
 
 }

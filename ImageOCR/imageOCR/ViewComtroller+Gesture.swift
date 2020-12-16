@@ -26,7 +26,10 @@ extension ViewController{
         for result in results {
             if let name = result.node.name{
                 if name.hasPrefix("book@") {
-                    showBookAbstract(id: getIdFromName(name))
+                    showAbstract(id: getIdFromName(name))
+                }
+                if name.hasPrefix("coffee@") {
+                    showAbstract(id: getIdFromName(name))
                 }
             }
         }

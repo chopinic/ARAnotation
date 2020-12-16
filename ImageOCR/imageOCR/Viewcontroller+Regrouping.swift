@@ -11,11 +11,19 @@ import UIKit
 extension ViewController{
     
     func getAttrName(kind: Int)->String{
-        if(kind == 1){return "Publisher"}
-        if(kind == 2){return "Author"}
-        if(kind == 3){return "Score"}
-        if(kind == 4){return "Related"}
-        else{return ""}
+        if isCoffee{
+            if(kind == 1){return "Fragrance"}
+            if(kind == 2){return "Body"}
+            if(kind == 3){return "Score"}
+            if(kind == 4){return "Balance"}
+            else{return ""}
+        }else{
+            if(kind == 1){return "Publisher"}
+            if(kind == 2){return "Author"}
+            if(kind == 3){return "Score"}
+            if(kind == 4){return "Related"}
+            else{return ""}
+        }
     }
     
     func getAttri(kind: Int, book: BookSt) -> String {
@@ -25,6 +33,17 @@ extension ViewController{
         if(kind == 4){return book.relatedBook}
         else{return ""}
     }
+    
+    
+    
+    func getAttri(kind: Int, coffee: CoffeeSt) -> String {
+        if(kind == 1){return coffee.fragrance}
+        if(kind == 2){return coffee.body}
+        if(kind == 3){return String(coffee.score)}
+        if(kind == 4){return coffee.balance}
+        else{return ""}
+    }
+
     
     func compareAttri(kind: Int, book1: BookSt, book2: BookSt )->Bool{
         return getAttri(kind: kind, book: book1)==getAttri(kind: kind, book: book2)
@@ -76,7 +95,6 @@ extension ViewController{
         }else{
             setMessage("Find \(result.count) groups")
         }
-//        nowGroup = result[0]
         var absx = 0.0
         var y = -0.08
         let z = -1.5*PicMatrix.itemDis

@@ -28,9 +28,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private var result: NSDictionary!
     var picMatrix = [PicMatrix]()
     var books = [BookSt]()
-    var coffees = [CoffeeSt]()
-    //var bookInfo = [BookInfo]()
-    //var bookSCNNode = [SCNNode]()
     var viewCenterPoint = CGPoint()
     var elementWeights = [ElementWeight]()
     var imageH = CGFloat()
@@ -39,18 +36,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var radio: Float = 1
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
-    var coffeeAbstractUI = UICoffeeAbstract()
     var nowEnhanceNodes = [SCNNode]()
     var textWidth = 300,textHeight = 200
+    
+    
     var isAntUpdate = false
     var isAntUpdateCot = 0
     var shouldBeInPlace = false
     
+    
+    var isCoffee = true
+    var coffees = [CoffeeSt]()
+    var coffeeAbstractUI = UICoffeeAbstract()
+
     // ui
     var isBookHidden = true
     var nowShowAbsId = -1
     var receiveAnsCot = 0
     
+    var utiQueue = DispatchQueue(label:"uploadImage", qos: .utility)
+
 
     
     
@@ -109,33 +114,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
         sceneView.session.run(configuration)
-        createButton( title: "book",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
-//        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
-        
-        
-        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
-        
+        // height 100
+        createButton( title: "scan",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
         createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
-        
+        // height 150
         createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
-        
+//        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
         let antButton = createButton(title: "Ant",negX: 100, negY: 150, action: nil)
-        
         antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
         antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
-
+        // height 250
+        createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
+        createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
 
         createDirectionButton()
-        createButton(title: "coffee",negX: 100, negY: 250, action: #selector(ViewController.buttonTapUploadCoffee))
+//        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
+        
+        // height 300
         createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
-//        createButton(title: "regrouping", negY: 200, action: #selector(ViewController.displayGroups))
-        createButton(title: "back",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
+
+        switchToCoffee()
+        switchToCoffee()
+
+//        createDirectionButton()
     }
 
     
-    func setLocation(locDic: NSDictionary, isBook: Bool = true)->Location{
+    func setLocation(locDic: NSDictionary)->Location{
         var loc = Location()
-        if(isBook){
+        if(isCoffee == false){
             loc.height = locDic["width"] as! Int
             loc.width = locDic["height"] as! Int
             loc.top = locDic["left"] as! Int
@@ -156,13 +163,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         print("setResult function is on \(Thread.current)" )
         receiveAnsCot+=1
         if let hasResult = result {
-            if let _ = hasResult["books_result_num"]{
+            if isCoffee == false{
                 setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
             }
             else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
         }
         if(receiveAnsCot != picMatrix.count){
             setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
+        }else{
+            setMessage("Receive all scan results")
         }
 
     }
@@ -175,7 +184,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 let nowCoffeeDic = nowforCoffee as! NSDictionary
                 var nowCoffee = CoffeeSt()
                 let coffeeloc = nowCoffeeDic["location"] as! NSDictionary
-                nowCoffee.loc = setLocation(locDic: coffeeloc ,isBook: false)
+                nowCoffee.loc = setLocation(locDic: coffeeloc)
                 nowCoffee.name = "no name"
                 nowCoffee.fragrance = nowCoffeeDic["fragrance"] as! String
                 nowCoffee.aroma = nowCoffeeDic["aroma"] as! String
@@ -390,14 +399,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             
             let text = SCNText(string: headAnchor.text, extrusionDepth: 0.1)
-            // 创建2D文字的时候只需要将 extrusionDepth 设置为0即可
-            // 设置字体的大小
             text.font = UIFont.systemFont(ofSize: 1)
             text.isWrapped = true
             text.containerFrame = CGRect(x: 0, y: 0, width: 5, height: 7)
 
             let material = SCNMaterial()
-            material.diffuse.contents = UIColor.init(red: 0, green: 0.5, blue: 0.4, alpha: 1)
+            material.diffuse.contents = UIColor.init(red: 1, green: 1, blue: 1, alpha: 1)
             text.materials = [material]
             
             let textNode = SCNNode(geometry: text)
@@ -431,7 +438,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
             let trans = sceneView.session.currentFrame!.camera.transform
             var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-10*PicMatrix.itemDis-0.01)
+            translation.columns.3.z = Float(-5)
             backnode.transform = SCNMatrix4(trans*translation)
 
         }
@@ -462,9 +469,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x)
             pos2d.y = CGFloat(pos.y-Float(coffeeAbstractUI.imageW/2))
-            DispatchQueue.main.async{
-                self.coffeeAbstractUI.updatePosition(position: pos2d)
-            }
+            coffeeAbstractUI.updatePosition(position: pos2d)
         }
         
         if(isAntUpdate){
@@ -475,32 +480,46 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 guard let name = node.name else {
                     continue
                 }
-                if name.hasPrefix("book@") {
-                    let bookid = getIdFromName(name)
-                    let pos = sceneView.projectPoint(node.position)
-                    let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
-                    let dis = calculateScreenDistance(viewCenterPoint,point)
-                    if dis<800{
-                        let ratio = CGFloat(min(2.5,(dis+25.0)/dis))
-                        let scale = SCNAction.scale(to: ratio, duration: 0)
-                        node.runAction(scale)
-                        mindis = min(mindis,dis)
-                        if mindis == dis{
-                            if isAntUpdateCot==0
-                            {minid = bookid}
-                        }
+                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
+                    return
+                }
+                let elementId = getIdFromName(name)
+                let pos = sceneView.projectPoint(node.position)
+                let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
+                let dis = calculateScreenDistance(viewCenterPoint,point)
+                if dis<800{
+                    let ratio = CGFloat(min(2.5,(dis+25.0)/dis))
+                    let scale = SCNAction.scale(to: ratio, duration: 0)
+                    node.runAction(scale)
+                    mindis = min(mindis,dis)
+                    if mindis == dis{
+                        if isAntUpdateCot==0
+                        {minid = elementId}
                     }
-                    else if shouldBeInPlace{
-                        node.transform = books[bookid].oriTrans
+                }
+                else if shouldBeInPlace{
+                    if isCoffee{
+                        node.transform = coffees[elementId].oriTrans
+                    }else{
+                        node.transform = books[elementId].oriTrans
                     }
                 }
             }
             if minid != -1 && minid != nowShowAbsId{
-                let node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
-                let prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false)
+                var node = Optional<SCNNode>(SCNNode())
+                var prevNode = Optional<SCNNode>(SCNNode())
+
+                if isCoffee{
+                    node = sceneView.scene.rootNode.childNode(withName: "coffee@\(minid)", recursively: false)
+                    prevNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(nowShowAbsId)", recursively: false)
+                }else{
+                    node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
+                    prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false)
+                }
+                
                 node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.015, duration: 0))
                 prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.015, duration: 0))
-                showBookAbstract(id: minid)
+                showAbstract(id: minid)
             }
         }
         
