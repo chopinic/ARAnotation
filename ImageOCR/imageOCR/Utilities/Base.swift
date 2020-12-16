@@ -17,19 +17,29 @@ public struct Location{
     var left = Int();
 
 }
-
-// book struct
-public struct BookSt{
+public class Element{
     var loc = Location()
     var oriTrans = SCNMatrix4()
-    var words = [String]()
-    var locations = [Location]()
-    var kinds = [String]()
     var matrixId: Int!=0
     var picid = -1
     var isDisplay: Bool!=false
     var uiPosVec: SCNVector3?
-    var nowScale: Double = 1
+    public func generateAbstract()->String{
+        return "Element abstract"
+    }
+}
+
+// book struct
+public class BookSt: Element{
+//    var loc = Location()
+//    var oriTrans = SCNMatrix4()
+    var words = [String]()
+    var locations = [Location]()
+    var kinds = [String]()
+//    var matrixId: Int!=0
+//    var picid = -1
+//    var isDisplay: Bool!=false
+//    var uiPosVec: SCNVector3?
     var title = ""
     var author = ""
     var publisher = ""
@@ -37,7 +47,7 @@ public struct BookSt{
     var score: Int = 0
     var remark = ""
     
-    public func generateAbstract()->String{
+    public override func generateAbstract()->String{
         var abstractscore = ""
         for _ in stride(from: 0, to: score ,by: 1){
             abstractscore+="⭐️"
@@ -50,20 +60,17 @@ public struct BookSt{
         abstract+="Rating: "+abstractscore+"\n\n"
         abstract+="Reviewer's words:\n  "+remark
         return abstract
-
     }
 }
 
+
 //coffee struct
-public struct CoffeeSt{
-    var loc = Location()
-    var oriTrans = SCNMatrix4()
-    var coffeeOriTrans = SCNMatrix4()
-    var matrixId: Int!=0
-    var picid = -1
+public class CoffeeSt: Element{
+//    var loc = Location()
+//    var oriTrans = SCNMatrix4()
+//    var matrixId: Int!=0
+//    var picid = -1
     var desPicid = -1
-    var isDisplay: Bool!=false
-    var uiPosVec: SCNVector3?
     var name = ""
     var fragrance = ""
     var aroma = ""
@@ -75,7 +82,7 @@ public struct CoffeeSt{
     var score: Int = 0
     var remark = ""
     
-    public func generateText()->String{
+    public override func generateAbstract()->String{
         var abs = name+"\n"
         for _ in stride(from: 0, to: score, by: 1){
             abs+="⭐️"

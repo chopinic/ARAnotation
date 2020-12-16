@@ -136,7 +136,7 @@ extension ViewController{
         if coffeeAbstractUI.getIsHidden(){
             coffeeAbstractUI.coffeeId = 0
             coffeeAbstractUI.setImage(elementPics[coffees[0].desPicid])
-            coffeeAbstractUI.setText(coffees[0].generateText())
+            coffeeAbstractUI.setText(coffees[0].generateAbstract())
             coffeeAbstractUI.setIsHidden(false)
         }
         else{

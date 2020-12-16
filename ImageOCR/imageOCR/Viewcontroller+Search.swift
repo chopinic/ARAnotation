@@ -141,7 +141,7 @@ extension ViewController: UITextFieldDelegate{
         if isCoffee{
             coffeeAbstractUI.coffeeId = id
             coffeeAbstractUI.setImage(elementPics[coffees[id].desPicid])
-            coffeeAbstractUI.setText(coffees[id].generateText())
+            coffeeAbstractUI.setText(coffees[id].generateAbstract())
             coffeeAbstractUI.setIsHidden(false)
             nowShowAbsId = coffeeAbstractUI.coffeeId
 

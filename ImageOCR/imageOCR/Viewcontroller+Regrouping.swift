@@ -26,44 +26,68 @@ extension ViewController{
         }
     }
     
-    func getAttri(kind: Int, book: BookSt) -> String {
-        if(kind == 1){return book.publisher}
-        if(kind == 2){return book.author}
-        if(kind == 3){return String(book.score)}
-        if(kind == 4){return book.relatedBook}
-        else{return ""}
+    func getAttri(kind: Int, ele: Element) -> String {
+        if let element = ele as? BookSt{
+            if(kind == 1){return element.publisher}
+            if(kind == 2){return element.author}
+            if(kind == 3){return String(element.score)}
+            if(kind == 4){return element.relatedBook}
+            else{return ""}
+        }else{
+            let coffee = ele as! CoffeeSt
+            if(kind == 1){return coffee.fragrance}
+            if(kind == 2){return coffee.body}
+            if(kind == 3){return String(coffee.score)}
+            if(kind == 4){return coffee.balance}
+            else{return ""}
+        }
     }
     
     
     
-    func getAttri(kind: Int, coffee: CoffeeSt) -> String {
-        if(kind == 1){return coffee.fragrance}
-        if(kind == 2){return coffee.body}
-        if(kind == 3){return String(coffee.score)}
-        if(kind == 4){return coffee.balance}
-        else{return ""}
-    }
 
     
-    func compareAttri(kind: Int, book1: BookSt, book2: BookSt )->Bool{
-        return getAttri(kind: kind, book: book1)==getAttri(kind: kind, book: book2)
+    func compareAttri(kind: Int, ele1: Element, ele2: Element )->Bool{
+        return getAttri(kind: kind, ele: ele1)==getAttri(kind: kind, ele: ele2)
     }
+
+
+    
     
     func generateGroups(kind: Int) -> [[Int]] {
         var result = [[Int]]()
-        for s in stride(from: 0, to: books.count, by: 1){
-            var isfind = false
-            for i in stride(from: 0, to: result.count, by: 1){
-                let currentBook = books[s]
-                let book2 = books[result[i][0]]
-                if compareAttri(kind: kind, book1: currentBook, book2: book2){
-                    result[i].append(s)
-                    isfind = true
-                    break
+        if isCoffee{
+            for s in stride(from: 0, to: coffees.count, by: 1){
+                var isfind = false
+                for i in stride(from: 0, to: result.count, by: 1){
+                    let currentCoffee = coffees[s]
+                    let coffee2 = coffees[result[i][0]]
+                    if compareAttri(kind: kind, ele1: currentCoffee, ele2: coffee2){
+                        result[i].append(s)
+                        isfind = true
+                        break
+                    }
+                }
+                if isfind == false {
+                    result.append([s])
                 }
             }
-            if isfind == false {
-                result.append([s])
+        }
+        else{
+            for s in stride(from: 0, to: books.count, by: 1){
+                var isfind = false
+                for i in stride(from: 0, to: result.count, by: 1){
+                    let currentBook = books[s]
+                    let book2 = books[result[i][0]]
+                    if compareAttri(kind: kind, ele1: currentBook, ele2: book2){
+                        result[i].append(s)
+                        isfind = true
+                        break
+                    }
+                }
+                if isfind == false {
+                    result.append([s])
+                }
             }
         }
         return result
@@ -77,16 +101,23 @@ extension ViewController{
         var result = generateGroups(kind: kind)
         if(finding != ""){
             var isFind = false
+            var groupName = ""
             for i in stride(from: 0, to: result.count, by: 1) {
-                if(getAttri(kind: kind, book: books[result[i][0]]).contains(finding) ){
+                var nowEle = Element()
+                if isCoffee {
+                    nowEle = coffees[result[i][0]]
+                }else{
+                    nowEle = books[result[i][0]]
+                }
+                if(getAttri(kind: kind, ele: nowEle).contains(finding) ){
+                    groupName = getAttri(kind: kind, ele: nowEle)
                     if i != 0 {result.swapAt(0, i)}
                     isFind = true
-                    print("find group kind: \(kind)!")
                     break
                 }
             }
             if(isFind){
-                setMessage("Find group \"\(getAttri(kind: kind, book: books[result[0][0]]))\" in all \(result.count) groups")
+                setMessage("Find group \(groupName) in all \(result.count) groups")
 
             }
             else{
@@ -103,7 +134,13 @@ extension ViewController{
         for i in stride(from: 0, to: result.count, by: 1) {
             for j in stride(from: 0, to: result[i].count, by: 1){
                 let id = result[i][j]
-                let nowBookNode = sceneView.scene.rootNode.childNode(withName: "book@\(result[i][j])", recursively: false)!
+                var nowNode = Optional<SCNNode>(SCNNode())
+                if isCoffee{
+                    nowNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(result[i][j])", recursively: false)
+                }else{
+                    nowNode = sceneView.scene.rootNode.childNode(withName: "book@\(result[i][j])", recursively: false)
+                }
+                
                 var translation = matrix_identity_float4x4
                 translation.columns.3.z = Float(z)
                 if i % 2 == 0{translation.columns.3.x = Float(absx)}
@@ -114,19 +151,19 @@ extension ViewController{
                 let bookSortNode = SCNNode()
                 bookSortNode.transform = SCNMatrix4(nowTrans*translation)
                 if j==0{
-                    print(getAttri(kind: kind, book:books[id]))
+                    print(getAttri(kind: kind, ele:books[id]))
                     translation.columns.3.y -= 0.1
                     translation.columns.3.x += 0.1
-                    var headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, book:books[id])
+                    let headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, ele:books[id])
                     let headAnchor = HeadAnchor(text: headString, transform: nowTrans*translation)
                     self.sceneView.session.add(anchor:headAnchor)
                 }
                 let nowPosVec = bookSortNode.position
                 let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
                 SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
-                    nowBookNode.transform = SCNMatrix4(nowTrans*translation)
+                    nowNode!.transform = SCNMatrix4(nowTrans*translation)
                 }
-                nowBookNode.runAction(trans)
+                nowNode!.runAction(trans)
             }
             if i % 3 == 2{
                 groupStarty = maxy+0.16
