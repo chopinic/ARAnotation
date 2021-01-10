@@ -139,23 +139,14 @@ extension ViewController: UITextFieldDelegate{
     
     func showAbstract(id: Int){
         if isCoffee{
-            coffeeAbstractUI.coffeeId = id
+            coffeeAbstractUI.id = id
             coffeeAbstractUI.setImage(elementPics[coffees[id].desPicid])
             coffeeAbstractUI.setText(coffees[id].generateAbstract())
             coffeeAbstractUI.setIsHidden(false)
-            nowShowAbsId = coffeeAbstractUI.coffeeId
-
         }else{
-            let currentBook = books[id]
-            let abstract = currentBook.generateAbstract()
-            DispatchQueue.main.async{
-                self.bookAbstractUI.bookId = id
-                self.nowShowAbsId = id
-//                self.bookAbstractUI.frame = CGRect(x: pos2d.x, y: pos2d.y, width: CGFloat(self.textWidth), height: CGFloat(self.textHeight))
-                self.bookAbstractUI.text = abstract
-                self.bookAbstractUI.isHidden = false
-                self.isBookHidden = false
-            }
+            bookAbstractUI.id = id
+            bookAbstractUI.setText(books[id].generateAbstract())
+            bookAbstractUI.setIsHidden(false)
         }
     }
     
@@ -163,28 +154,10 @@ extension ViewController: UITextFieldDelegate{
         if isCoffee{
             coffeeAbstractUI.setIsHidden(true)
         }else{
-            DispatchQueue.main.async{
-                self.bookAbstractUI.isHidden = true
-                self.isBookHidden = true
-            }
+            bookAbstractUI.setIsHidden(true)
         }
     }
-    
-//    func generateAbstract(currentBook: BookSt)-> String{
-//        var abstractscore = ""
-//        for _ in stride(from: 0, to: currentBook.score ,by: 1){
-//            abstractscore+="⭐️"
-//        }
-//        var abstract = ""
-//        for bookStr in currentBook.words {
-//            abstract+=bookStr
-//            abstract+="\n"
-//        }
-//        abstract+="Rating: "+abstractscore+"\n\n"
-//        abstract+="Reviewer's words:\n  "+currentBook.remark
-//        return abstract
-//    }
-    
+        
     public func resetSearch(){
         scaleNodes(ids: [])
         hideAbstract()

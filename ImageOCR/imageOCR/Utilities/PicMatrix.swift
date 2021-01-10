@@ -13,34 +13,40 @@ import ARKit
 
 class PicMatrix{
     
+    
+//    static
+////  iphone X:
+//    static var camWAngle: Double = 48.71/2
+//    static var camHAngle: Double = 61.15/2
+//    static var imageW: Double = 4320
+//    static var imageH: Double  = 5760
+    
+// ipad 6 horizontal:
+//    static var camWAngle: Double = 22.3
+//    static var camHAngle: Double = 26.5
+//    static var imageW: Double = 2880
+//    static var imageH: Double  = 2000
+
+// ipad pro horizontal:
+    static var camWAngle: Double = 30.5
+    static var camHAngle: Double = 24
+    static var imageW: Double = 3840
+    static var imageH: Double  = 2880
+    static var xOffset: Float = 0.002
+    static var yOffset: Float = 0
+
     var prevTrans: simd_float4x4?
     
     static var itemDis: Double = 0.4
     
-//    static
-    
-//    var camWAngle: Double = 32.71/2
-//    var camWAngle: Double = 36.71/2 // cal
-    static var camWAngle: Double = 48.71/2
-
-    static var camHAngle: Double = 61.15/2
-//    var camHAngle: Double = 65.15/2
-
     static var actualPicW: Double = 0.29
     
     static var actualPicH: Double = 0.26
     
-    static var imageW: Double = 4320
     
-    static var imageH: Double  = 5760
+    //static var xCoffeeOffset: Float = 0
     
-    static var xOffset: Float = -0.019
-    
-    static var yOffset: Float = 0.00
-    
-    static var xCoffeeOffset: Float = 0
-    
-    static var yCoffeeOffset: Float = 0
+    //static var yCoffeeOffset: Float = 0
 
     public static func findMax(x:Double,y:Double)->Double{
         if x>y{
@@ -59,26 +65,26 @@ class PicMatrix{
     
     public static func addxOffSet(){
         xOffset += 0.002;
-        xCoffeeOffset += 0.002;
+        //xCoffeeOffset += 0.002;
         print("now xOffset:\(xOffset)")
     }
     
     public static func decxOffSet(){
         xOffset -= 0.002;
-        xCoffeeOffset -= 0.002;
+        //xCoffeeOffset -= 0.002;
         print("now xOffset:\(xOffset)")
     }
     
     public static func addyOffSet(){
         yOffset += 0.002;
-        yCoffeeOffset += 0.002;
+        //yCoffeeOffset += 0.002;
 
         print("now yOffset:\(yOffset)")
     }
     
     public static func decyOffSet(){
         yOffset -= 0.002;
-        yCoffeeOffset -= 0.002;
+        //yCoffeeOffset -= 0.002;
         print("now yOffset:\(yOffset)")
     }
     
@@ -103,30 +109,27 @@ class PicMatrix{
         actualPicH = 2*itemDis*tan(camHAngle * Double.pi / 180)
 
         if(isW){
-            let midOffset = -offset+imageW/2
+            let midOffset = offset-imageW/2
             return actualPicW*(midOffset/imageW)
         }
         else{
-            let midOffset = offset-imageH/2
+            let midOffset = -offset+imageH/2
             return actualPicH*(midOffset/imageH)
         }
     }
         
-    public func addCoffeeAnchor(view: ARSCNView,id:Int,coffee:CoffeeSt){
+    public func addCoffeeAnchor(view: ARSCNView,id:Int,coffee:CoffeeSt, nowOri: Int = 1){
         guard let trans = prevTrans
         else { return }
-        let picW : Double = PicMatrix.imageW - Double(coffee.loc.left);
-//        let picW : Double = Double(coffee.loc.left);
-        let picH : Double = Double(coffee.loc.top);
         let width = Double(coffee.loc.width);
         let height = Double(coffee.loc.height);
+        let picW : Double = Double(coffee.loc.left)+width/2;
+        let picH : Double = Double(coffee.loc.top)+height/2;
         var x = Float(PicMatrix.getActualOffset(offset: picW,isW: true))
         var y = Float(PicMatrix.getActualOffset(offset: picH,isW: false))
         let z  = Float(-1*PicMatrix.itemDis)
-        let w = PicMatrix.getActualLen(oriLen: width, isW: true)
-        let h = PicMatrix.getActualLen(oriLen:height, isW: false)
-        x += Float(w/2)+PicMatrix.xCoffeeOffset //-:left
-        y += Float(h/2)+PicMatrix.yCoffeeOffset //+:ri
+        x += PicMatrix.xOffset //-:left
+        y += PicMatrix.yOffset //+:ri
         var zz = z
         if(id%3==0){
             zz+=0.005
@@ -135,28 +138,29 @@ class PicMatrix{
         }
         var translation = matrix_identity_float4x4
         translation.columns.3.z = zz
-        translation.columns.3.x = y
-        translation.columns.3.y = x
+        translation.columns.3.x = x
+        translation.columns.3.y = y
         let transform = trans * translation
         let anchor = CoffeeAnchor(id:id, transform: transform)
         view.session.add(anchor: anchor)
         
     }
-    public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt){
+    
+    public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt, nowOri: Int = 1){
 //        print("addBookAnchor function is on \(Thread.current)" )
         guard let trans = prevTrans
         else { return }
-        let picW : Double = Double(book.loc.left);
-        let picH : Double = Double(book.loc.top);
-        let width = Double(book.loc.width);
-        let height = Double(book.loc.height);
+        let width = Double(book.loc.width)
+        let height = Double(book.loc.height)
+        let picW : Double = Double(book.loc.left)+width/2
+        let picH : Double = Double(book.loc.top)+height/2
         var x = Float(PicMatrix.getActualOffset(offset: picW,isW: true))
         var y = Float(PicMatrix.getActualOffset(offset: picH,isW: false))
         let z  = Float(-1*PicMatrix.itemDis)
         let w = PicMatrix.getActualLen(oriLen: width, isW: true)
-        let h = PicMatrix.getActualLen(oriLen:height, isW: false)
-        x += Float(w/2)+PicMatrix.xOffset //-:left
-        y += Float(h/2)+PicMatrix.yOffset //+:ri
+        let h = PicMatrix.getActualLen(oriLen: height, isW: false)
+        x += PicMatrix.xOffset //-:left
+        y += PicMatrix.yOffset //+:ri
         
         var zz = z
         if(id%3==0){
@@ -166,10 +170,13 @@ class PicMatrix{
         }
         var translation = matrix_identity_float4x4
         translation.columns.3.z = zz
-        translation.columns.3.x = y
-        translation.columns.3.y = x
+        translation.columns.3.x = x
+        translation.columns.3.y = y
+        print("x:\(x), y:\(y), h:\(h), w:\(w)")
         let transform = trans * translation
         let anchor = BookAnchor(id:id, transform: transform)
         view.session.add(anchor: anchor)
     }
 }
+//x:-0.106536895, y:-0.24927528, h:0.19478754982248456, w:0.11486377820200745
+

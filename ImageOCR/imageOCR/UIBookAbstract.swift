@@ -8,44 +8,61 @@
 
 import UIKit
 
-class UIBookAbstract: UITextView {
+class UIBookAbstract {
     
-    public var bookname: String ;
-    public var abstract: String ;
-    public var bookId: Int;
+    public var id: Int;
+    public var isHidden: Bool;
+    public var ui: UITextView;
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     init(){
-        self.bookname = "";
-        self.abstract = "";
-        self.bookId = -1;
-        super.init(frame: CGRect(), textContainer: nil)
-        self.text = self.abstract;
+        self.id = -1;
+        isHidden = true
+        ui = UITextView(frame: CGRect(), textContainer: nil)
+        DispatchQueue.main.async{
+            self.ui.isHidden = true
+            self.ui.isEditable = false
+            self.ui.layer.cornerRadius = 15.0
+            self.ui.layer.borderWidth = 2.0
+            self.ui.layer.borderColor = UIColor.red.cgColor
+            self.ui.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+            self.ui.frame = CGRect(x: 10, y: 10, width: CGFloat(300), height: CGFloat(250))
+        }
     }
-    init(name: String, info: String, id:Int , frame: CGRect){
-        self.bookname = name;
-        self.abstract = info;
-        self.bookId = id;
-        super.init(frame: frame, textContainer: nil)
-        self.text = self.abstract;
-    }
-    
-    
-//    public func setFrame(frame:CGRect){
-//        
+//    init(name: String, info: String, id:Int , frame: CGRect){
+//        init()
+//
 //    }
     
-    public func updatePosition(position: CGPoint){
-//        let centerPoint = getCenterPoint(position)
-        if(isHidden==false){frame.origin = CGPoint(x: position.x, y: position.y)}
+    
+    func setText(_ str: String){
+        DispatchQueue.main.async{
+            self.ui.text = str
+        }
     }
     
-    func getCenterPoint(_ point: CGPoint) -> CGPoint {
-        let xCoord = CGFloat(point.x) - (frame.width) / 2
-        let yCoord = CGFloat(point.y) - (frame.height) / 2
-        return CGPoint(x: xCoord, y: yCoord)
+    func getIsHidden()->Bool{
+        return isHidden
     }
+    
+    func setIsHidden(_ hid:Bool){
+        isHidden = hid
+        DispatchQueue.main.async{
+            self.ui.isHidden = hid
+        }
+    }
+ 
+    public func updatePosition(position: CGPoint){
+        if(isHidden==false){
+            DispatchQueue.main.async{
+                self.ui.frame.origin = CGPoint(x: position.x, y: position.y)
+            }
+        }
+    }
+    
+//    func getCenterPoint(_ point: CGPoint) -> CGPoint {
+//        let xCoord = CGFloat(point.x) - (frame.width) / 2
+//        let yCoord = CGFloat(point.y) - (frame.height) / 2
+//        return CGPoint(x: xCoord, y: yCoord)
+//    }
 
 }

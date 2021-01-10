@@ -99,9 +99,9 @@ extension ViewController{
 
         let nowTrans = sceneView.session.currentFrame!.camera.transform
         var result = generateGroups(kind: kind)
+        var groupName = ""
         if(finding != ""){
             var isFind = false
-            var groupName = ""
             for i in stride(from: 0, to: result.count, by: 1) {
                 var nowEle = Element()
                 if isCoffee {
@@ -135,10 +135,13 @@ extension ViewController{
             for j in stride(from: 0, to: result[i].count, by: 1){
                 let id = result[i][j]
                 var nowNode = Optional<SCNNode>(SCNNode())
+                var nowElement = Element()
                 if isCoffee{
-                    nowNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(result[i][j])", recursively: false)
+                    nowElement = coffees[id]
+                    nowNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(id)", recursively: false)
                 }else{
-                    nowNode = sceneView.scene.rootNode.childNode(withName: "book@\(result[i][j])", recursively: false)
+                    nowElement = books[id]
+                    nowNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false)
                 }
                 
                 var translation = matrix_identity_float4x4
@@ -148,17 +151,17 @@ extension ViewController{
                 translation.columns.3.y = Float(y)
                 y += 0.03
                 maxy = max(maxy, y)
-                let bookSortNode = SCNNode()
-                bookSortNode.transform = SCNMatrix4(nowTrans*translation)
+                let sortNode = SCNNode()
+                sortNode.transform = SCNMatrix4(nowTrans*translation)
+                let nowPosVec = sortNode.position
                 if j==0{
-                    print(getAttri(kind: kind, ele:books[id]))
-                    translation.columns.3.y -= 0.1
-                    translation.columns.3.x += 0.1
-                    let headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, ele:books[id])
+                    translation.columns.3.y -= Float(PicMatrix.itemDis/4)
+                    translation.columns.3.x += Float(PicMatrix.itemDis/4)
+                    let headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, ele: nowElement)
+                    print(headString)
                     let headAnchor = HeadAnchor(text: headString, transform: nowTrans*translation)
                     self.sceneView.session.add(anchor:headAnchor)
                 }
-                let nowPosVec = bookSortNode.position
                 let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
                 SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
                     nowNode!.transform = SCNMatrix4(nowTrans*translation)

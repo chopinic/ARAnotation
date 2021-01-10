@@ -21,23 +21,19 @@ extension ViewController{
     
     
     @objc func tappedOnARView(_ sender: UITapGestureRecognizer) {
+//        print("touch")
         let touchLocation = sender.location(in: sceneView)
         let results = sceneView.hitTest(touchLocation)
         for result in results {
             if let name = result.node.name{
-                if name.hasPrefix("book@") {
+                if name.hasPrefix("book@")&&isCoffee==false {
                     showAbstract(id: getIdFromName(name))
                 }
-                if name.hasPrefix("coffee@") {
+                if name.hasPrefix("coffee@")&&isCoffee {
                     showAbstract(id: getIdFromName(name))
                 }
             }
         }
-
-//        if let object = sceneView.virtualObject(at: touchLocation) {
-//            return object
-//        }
-
 
     }
     

@@ -11,6 +11,8 @@ import ARKit
 public struct Internet {
     static var responseBuffer: String = "";
     
+    static public var imgData: String = "";
+        
     static func getDictionaryFromJSONString(jsonString:String) ->NSDictionary{
         
         let jsonData:Data = jsonString.data(using: .utf8)!
@@ -74,17 +76,24 @@ public struct Internet {
     
     static func uploadImage(cot:Int, url: URL, capturedImage: CVPixelBuffer, controller: ViewController?){
         var cI = CIImage()
+
+        print(controller?.nowOrientation)
         if(controller?.isCoffee == true){
-            cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
+            if controller?.nowOrientation == UIInterfaceOrientation.portrait.rawValue{
+                cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
+            }
+            else{
+                cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
+            }
         }
-        else{ cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)}
+        else{ cI = CIImage(cvPixelBuffer: capturedImage).oriented(.left )}
         let tempUiImage = UIImage(ciImage: cI)
 
         if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
             print("uploadImage function is on \(Thread.current)" )
             let imageData = data.base64EncodedString()
             var request = URLRequest(url: url)
-//            print(imageData)
+            imgData = imageData
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             if upload(request: request, data: imageData.data(using: .utf8)!, cot: cot, controller: controller) != nil{

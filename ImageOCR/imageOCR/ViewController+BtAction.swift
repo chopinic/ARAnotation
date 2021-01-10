@@ -19,7 +19,7 @@ extension ViewController{
         else{
             isCoffee = true
             setMessage("Set to coffee")
-            PicMatrix.itemDis = 1.5
+            PicMatrix.itemDis = 0.4
         }
     }
 
@@ -71,10 +71,22 @@ extension ViewController{
         resetAndAddAnchor(isReset: true)
     }
     
+    @objc func buttonTapData(){
+        print(Internet.imgData)
+    }
     
     @objc func buttonTapUpload(){
         
         if let capturedImage = sceneView.session.currentFrame?.capturedImage{
+            if #available(iOS 13.0, *) {
+                if let result = sceneView.raycastQuery(from: wholeView.center, allowing: .estimatedPlane
+                                                       , alignment: .any) {
+//                    result.origin
+//                    result.
+                }
+            } else {
+                // Fallback on earlier versions
+            }
             let nowMatrix = PicMatrix()
             nowMatrix.saveCurrentTrans(view: sceneView)
             picMatrix.append(nowMatrix)
@@ -134,7 +146,7 @@ extension ViewController{
     @objc func buttonShowCoffeeAbs(){
 
         if coffeeAbstractUI.getIsHidden(){
-            coffeeAbstractUI.coffeeId = 0
+            coffeeAbstractUI.id = 0
             coffeeAbstractUI.setImage(elementPics[coffees[0].desPicid])
             coffeeAbstractUI.setText(coffees[0].generateAbstract())
             coffeeAbstractUI.setIsHidden(false)

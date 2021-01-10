@@ -9,6 +9,8 @@
 import UIKit
 import SceneKit
 import ARKit
+import RealityKit
+
 //import Base
 
 
@@ -50,9 +52,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var coffeeAbstractUI = UICoffeeAbstract()
 
     // ui
-    var isBookHidden = true
-    var nowShowAbsId = -1
     var receiveAnsCot = 0
+    var nowOrientation = 0
     
     var utiQueue = DispatchQueue(label:"uploadImage", qos: .utility)
 
@@ -83,14 +84,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         attrSelect.dataSource = self
         bookAttr = ["Title", "Publisher", "Author", "Score", "Relate"]
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
-        bookAbstractUI = UIBookAbstract()
-        bookAbstractUI.isHidden = true
-        bookAbstractUI.isEditable = false
-        bookAbstractUI.layer.cornerRadius = 15.0
-        bookAbstractUI.layer.borderWidth = 2.0
-        bookAbstractUI.layer.borderColor = UIColor.red.cgColor
-        bookAbstractUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
-        self.sceneView.addSubview(bookAbstractUI)
+        
+        self.sceneView.addSubview(bookAbstractUI.ui)
 
         coffeeAbstractUI.setIsHidden(true)
         self.sceneView.addSubview(coffeeAbstractUI.ui)
@@ -113,18 +108,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
+        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
+            if #available(iOS 13.4, *) {
+                configuration.sceneReconstruction = .meshWithClassification
+            }
+        }
         sceneView.session.run(configuration)
         // height 100
         createButton( title: "scan",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
         createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
         // height 150
         createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
-//        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
+        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
         let antButton = createButton(title: "Ant",negX: 100, negY: 150, action: nil)
         antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
         antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
+
+        createButton(title: "data",negY: 200, action: #selector(ViewController.buttonTapData))
+
+        
         // height 250
-        createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
+        //createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
         createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
 
         createDirectionButton()
@@ -136,23 +140,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         switchToCoffee()
         switchToCoffee()
 
+        DispatchQueue.main.async{
+            self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
+        }
 //        createDirectionButton()
     }
-
     
     func setLocation(locDic: NSDictionary)->Location{
         var loc = Location()
-        if(isCoffee == false){
-            loc.height = locDic["width"] as! Int
-            loc.width = locDic["height"] as! Int
-            loc.top = locDic["left"] as! Int
-            loc.left = locDic["top"] as! Int
-        }
-        else{
+        if(isCoffee){
             loc.height = locDic["height"] as! Int
             loc.width = locDic["width"] as! Int
             loc.top = locDic["top"] as! Int
             loc.left = locDic["left"] as! Int
+        }
+        else{
+            loc.height = locDic["width"] as! Int
+            loc.width = locDic["height"] as! Int
+            loc.left = Int(PicMatrix.imageW) - (locDic["top"] as! Int) - loc.width
+//            loc.left = Int(PicMatrix.imageW) - (locDic["left"] as! Int)
+            loc.top = (locDic["left"] as! Int)
         }
         return loc;
     }
@@ -182,10 +189,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             print("Found \(coffeeArray.count) coffees")
             for nowforCoffee in coffeeArray{
                 let nowCoffeeDic = nowforCoffee as! NSDictionary
-                var nowCoffee = CoffeeSt()
+                let nowCoffee = CoffeeSt()
                 let coffeeloc = nowCoffeeDic["location"] as! NSDictionary
                 nowCoffee.loc = setLocation(locDic: coffeeloc)
-                nowCoffee.name = "no name"
+                nowCoffee.name = nowCoffeeDic["words"] as! String
                 nowCoffee.fragrance = nowCoffeeDic["fragrance"] as! String
                 nowCoffee.aroma = nowCoffeeDic["aroma"] as! String
                 nowCoffee.acidity = nowCoffeeDic["acidity"] as! String
@@ -202,8 +209,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     var strBase64 = nowCoffeeDic["base64"] as! String
                     var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
                     if let pic = UIImage(data: dataDecoded){
-                        let temppic = pic.rotate(radians: -.pi/2)
-                        elementPics.append(temppic)
+                        if nowOrientation == UIInterfaceOrientation.portrait.rawValue{
+                            let temppic = pic.rotate(radians: -.pi/2)
+                            elementPics.append(temppic)
+                        }else{
+//                            let temppic = pic.rotate(radians: .pi/2)
+                            elementPics.append(pic)
+                        }
                     }else{
                         elementPics.append(UIImage(named: "coffee1.jpg")!.rotate(radians: -.pi/2))
                     }
@@ -232,7 +244,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             print("Found \(bookarray.count) books")
             for nowforbook in bookarray{
                 let nowtempbook = nowforbook as! NSDictionary
-                var nowbook = BookSt()
+                let nowbook = BookSt()
                 let bookloc = nowtempbook["location"] as! NSDictionary
                 nowbook.loc = setLocation(locDic: bookloc)
                 nowbook.title = nowtempbook["title"] as! String
@@ -247,7 +259,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     let strBase64 = nowtempbook["base64"] as! String
                     let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
                     if let pic = UIImage(data: dataDecoded){
-                        elementPics.append(pic)
+                        let temppic = pic.rotate(radians: .pi/2)
+                        elementPics.append(temppic)
                     }else{
                         elementPics.append(UIImage(named: "test2.png")!)
                     }
@@ -329,7 +342,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             let nowMatrix = books[i].matrixId!-1
             books[i].isDisplay = true;
-            picMatrix[nowMatrix].addBookAnchor(view:sceneView, id:i,book:books[i])
+            picMatrix[nowMatrix].addBookAnchor(view:sceneView, id:i,book:books[i],nowOri: nowOrientation)
         }
         
         for i in stride(from: 0, to: coffees.count ,by: 1){
@@ -338,7 +351,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             let nowMatrix = coffees[i].matrixId!-1
             coffees[i].isDisplay = true;
-            picMatrix[nowMatrix].addCoffeeAnchor(view:sceneView, id:i,coffee:coffees[i])
+            picMatrix[nowMatrix].addCoffeeAnchor(view:sceneView, id:i,coffee:coffees[i],nowOri: nowOrientation)
         }
     }
     
@@ -351,7 +364,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let currentBook = books[id]
             let rootLoc = currentBook.loc
             let picContents = elementPics[currentBook.picid]
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
             print("bookid: \(id)")
             var words = ""
             for str in currentBook.words {
@@ -366,7 +379,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             var translation = matrix_identity_float4x4
             translation.columns.3.x = -Float(size.width)
-            translation.columns.3.y = -Float(size.height)
+            translation.columns.3.y = Float(size.height)/2
             let topPos = anchor.transform*translation
             let top = SCNNode();
             top.transform = SCNMatrix4(topPos)
@@ -376,9 +389,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let currentCoffee = coffees[id]
             let rootLoc = currentCoffee.loc
             let picContents = elementPics[currentCoffee.picid]
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: false))
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
             print("coffeeid: \(id) \(coffees[id].name)")
-            
             let coffee = createPlaneNode(size: size, rotation: 0, contents: picContents)
             coffee.name = "coffee@\(id)"
             coffee.transform = SCNMatrix4(anchor.transform)
@@ -424,17 +436,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
-//        var centerPoint = CGPoint()
-
-//        DispatchQueue.main.async{
-//            centerPoint = self.sceneView.center
-//            isBookHidden = self.bookAbstractUI.isHidden
-//            nowShowAbsId = self.bookAbstractUI.bookId
-//            isCoffeeHidden = self.coffeeDes.isHidden
-//            nowShowCoffeeAbsId = self.coffeeAbstractUI.coffeeId
-//        }
-
-        
         if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
             let trans = sceneView.session.currentFrame!.camera.transform
             var translation = matrix_identity_float4x4
@@ -443,28 +444,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         }
 
-        if(isBookHidden == false){
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false) else{
-                print("renderer: no such book \(nowShowAbsId)")
+        if(bookAbstractUI.getIsHidden() == false){
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(bookAbstractUI.id)", recursively: false) else{
+                print("renderer: no such book \(bookAbstractUI.id)")
                 return
             }
-            let bookTopPos = childNode.position+books[nowShowAbsId].uiPosVec!
+            let bookTopPos = childNode.position+books[bookAbstractUI.id].uiPosVec!
             let pos = sceneView.projectPoint(bookTopPos)
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x-Float(textWidth/2))
             pos2d.y = CGFloat(pos.y-Float(textHeight))
-            
             DispatchQueue.main.async{
                 self.bookAbstractUI.updatePosition(position: pos2d)
             }
         }
         
         if(coffeeAbstractUI.getIsHidden() == false){
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.coffeeId)", recursively: false) else{
-                print("renderer: no such coffee \(coffeeAbstractUI.coffeeId)")
+            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.id)", recursively: false) else{
+                print("renderer: no such coffee \(coffeeAbstractUI.id)")
                 return
             }
-            let topPos = childNode.position+coffees[coffeeAbstractUI.coffeeId].uiPosVec!
+            let topPos = childNode.position+coffees[coffeeAbstractUI.id].uiPosVec!
             let pos = sceneView.projectPoint(topPos)
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x)
@@ -480,10 +480,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 guard let name = node.name else {
                     continue
                 }
+//                print(name)
                 guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
                     return
                 }
                 let elementId = getIdFromName(name)
+//                print(elementId)
                 let pos = sceneView.projectPoint(node.position)
                 let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
                 let dis = calculateScreenDistance(viewCenterPoint,point)
@@ -505,16 +507,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     }
                 }
             }
-            if minid != -1 && minid != nowShowAbsId{
+            let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
+            if minid != -1 && minid != prevId{
                 var node = Optional<SCNNode>(SCNNode())
                 var prevNode = Optional<SCNNode>(SCNNode())
 
                 if isCoffee{
                     node = sceneView.scene.rootNode.childNode(withName: "coffee@\(minid)", recursively: false)
-                    prevNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(nowShowAbsId)", recursively: false)
+                    prevNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(prevId)", recursively: false)
                 }else{
                     node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
-                    prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(nowShowAbsId)", recursively: false)
+                    prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(prevId)", recursively: false)
                 }
                 
                 node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.015, duration: 0))

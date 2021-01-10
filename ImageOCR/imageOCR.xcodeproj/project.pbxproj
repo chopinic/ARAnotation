@@ -17,7 +17,6 @@
 		0942A3A12556581D00ECC38C /* AddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0942A3A02556581D00ECC38C /* AddButton.swift */; };
 		094C0D67253DC318006B381D /* Internet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D66253DC318006B381D /* Internet.swift */; };
 		094C0D6A253E7002006B381D /* PicMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094C0D69253E7001006B381D /* PicMatrix.swift */; };
-		0958D5F72550E72F00F6105A /* BookNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0958D5F62550E72F00F6105A /* BookNode.swift */; };
 		09626B75255B7EFC0013D22B /* test2.png in Resources */ = {isa = PBXBuildFile; fileRef = 09626B74255B7EFC0013D22B /* test2.png */; };
 		0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B01D2564CE3000315782 /* ViewController+Button.swift */; };
 		0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B0202564D03B00315782 /* ViewController+BtAction.swift */; };
@@ -52,7 +51,6 @@
 		0942A3A02556581D00ECC38C /* AddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddButton.swift; sourceTree = "<group>"; };
 		094C0D66253DC318006B381D /* Internet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet.swift; sourceTree = "<group>"; };
 		094C0D69253E7001006B381D /* PicMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicMatrix.swift; sourceTree = "<group>"; };
-		0958D5F62550E72F00F6105A /* BookNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNode.swift; sourceTree = "<group>"; };
 		09626B74255B7EFC0013D22B /* test2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test2.png; sourceTree = "<group>"; };
 		0976B01D2564CE3000315782 /* ViewController+Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+Button.swift"; sourceTree = "<group>"; };
 		0976B0202564D03B00315782 /* ViewController+BtAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+BtAction.swift"; sourceTree = "<group>"; };
@@ -98,7 +96,6 @@
 				0942A397255654B300ECC38C /* DebugString.swift */,
 				094C0D69253E7001006B381D /* PicMatrix.swift */,
 				094C0D66253DC318006B381D /* Internet.swift */,
-				0958D5F62550E72F00F6105A /* BookNode.swift */,
 				0942A39C2556556700ECC38C /* UITextUtilities.swift */,
 				0942A3A02556581D00ECC38C /* AddButton.swift */,
 			);
@@ -272,7 +269,6 @@
 				09B72CBF25848BA1008FEDD6 /* HeadAnchor.swift in Sources */,
 				091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */,
 				E49C2DFF20BC53F700D6C6F3 /* AppDelegate.swift in Sources */,
-				0958D5F72550E72F00F6105A /* BookNode.swift in Sources */,
 				0942A39D2556556700ECC38C /* UITextUtilities.swift in Sources */,
 				091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */,
 				0942A398255654B300ECC38C /* DebugString.swift in Sources */,

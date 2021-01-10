@@ -12,7 +12,7 @@ class UICoffeeAbstract {
     
     public var coffeeName: String ;
     public var abstract: String ;
-    public var coffeeId: Int;
+    public var id: Int;
     public var imageW: CGFloat = 150;
     public var textW: CGFloat = 300;
     public var ui: UIImageView;
@@ -26,7 +26,7 @@ class UICoffeeAbstract {
     init() {
         self.coffeeName = "";
         self.abstract = "";
-        self.coffeeId = -1;
+        self.id = -1;
         self.ui = UIImageView()
         self.textUI = UITextView()
         DispatchQueue.main.async{
