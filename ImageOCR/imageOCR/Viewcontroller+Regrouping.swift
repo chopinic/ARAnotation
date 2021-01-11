@@ -8,6 +8,7 @@
 
 import ARKit
 import UIKit
+import RealityKit
 extension ViewController{
     
     func getAttrName(kind: Int)->String{
@@ -97,7 +98,7 @@ extension ViewController{
         shouldBeInPlace = false
         removeHeadAnchor()
 
-        let nowTrans = sceneView.session.currentFrame!.camera.transform
+        let nowTrans = arView.session.currentFrame!.camera.transform
         var result = generateGroups(kind: kind)
         var groupName = ""
         if(finding != ""){
@@ -134,14 +135,14 @@ extension ViewController{
         for i in stride(from: 0, to: result.count, by: 1) {
             for j in stride(from: 0, to: result[i].count, by: 1){
                 let id = result[i][j]
-                var nowNode = Optional<SCNNode>(SCNNode())
+                var nowNode : Entity
                 var nowElement = Element()
                 if isCoffee{
                     nowElement = coffees[id]
-                    nowNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(id)", recursively: false)
+                    nowNode = arView.scene.findEntity(named: "coffee@\(id)")!
                 }else{
                     nowElement = books[id]
-                    nowNode = sceneView.scene.rootNode.childNode(withName: "book@\(id)", recursively: false)
+                    nowNode = arView.scene.findEntity(named: "book@\(id)")!
                 }
                 
                 var translation = matrix_identity_float4x4
@@ -151,22 +152,15 @@ extension ViewController{
                 translation.columns.3.y = Float(y)
                 y += 0.03
                 maxy = max(maxy, y)
-                let sortNode = SCNNode()
-                sortNode.transform = SCNMatrix4(nowTrans*translation)
-                let nowPosVec = sortNode.position
                 if j==0{
                     translation.columns.3.y -= Float(PicMatrix.itemDis/4)
                     translation.columns.3.x += Float(PicMatrix.itemDis/4)
                     let headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, ele: nowElement)
                     print(headString)
                     let headAnchor = HeadAnchor(text: headString, transform: nowTrans*translation)
-                    self.sceneView.session.add(anchor:headAnchor)
+                    self.arView.session.add(anchor:headAnchor)
                 }
-                let trans = SCNAction.move(to: nowPosVec, duration: 0.4);
-                SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
-                    nowNode!.transform = SCNMatrix4(nowTrans*translation)
-                }
-                nowNode!.runAction(trans)
+                nowNode.move(to: nowTrans*translation, relativeTo: nowNode, duration: 0.4)
             }
             if i % 3 == 2{
                 groupStarty = maxy+0.16

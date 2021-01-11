@@ -7,9 +7,58 @@ The sample app's reusable helper functions.
 
 import Foundation
 import ARKit
+import RealityKit
 import CoreML
+import UIKit
 import VideoToolbox
 
+func makeRotationMatrix(x:Float = 0,y:Float = 0,z:Float = 0)->simd_float4x4{
+    return makeRotationMatrixX(angle: x)*makeRotationMatrixY(angle: y)*makeRotationMatrixZ(angle: z);
+}
+
+func makeRotationMatrixX(angle: Float) -> simd_float4x4 {
+    let rows = [
+        simd_float4(1,    0,          0,           0),
+        simd_float4(0,    cos(angle), -sin(angle), 0),
+        simd_float4(0,    sin(angle), cos(angle),  0),
+        simd_float4(0,    0,          0,           1)
+    ]
+    
+    return float4x4(rows: rows)
+}
+
+func makeScaleMatrix(by: Float) -> simd_float4x4 {
+    let rows = [
+        simd_float4(1,    0, 0, 0),
+        simd_float4(0,    1, 0, 0),
+        simd_float4(0,    0, 1, 0),
+        simd_float4(0,    0, 0, by)
+    ]
+    
+    return float4x4(rows: rows)
+}
+
+func makeRotationMatrixY(angle: Float) -> simd_float4x4 {
+    let rows = [
+        simd_float4(cos(angle), 0,    sin(angle),  0),
+        simd_float4(0,          1,    0,           0),
+        simd_float4(-sin(angle),0,    cos(angle),  0),
+        simd_float4(0,          0,    0,           1)
+    ]
+    
+    return float4x4(rows: rows)
+}
+
+func makeRotationMatrixZ(angle: Float) -> simd_float4x4 {
+    let rows = [
+        simd_float4( cos(angle), -sin(angle), 0,0),
+        simd_float4(sin(angle), cos(angle), 0,0),
+        simd_float4( 0,          0,          1,0),
+        simd_float4( 0,          0,          0,1)
+    ]
+    
+    return float4x4(rows: rows)
+}
 extension CIImage {
     
     /// Returns a pixel buffer of the image's current contents.
@@ -67,12 +116,35 @@ extension MLMultiArray {
     }
 }
 
+func getDocumentsDirectory() -> URL {
+    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+    return paths[0]
+}
 
 //func createTransPlaneNode(size: CGSize, geometry:SCNGeometry){
 //    let plane = SCNPlane(width: size.width, height: size.height)
 //    
 //    return createPlaneNode(size: size, geometry)
 //}
+func createPlane(id:Int,size: CGSize)->ModelEntity{
+//    print(getDocumentsDirectory().appendingPathComponent("book@\(id).png"))
+    do{
+        let resource = try TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("book@\(id).png"))
+            var material = UnlitMaterial()
+            material.baseColor = MaterialColorParameter.texture(resource)
+            material.tintColor = UIColor.white.withAlphaComponent(0.99)
+
+            let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+
+            imagePlane.position.y = 0.1
+
+            return imagePlane
+    }catch{
+        return ModelEntity()
+    }
+    
+}
+
 
 /// Creates a SceneKit node with plane geometry, to the argument size, rotation, and material contents.
 func createPlaneNode(size: CGSize, rotation: Float, contents: Any?) -> SCNNode {

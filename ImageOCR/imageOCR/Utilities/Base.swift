@@ -19,7 +19,7 @@ public struct Location{
 }
 public class Element{
     var loc = Location()
-    var oriTrans = SCNMatrix4()
+    var oriTrans = simd_float4x4()
     var matrixId: Int!=0
     var picid = -1
     var isDisplay: Bool!=false

@@ -8,11 +8,12 @@
 
 import UIKit
 import ARKit
+import RealityKit
 
 extension ViewController{
     func arViewGestureSetup() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
-        sceneView.addGestureRecognizer(tapGesture)
+        arView.addGestureRecognizer(tapGesture)
         
 //        let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(swipedDownOnARView))
 //        swipeGesture.direction = .down
@@ -22,19 +23,44 @@ extension ViewController{
     
     @objc func tappedOnARView(_ sender: UITapGestureRecognizer) {
 //        print("touch")
-        let touchLocation = sender.location(in: sceneView)
-        let results = sceneView.hitTest(touchLocation)
-        for result in results {
-            if let name = result.node.name{
-                if name.hasPrefix("book@")&&isCoffee==false {
-                    showAbstract(id: getIdFromName(name))
-                }
-                if name.hasPrefix("coffee@")&&isCoffee {
-                    showAbstract(id: getIdFromName(name))
-                }
+        let touchLocation = sender.location(in: arView)
+//        let results = arView.hitTest(touchLocation)
+        guard let result = arView.entity(at: touchLocation)else{
+            return
+        }
+//        for result in results {
+        let name = result.name
+        if name.hasPrefix("book@")&&isCoffee==false {
+            showAbstract(id: getIdFromName(name))
+        }
+        if name.hasPrefix("coffee@")&&isCoffee {
+            showAbstract(id: getIdFromName(name))
+        }
+            
+//        }
+
+    }
+    
+    func findById(id: Int)->AnchorEntity?{
+        if(isCoffee){
+            return arView.scene.findEntity(named: "coffee@\(id)") as? AnchorEntity
+        }else{
+            return arView.scene.findEntity(named: "book@\(id)")as? AnchorEntity
+        }
+    }
+    
+    func getEntityList()->[AnchorEntity]{
+        var list = [AnchorEntity]()
+        if(isCoffee){
+            for i in stride(from: 0, to: coffees.count, by: 1){
+                list.append(findById(id: i)!)
+            }
+        }else{
+            for i in stride(from: 0, to: books.count, by: 1){
+                list.append(findById(id: i)!)
             }
         }
-
+        return list
     }
     
 }

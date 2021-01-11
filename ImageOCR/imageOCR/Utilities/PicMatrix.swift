@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 import SceneKit
-import ARKit
+import RealityKit
 
 class PicMatrix{
     
@@ -28,12 +28,12 @@ class PicMatrix{
 //    static var imageH: Double  = 2000
 
 // ipad pro horizontal:
-    static var camWAngle: Double = 30.5
+    static var camWAngle: Double = 30.35
     static var camHAngle: Double = 24
     static var imageW: Double = 3840
     static var imageH: Double  = 2880
     static var xOffset: Float = 0.002
-    static var yOffset: Float = 0
+    static var yOffset: Float = -0.016
 
     var prevTrans: simd_float4x4?
     
@@ -88,8 +88,8 @@ class PicMatrix{
         print("now yOffset:\(yOffset)")
     }
     
-    public func saveCurrentTrans(view: ARSCNView){
-        prevTrans = view.session.currentFrame?.camera.transform
+    public func saveCurrentTrans(trans:simd_float4x4){
+        prevTrans = trans
         return
     }
     
@@ -118,9 +118,9 @@ class PicMatrix{
         }
     }
         
-    public func addCoffeeAnchor(view: ARSCNView,id:Int,coffee:CoffeeSt, nowOri: Int = 1){
+    public func addCoffeeAnchor(id:Int,coffee:CoffeeSt)->simd_float4x4{
         guard let trans = prevTrans
-        else { return }
+        else { return matrix_identity_float4x4}
         let width = Double(coffee.loc.width);
         let height = Double(coffee.loc.height);
         let picW : Double = Double(coffee.loc.left)+width/2;
@@ -137,45 +137,40 @@ class PicMatrix{
             zz+=0.003
         }
         var translation = matrix_identity_float4x4
-        translation.columns.3.z = zz
+        translation.columns.3.z = 0
         translation.columns.3.x = x
         translation.columns.3.y = y
         let transform = trans * translation
-        let anchor = CoffeeAnchor(id:id, transform: transform)
-        view.session.add(anchor: anchor)
+        return transform
         
     }
     
-    public func addBookAnchor(view: ARSCNView,id:Int,book:BookSt, nowOri: Int = 1){
+    public func addBookAnchor(id:Int,book:BookSt)->simd_float4x4{
 //        print("addBookAnchor function is on \(Thread.current)" )
         guard let trans = prevTrans
-        else { return }
+        else { return matrix_identity_float4x4}
         let width = Double(book.loc.width)
         let height = Double(book.loc.height)
         let picW : Double = Double(book.loc.left)+width/2
         let picH : Double = Double(book.loc.top)+height/2
         var x = Float(PicMatrix.getActualOffset(offset: picW,isW: true))
         var y = Float(PicMatrix.getActualOffset(offset: picH,isW: false))
-        let z  = Float(-1*PicMatrix.itemDis)
-        let w = PicMatrix.getActualLen(oriLen: width, isW: true)
-        let h = PicMatrix.getActualLen(oriLen: height, isW: false)
         x += PicMatrix.xOffset //-:left
         y += PicMatrix.yOffset //+:ri
         
-        var zz = z
+        var zz = 0.0
         if(id%3==0){
             zz+=0.005
         }else if(id%3==1){
             zz+=0.003
         }
         var translation = matrix_identity_float4x4
-        translation.columns.3.z = zz
+        translation.columns.3.z = Float(zz)
         translation.columns.3.x = x
         translation.columns.3.y = y
-        print("x:\(x), y:\(y), h:\(h), w:\(w)")
+//        print("x:\(x), y:\(y), h:\(h), w:\(w)")
         let transform = trans * translation
-        let anchor = BookAnchor(id:id, transform: transform)
-        view.session.add(anchor: anchor)
+        return transform
     }
 }
 //x:-0.106536895, y:-0.24927528, h:0.19478754982248456, w:0.11486377820200745

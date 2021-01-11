@@ -7,6 +7,7 @@
 //
 
 import ARKit
+import RealityKit
 import UIKit
 
 extension ViewController: UITextFieldDelegate{
@@ -94,43 +95,24 @@ extension ViewController: UITextFieldDelegate{
     public func scaleNodes(ids: [Int], time: Double = 0.4){
         isAntUpdate = false
 //        let closer = SCNAction.moveBy(x: 0, y: 0, z: 0.01, duration: 0.4)
-        let enhance = SCNAction.scale(to: CGFloat(2), duration: time)
-        enhance.timingMode = .easeOut
         
-        let disenhance = SCNAction.scale(to: 1, duration: time)
-        disenhance.timingMode = .easeOut
 
-        for node in sceneView.scene.rootNode.childNodes{
-            guard let name = node.name else {
-                continue
-            }
+        for node in getEntityList(){
+            let name = node.name
             var elementId = -1
             if isCoffee{guard name.hasPrefix("coffee@") else {return}}
             else{guard name.hasPrefix("book@") else {return}}
             elementId = getIdFromName(name)
 
             if ids.firstIndex(of: elementId) != nil{
-                node.runAction(enhance)
-                let material = node.geometry!.firstMaterial!
-                // highlight it
-                SCNTransaction.begin()
-                SCNTransaction.animationDuration = 0.5
-
-                // on completion - unhighlight
-                SCNTransaction.completionBlock = {
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-
-                    material.emission.contents = UIColor.black
-
-                    SCNTransaction.commit()
-                }
-
-                material.emission.contents = UIColor.yellow
-
-                SCNTransaction.commit()
+                var enhance = 
+                enhance.scale = SIMD3<Float>(x: 2, y: 2, z: 1)
+                node.move(to: enhance, relativeTo: node.parent, duration: 0.2)
             }
-            else{node.runAction(disenhance)}
+            else{
+                let ori = node.scale.x
+                node.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
+            }
         }
     }
     
@@ -174,39 +156,35 @@ extension ViewController: UITextFieldDelegate{
         let z = -1*PicMatrix.itemDis
         var absy =  0.0
         let x =  0.0
-        let nowTrans = sceneView.session.currentFrame!.camera.transform
+        let nowTrans = arView.session.currentFrame!.camera.transform
         elementWeights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: elementWeights.count ,by: 1){
             let elementWeight = elementWeights[i]
-            var nowNode = SCNNode()
+            var nowNode : Entity
             if isCoffee{
-                nowNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(elementWeight.id)", recursively: false)!
+                nowNode = arView.scene.findEntity(named: "coffee@\(elementWeight.id)")!
             }else{
-                nowNode = sceneView.scene.rootNode.childNode(withName: "book@\(elementWeight.id)", recursively: false)!
+                nowNode = arView.scene.findEntity(named: "book@\(elementWeight.id)")!
             }
             var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(z)
-            translation.columns.3.x = Float(x)
+            translation.columns.3.y = Float(x)
             if(i%2 != 0){
-                translation.columns.3.y = Float(absy)
+                translation.columns.3.x = Float(absy)
             }
             else{
-                translation.columns.3.y = Float(-1*absy)
+                translation.columns.3.x = Float(-1*absy)
                 absy += 0.03
             }
-            if isCoffee{
-                let temp = translation.columns.3.x
-                translation.columns.3.x = translation.columns.3.y*2
-                translation.columns.3.y = temp
-            }
-            let sortNode = SCNNode()
-            sortNode.transform = SCNMatrix4(nowTrans*translation)
-            let nowPosVec = sortNode.position
-            let trans = SCNAction.move(to: nowPosVec, duration: 0.4)
-            SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
-                nowNode.transform = SCNMatrix4(nowTrans*translation)
-            }
-            nowNode.runAction(trans)
+//            let sortNode = SCNNode()
+//            sortNode.transform = SCNMatrix4(nowTrans*translation)
+//            let nowPosVec = sortNode.position
+            nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
+//            let trans = SCNAction.move(to: nowPosVec, duration: 0.4)
+//            SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
+//                nowNode.transform = SCNMatrix4(nowTrans*translation)
+//            }
+//            nowNode.runAction(trans)
         }
     }
     
@@ -231,25 +209,20 @@ extension ViewController: UITextFieldDelegate{
         hideAbstract()
         removeHeadAnchor()
 
-        let childNodes = sceneView.scene.rootNode.childNodes
+        let childNodes = getEntityList()
         for node in childNodes {
-            guard let name = node.name else {
-                continue
-            }
+            let name = node.name
             guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
                 return
             }
-
             let id = getIdFromName(name)
-            let restore = SCNAction.customAction(duration: 0.4){(node,time) in
-                if self.isCoffee{
-                    node.transform = self.coffees[id].oriTrans
-                }else{
-                    node.transform = self.books[id].oriTrans
-                }
+            if self.isCoffee{
+                node.move(to: self.coffees[id].oriTrans, relativeTo: rootnode, duration: 0.4)
+// .transform =
+            }else{
+                node.move(to: self.books[id].oriTrans, relativeTo: rootnode, duration: 0.4)
             }
-            restore.timingMode = .easeOut
-            node.runAction(restore)
+
         }
 
 

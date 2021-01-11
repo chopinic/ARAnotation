@@ -39,15 +39,16 @@ extension ViewController{
     }
     
     @objc func buttonTapDebug(){
-        let nowBookDeal = PicMatrix()
-        nowBookDeal.saveCurrentTrans(view: sceneView)
-        picMatrix.append(nowBookDeal)
-
-        if isCoffee{
-            setResult(cot: picMatrix.count, receive: DebugString.jsonStringCoffee ,isDebug: true);
-        }else{
-            setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
-        }
+        resetAndAddAnchor()
+//        let nowBookDeal = PicMatrix()
+//        nowBookDeal.saveCurrentTrans(view: sceneView)
+//        picMatrix.append(nowBookDeal)
+//
+//        if isCoffee{
+//            setResult(cot: picMatrix.count, receive: DebugString.jsonStringCoffee ,isDebug: true);
+//        }else{
+//            setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
+//        }
     }
 
         
@@ -77,18 +78,14 @@ extension ViewController{
     
     @objc func buttonTapUpload(){
         
-        if let capturedImage = sceneView.session.currentFrame?.capturedImage{
-            if #available(iOS 13.0, *) {
-                if let result = sceneView.raycastQuery(from: wholeView.center, allowing: .estimatedPlane
-                                                       , alignment: .any) {
-//                    result.origin
-//                    result.
-                }
-            } else {
-                // Fallback on earlier versions
+        if let capturedImage = arView.session.currentFrame?.capturedImage{
+            guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
+                setMessage("no plane detected")
+                return
             }
             let nowMatrix = PicMatrix()
-            nowMatrix.saveCurrentTrans(view: sceneView)
+            let rotationTrans = makeRotationMatrix(x: -.pi/2)
+            nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
@@ -156,27 +153,27 @@ extension ViewController{
         }
     }
     
-    @objc func buttonTapCreateBigPlane(){
-        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
-            backnode.name = "trans@0"
-            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0)
-        }
-        else if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@0", recursively: false){
-            backnode.name = "trans@1"
-            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8)
-        }
-        else{
-            let nowTrans = sceneView.session.currentFrame!.camera.transform
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(43200),isW: true), height: PicMatrix.getActualLen(oriLen:Double(57600),isW: false))
-            let transTip = createPlaneNode(size: size, rotation: 0, contents: UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8))
-            transTip.name = "trans@1"
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-10*PicMatrix.itemDis-0.01)
-            transTip.transform = SCNMatrix4(nowTrans*translation)
-            transTip.constraints = [SCNBillboardConstraint()]
-            sceneView.scene.rootNode.addChildNode(transTip)
-        }
-    }
+//    @objc func buttonTapCreateBigPlane(){
+//        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
+//            backnode.name = "trans@0"
+//            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0)
+//        }
+//        else if larViewde = sceneView.scene.rootNode.childNode(withName: "trans@0", recursively: false){
+//            backnode.name = "trans@1"
+//            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8)
+//        }
+//        else{
+//            let nowTrans = sceneView.session.currentFrame!.camera.transform
+//            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(43200),isW: true), height: PicMatrix.getActualLen(oriLen:Double(57600),isW: false))
+//            let transTip = createPlaneNode(size: size, rotation: 0, contents: UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8))
+//            transTip.name = "trans@1"
+//            var translation = matrix_identity_float4x4
+//            translation.columns.3.z = Float(-10*PicMatrix.itemDis-0.01)
+//            transTip.transform = SCNMatrix4(nowTrans*translation)
+//            transTip.constraints = [SCNBillboardConstraint()]
+//            sceneView.scene.rootNode.addChildNode(transTip)
+//        }
+//    }
     
 }
 

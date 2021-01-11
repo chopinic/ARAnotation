@@ -17,10 +17,10 @@ import RealityKit
 
 
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+class ViewController: UIViewController, ARSessionDelegate {
     
     @IBOutlet var wholeView: UIView!
-    @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet var arView: ARView!
     @IBOutlet var inputText: UITextField!
     @IBOutlet var attrSelect: UIPickerView!
     @IBOutlet var message: UITextField!
@@ -40,6 +40,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
     var textWidth = 300,textHeight = 200
+    var rootnode = AnchorEntity()
     
     
     var isAntUpdate = false
@@ -85,24 +86,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         bookAttr = ["Title", "Publisher", "Author", "Score", "Relate"]
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
         
-        self.sceneView.addSubview(bookAbstractUI.ui)
+        self.arView.addSubview(bookAbstractUI.ui)
 
         coffeeAbstractUI.setIsHidden(true)
-        self.sceneView.addSubview(coffeeAbstractUI.ui)
-        self.sceneView.addSubview(coffeeAbstractUI.textUI)
+        self.arView.addSubview(coffeeAbstractUI.ui)
+        self.arView.addSubview(coffeeAbstractUI.textUI)
 
 
-        sceneView.bounds.size.width = wholewidth
-        sceneView.bounds.size.height = wholeHeight
-        sceneView.center = wholeView.center
+        arView.bounds.size.width = wholewidth
+        arView.bounds.size.height = wholeHeight
+        arView.center = wholeView.center
         
-        viewCenterPoint = sceneView.center
-        let scene = SCNScene()
-        sceneView.scene = scene
-        sceneView.delegate = self
-        
+        viewCenterPoint = arView.center
+//        let scene = SCNScene()
+//        sceneView.scene = scene
+        arView.session.delegate = self
+        arView.environment.sceneUnderstanding.options = []
+        arView.debugOptions.insert(.showSceneUnderstanding)
+        arView.renderOptions = [.disablePersonOcclusion, .disableDepthOfField, .disableMotionBlur]
         arViewGestureSetup()
-
+        wholeView.sendSubview(toBack: arView)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -113,7 +116,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 configuration.sceneReconstruction = .meshWithClassification
             }
         }
-        sceneView.session.run(configuration)
+        arView.session.run(configuration)
         // height 100
         createButton( title: "scan",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
         createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
@@ -144,6 +147,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
         }
 //        createDirectionButton()
+        let rootNode = AnchorEntity(world: matrix_identity_float4x4)
+        rootNode.name = "rootnode@"
+        arView.scene.addAnchor(rootNode)
+        rootnode = rootNode
     }
     
     func setLocation(locDic: NSDictionary)->Location{
@@ -237,7 +244,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         self.resetAndAddAnchor()
     }
-    
+
     public func setForBooks(cot:Int, hasResult: NSDictionary, isDebug: Bool){
         if let resultbooks = hasResult["words_result"] {
             let bookarray = resultbooks as! NSArray
@@ -260,9 +267,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
                     if let pic = UIImage(data: dataDecoded){
                         let temppic = pic.rotate(radians: .pi/2)
-                        elementPics.append(temppic)
-                    }else{
-                        elementPics.append(UIImage(named: "test2.png")!)
+                        let data = UIImagePNGRepresentation(temppic)
+                        let filename = getDocumentsDirectory().appendingPathComponent("book@\(books.count).png")
+                        try! data!.write(to: filename)
                     }
                 }
                 nowbook.picid = elementPics.count-1
@@ -278,25 +285,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-        self.resetAndAddAnchor()
+//        self.resetAndAddAnchor()
     }
     
     public func removeHeadAnchor(){
-        if let anchorlist = sceneView.session.currentFrame?.anchors {
-            for anchor in anchorlist {
-                if let hanchor = anchor as? HeadAnchor{
-                    sceneView.session.remove(anchor: hanchor)
-                }
-            }
-        }
+//        if let anchorlist = sceneView.session.currentFrame?.anchors {
+//            for anchor in anchorlist {
+//                if let hanchor = anchor as? HeadAnchor{
+//                    sceneView.session.remove(anchor: hanchor)
+//                }
+//            }
+//        }
         
-        let childNodes = sceneView.scene.rootNode.childNodes
+        let childNodes = arView.scene.anchors
+
         for node in childNodes {
-            guard let name = node.name else {
-                continue
-            }
+            let name = node.name
             if name.hasPrefix("head@") {
-                node.removeFromParentNode()
+                arView.scene.removeAnchor(node)
             }
         }
     }
@@ -311,25 +317,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 coffees[i].isDisplay = false
             }
             
-            if let anchorlist = sceneView.session.currentFrame?.anchors {
-                for anchor in anchorlist {
-                    if let imanchor = anchor as? BookAnchor{
-                        sceneView.session.remove(anchor: imanchor)
-                    }
-                    else if let imanchor = anchor as? CoffeeAnchor{
-                        sceneView.session.remove(anchor: imanchor)
-                    }
-                }
-            }
-            let childNodes = sceneView.scene.rootNode.childNodes
+//            if let anchorlist = sceneView.session.currentFrame?.anchors {
+//                for anchor in anchorlist {
+//                    if let imanchor = anchor as? BookAnchor{
+//                        sceneView.session.remove(anchor: imanchor)
+//                    }
+//                    else if let imanchor = anchor as? CoffeeAnchor{
+//                        sceneView.session.remove(anchor: imanchor)
+//                    }
+//                }
+//            }
+            let childNodes = getEntityList()
             for node in childNodes {
-                guard let name = node.name else {
-                    continue
-                }
+                let name = node.name
                 if name.hasPrefix("book@") {
-                    node.removeFromParentNode()
+                    print("remove:\(name)")
+                    arView.scene.removeAnchor(node)
                 }else if name.hasPrefix("coffee@"){
-                    node.removeFromParentNode()
+                    arView.scene.removeAnchor(node)
                 }else{
                     continue;
                 }
@@ -342,7 +347,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             let nowMatrix = books[i].matrixId!-1
             books[i].isDisplay = true;
-            picMatrix[nowMatrix].addBookAnchor(view:sceneView, id:i,book:books[i],nowOri: nowOrientation)
+            let trans = picMatrix[nowMatrix].addBookAnchor(id:i,book:books[i])
+            books[i].oriTrans = trans
+            let currentBook = books[i]
+            let rootLoc = currentBook.loc
+//            let picContents = elementPics[currentBook.picid]
+            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
+            print("bookid: \(i)")
+            var words = ""
+            for str in currentBook.words {
+                words+=str+" "
+            }
+            print(" words: \(words)")
+            let book = AnchorEntity(world: trans)
+            book.addChild(createPlane(id: i, size: size))
+            book.name = "book@\(i)"
+            arView.scene.addAnchor(book)
+            
+            var translation = matrix_identity_float4x4
+            translation.columns.3.x = -Float(size.width)
+            translation.columns.3.y = Float(size.height)/2
+            let topPos = book.transform.matrix*translation
+            let top = SCNNode();
+            top.transform = SCNMatrix4(topPos)
+            books[i].uiPosVec = top.position-SCNVector3(book.position)
         }
         
         for i in stride(from: 0, to: coffees.count ,by: 1){
@@ -351,182 +379,154 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             let nowMatrix = coffees[i].matrixId!-1
             coffees[i].isDisplay = true;
-            picMatrix[nowMatrix].addCoffeeAnchor(view:sceneView, id:i,coffee:coffees[i],nowOri: nowOrientation)
+            picMatrix[nowMatrix].addCoffeeAnchor(id:i,coffee:coffees[i])
         }
     }
     
-        
     
     
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+    
+    func session(_ session: ARSession, didAdd anchors: [ARAnchor]){
+        let anchor = anchors.first!;
         if let bookAnchor = anchor as? BookAnchor{
-            let id = bookAnchor.id!;
-            let currentBook = books[id]
-            let rootLoc = currentBook.loc
-            let picContents = elementPics[currentBook.picid]
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
-            print("bookid: \(id)")
-            var words = ""
-            for str in currentBook.words {
-                words+=str+" "
-            }
-            print(" words: \(words)")
-            let book = createPlaneNode(size: size, rotation: 0, contents: picContents)
-            book.name = "book@\(id)"
-            book.transform = SCNMatrix4(anchor.transform)
-            books[id].oriTrans = book.transform
-            sceneView.scene.rootNode.addChildNode(book)
-            
-            var translation = matrix_identity_float4x4
-            translation.columns.3.x = -Float(size.width)
-            translation.columns.3.y = Float(size.height)/2
-            let topPos = anchor.transform*translation
-            let top = SCNNode();
-            top.transform = SCNMatrix4(topPos)
-            books[id].uiPosVec = top.position-book.position
-        }else if let coffeeAnchor = anchor as? CoffeeAnchor{
-            let id = coffeeAnchor.id!;
-            let currentCoffee = coffees[id]
-            let rootLoc = currentCoffee.loc
-            let picContents = elementPics[currentCoffee.picid]
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
-            print("coffeeid: \(id) \(coffees[id].name)")
-            let coffee = createPlaneNode(size: size, rotation: 0, contents: picContents)
-            coffee.name = "coffee@\(id)"
-            coffee.transform = SCNMatrix4(anchor.transform)
-            coffees[id].oriTrans = coffee.transform
-            sceneView.scene.rootNode.addChildNode(coffee)
-//            print(coffee.position)
-            
-            var translation = matrix_identity_float4x4
-//            translation.columns.3.x = Float(size.width)
-            translation.columns.3.y = Float(size.height/2)
-            let topPos = anchor.transform*translation
-            let top = SCNNode();
-            top.transform = SCNMatrix4(topPos)
-            coffees[id].uiPosVec = top.position-coffee.position
-            
-            
-        }else if let headAnchor = anchor as? HeadAnchor{
-            
-            
-            let text = SCNText(string: headAnchor.text, extrusionDepth: 0.1)
-            text.font = UIFont.systemFont(ofSize: 1)
-            text.isWrapped = true
-            text.containerFrame = CGRect(x: 0, y: 0, width: 5, height: 7)
-
-            let material = SCNMaterial()
-            material.diffuse.contents = UIColor.init(red: 1, green: 1, blue: 1, alpha: 1)
-            text.materials = [material]
-            
-            let textNode = SCNNode(geometry: text)
-            textNode.name = "head@"
-            textNode.transform = SCNMatrix4(headAnchor.transform)
-            textNode.scale = SCNVector3(x: 0.02, y: 0.02, z: 0.02)
-            textNode.constraints = [SCNBillboardConstraint()]
-            sceneView.scene.rootNode.addChildNode(textNode)
-//            textNode.runAction(rot)
-
-
-//            print("headnode pos: \(headNode.position)")
         }
+//        }else if let coffeeAnchor = anchor as? CoffeeAnchor{
+//            let id = coffeeAnchor.id!;
+//            let currentCoffee = coffees[id]
+//            let rootLoc = currentCoffee.loc
+//            let picContents = elementPics[currentCoffee.picid]
+//            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
+//            print("coffeeid: \(id) \(coffees[id].name)")
+//            let coffee = createPlaneNode(size: size, rotation: 0, contents: picContents)
+//            coffee.name = "coffee@\(id)"
+//            coffee.transform = SCNMatrix4(anchor.transform)
+//            coffees[id].oriTrans = coffee.transform
+//            arView.scene.rootNode.addChildNode(coffee)
+//
+//            var translation = matrix_identity_float4x4
+//            translation.columns.3.y = Float(size.height/2)
+//            let topPos = anchor.transform*translation
+//            let top = SCNNode();
+//            top.transform = SCNMatrix4(topPos)
+//            coffees[id].uiPosVec = top.position-coffee.position
+//
+            
+//        }else if let headAnchor = anchor as? HeadAnchor{
+//
+//
+//            let text = SCNText(string: headAnchor.text, extrusionDepth: 0.1)
+//            text.font = UIFont.systemFont(ofSize: 1)
+//            text.isWrapped = true
+//            text.containerFrame = CGRect(x: 0, y: 0, width: 5, height: 7)
+//
+//            let material = SCNMaterial()
+//            material.diffuse.contents = UIColor.init(red: 1, green: 1, blue: 1, alpha: 1)
+//            text.materials = [material]
+//
+//            let textNode = SCNNode(geometry: text)
+//            textNode.name = "head@"
+//            textNode.transform = SCNMatrix4(headAnchor.transform)
+//            textNode.scale = SCNVector3(x: 0.02, y: 0.02, z: 0.02)
+//            textNode.constraints = [SCNBillboardConstraint()]
+//            sceneView.scene.rootNode.addChildNode(textNode)
+//        }
     }
     
     
     
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        
-        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
-            let trans = sceneView.session.currentFrame!.camera.transform
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-5)
-            backnode.transform = SCNMatrix4(trans*translation)
-
-        }
-
-        if(bookAbstractUI.getIsHidden() == false){
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(bookAbstractUI.id)", recursively: false) else{
-                print("renderer: no such book \(bookAbstractUI.id)")
-                return
-            }
-            let bookTopPos = childNode.position+books[bookAbstractUI.id].uiPosVec!
-            let pos = sceneView.projectPoint(bookTopPos)
-            var pos2d = CGPoint()
-            pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-            pos2d.y = CGFloat(pos.y-Float(textHeight))
-            DispatchQueue.main.async{
-                self.bookAbstractUI.updatePosition(position: pos2d)
-            }
-        }
-        
-        if(coffeeAbstractUI.getIsHidden() == false){
-            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.id)", recursively: false) else{
-                print("renderer: no such coffee \(coffeeAbstractUI.id)")
-                return
-            }
-            let topPos = childNode.position+coffees[coffeeAbstractUI.id].uiPosVec!
-            let pos = sceneView.projectPoint(topPos)
-            var pos2d = CGPoint()
-            pos2d.x = CGFloat(pos.x)
-            pos2d.y = CGFloat(pos.y-Float(coffeeAbstractUI.imageW/2))
-            coffeeAbstractUI.updatePosition(position: pos2d)
-        }
-        
-        if(isAntUpdate){
-            isAntUpdateCot = (isAntUpdateCot+1)%5
-            var mindis = 1000.0
-            var minid = -1
-            for node in sceneView.scene.rootNode.childNodes {
-                guard let name = node.name else {
-                    continue
-                }
-//                print(name)
-                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
-                    return
-                }
-                let elementId = getIdFromName(name)
-//                print(elementId)
-                let pos = sceneView.projectPoint(node.position)
-                let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
-                let dis = calculateScreenDistance(viewCenterPoint,point)
-                if dis<800{
-                    let ratio = CGFloat(min(2.5,(dis+25.0)/dis))
-                    let scale = SCNAction.scale(to: ratio, duration: 0)
-                    node.runAction(scale)
-                    mindis = min(mindis,dis)
-                    if mindis == dis{
-                        if isAntUpdateCot==0
-                        {minid = elementId}
-                    }
-                }
-                else if shouldBeInPlace{
-                    if isCoffee{
-                        node.transform = coffees[elementId].oriTrans
-                    }else{
-                        node.transform = books[elementId].oriTrans
-                    }
-                }
-            }
-            let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
-            if minid != -1 && minid != prevId{
-                var node = Optional<SCNNode>(SCNNode())
-                var prevNode = Optional<SCNNode>(SCNNode())
-
-                if isCoffee{
-                    node = sceneView.scene.rootNode.childNode(withName: "coffee@\(minid)", recursively: false)
-                    prevNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(prevId)", recursively: false)
-                }else{
-                    node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
-                    prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(prevId)", recursively: false)
-                }
-                
-                node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.015, duration: 0))
-                prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.015, duration: 0))
-                showAbstract(id: minid)
-            }
-        }
-        
-    }
+//    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+//
+//        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
+//            let trans = arView.session.currentFrame!.camera.transform
+//            var translation = matrix_identity_float4x4
+//            translation.columns.3.z = Float(-5)
+//            backnode.transform = SCNMatrix4(trans*translation)
+//
+//        }
+//
+//        if(bookAbstractUI.getIsHidden() == false){
+//            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(bookAbstractUI.id)", recursively: false) else{
+//                print("renderer: no such book \(bookAbstractUI.id)")
+//                return
+//            }
+//            let bookTopPos = childNode.position+books[bookAbstractUI.id].uiPosVec!
+//            let pos = sceneView.projectPoint(bookTopPos)
+//            var pos2d = CGPoint()
+//            pos2d.x = CGFloat(pos.x-Float(textWidth/2))
+//            pos2d.y = CGFloat(pos.y-Float(textHeight))
+//            DispatchQueue.main.async{
+//                self.bookAbstractUI.updatePosition(position: pos2d)
+//            }
+//        }
+//
+//        if(coffeeAbstractUI.getIsHidden() == false){
+//            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.id)", recursively: false) else{
+//                print("renderer: no such coffee \(coffeeAbstractUI.id)")
+//                return
+//            }
+//            let topPos = childNode.position+coffees[coffeeAbstractUI.id].uiPosVec!
+//            let pos = sceneView.projectPoint(topPos)
+//            var pos2d = CGPoint()
+//            pos2d.x = CGFloat(pos.x)
+//            pos2d.y = CGFloat(pos.y-Float(coffeeAbstractUI.imageW/2))
+//            coffeeAbstractUI.updatePosition(position: pos2d)
+//        }
+//
+//        if(isAntUpdate){
+//            isAntUpdateCot = (isAntUpdateCot+1)%5
+//            var mindis = 1000.0
+//            var minid = -1
+//            for node in sceneView.scene.rootNode.childNodes {
+//                guard let name = node.name else {
+//                    continue
+//                }
+////                print(name)
+//                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
+//                    return
+//                }
+//                let elementId = getIdFromName(name)
+////                print(elementId)
+//                let pos = sceneView.projectPoint(node.position)
+//                let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
+//                let dis = calculateScreenDistance(viewCenterPoint,point)
+//                if dis<800{
+//                    let ratio = CGFloat(min(2.5,(dis+25.0)/dis))
+//                    let scale = SCNAction.scale(to: ratio, duration: 0)
+//                    node.runAction(scale)
+//                    mindis = min(mindis,dis)
+//                    if mindis == dis{
+//                        if isAntUpdateCot==0
+//                        {minid = elementId}
+//                    }
+//                }
+//                else if shouldBeInPlace{
+//                    if isCoffee{
+//                        node.transform = coffees[elementId].oriTrans
+//                    }else{
+//                        node.transform = books[elementId].oriTrans
+//                    }
+//                }
+//            }
+//            let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
+//            if minid != -1 && minid != prevId{
+//                var node = Optional<SCNNode>(SCNNode())
+//                var prevNode = Optional<SCNNode>(SCNNode())
+//
+//                if isCoffee{
+//                    node = sceneView.scene.rootNode.childNode(withName: "coffee@\(minid)", recursively: false)
+//                    prevNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(prevId)", recursively: false)
+//                }else{
+//                    node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
+//                    prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(prevId)", recursively: false)
+//                }
+//
+//                node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.015, duration: 0))
+//                prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.015, duration: 0))
+//                showAbstract(id: minid)
+//            }
+//        }
+//
+//    }
     
     override func didReceiveMemoryWarning(){
         super.didReceiveMemoryWarning()
