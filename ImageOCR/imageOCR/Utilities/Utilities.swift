@@ -185,9 +185,10 @@ func createPlane(id:Int,size: CGSize, isCoffee: Bool)->ModelEntity{
         material.tintColor = UIColor.white.withAlphaComponent(0.99)
 
         let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
-
-        imagePlane.position.y = 0.1
+        
+//        imagePlane.position.y = 0.1
         imagePlane.name = "book@\(id)"
+//        imagePlane.scale = SIMD3<Float>(2)
         return imagePlane
     }
 }

@@ -35,15 +35,9 @@ public class Element{
 
 // book struct
 public class BookSt: Element{
-//    var loc = Location()
-//    var oriTrans = SCNMatrix4()
     var words = [String]()
     var locations = [Location]()
     var kinds = [String]()
-//    var matrixId: Int!=0
-//    var picid = -1
-//    var isDisplay: Bool!=false
-//    var uiPosVec: SCNVector3?
     var title = ""
     var author = ""
     var publisher = ""
@@ -52,8 +46,8 @@ public class BookSt: Element{
     var remark = ""
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
-        translation.columns.3.y = Float(size.height)
-        translation.columns.3.x = Float(1.5*size.width)
+        translation.columns.3.y = Float(size.height)/2
+        translation.columns.3.x = -Float(size.width)
         translation = trans*translation
         let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
         let bookToppos4 = translation*rootpos

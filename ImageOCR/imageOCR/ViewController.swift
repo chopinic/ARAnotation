@@ -41,7 +41,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
-    var textWidth = 300,textHeight = 200
+    var textWidth = 300,textHeight = 250
     var rootnode = AnchorEntity()
     
     
@@ -310,6 +310,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
     
     public func resetPicTracking(){
+        if(isCoffee==false){return}
         let fileName = "MenuOri@.png"
         let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/" + fileName
         guard let oriMenu = UIImage(contentsOfFile: path)else{
@@ -375,23 +376,17 @@ class ViewController: UIViewController, ARSessionDelegate {
 //            let picContents = elementPics[currentBook.picid]
             let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
             books[i].size = size
-            print("\(i): \(size)")
-            print("bookid: \(i)")
+            print("bookid: \(i),size \(size)")
             var words = ""
             for str in currentBook.words {
                 words+=str+" "
             }
-            print(" words: \(words)")
+//            print(" words: \(words)")
             let book = AnchorEntity(world: trans)
             book.addChild(createPlane(id: i, size: size, isCoffee: isCoffee))
             book.name = "book@\(i)"
             book.generateCollisionShapes(recursive: true)
             arView.scene.addAnchor(book)
-            
-//            let topPos = book.transform.matrix*translation
-//            let top = SCNNode();
-//            top.transform = SCNMatrix4(topPos)
-//            books[i].uiPosVec = top.position-SCNVector3(book.position)
         }
         
         for i in stride(from: 0, to: coffees.count ,by: 1){
@@ -465,7 +460,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 print("renderer: no such book \(bookAbstractUI.id)")
                 return
             }
-            if let pos = arView.project(books[bookAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: nil))){
+            if let pos = arView.project(books[bookAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
 //                print(pos)
                 var pos2d = CGPoint()
                 pos2d.x = pos.x-CGFloat(textWidth/2)
@@ -479,7 +474,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 print("renderer: no such coffee \(coffeeAbstractUI.id)")
                 return
             }
-            if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: nil))){
+            if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
                 var pos2d = CGPoint()
                 pos2d.x = pos.x//+CGFloat(coffeeAbstractUI.imageW/2)
                 pos2d.y = pos.y-500//-CGFloat(coffeeAbstractUI.imageW/2)
@@ -499,14 +494,11 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }
                 let elementId = getIdFromName(name)
                 guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
-                let point = CGPoint(x:pos.x,y:pos.y-arView.center.y/2-200)
+                let point = CGPoint(x:pos.x,y:pos.y)
 //                let centerP = CGPoint(x: 590, y: 400)
-                var dis = 0.0
-                if(isCoffee)
-                {dis = calculateScreenDistance(arView.center,point)}
-                else{dis = calculateXDistance(arView.center,point)}
-//                if(elementId == 1){
-//                    print("dis: \(dis)")}
+                let dis = calculateScreenDistance(arView.center,point)
+                if(elementId == 1){
+                    print("dis: \(dis)")}
 
                 if dis<800{
 //                    while(ratio.count<=elementId){
@@ -518,9 +510,9 @@ class ViewController: UIViewController, ARSessionDelegate {
 //                    node.transform
                     node.setScale(SIMD3<Float>(x:ratio/2+0.5,y:1,z:ratio), relativeTo: rootnode) //scale =
 //                    node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:ratio[elementId]/20), relativeTo: rootnode)
-                    mindis = min(mindis,calculateScreenDistance(arView.center,point))
+                    mindis = min(mindis,dis)
                     
-                    if mindis == calculateScreenDistance(arView.center,point){
+                    if mindis == dis{
                         if isAntUpdateCot==0
                         {minid = elementId}
                     }

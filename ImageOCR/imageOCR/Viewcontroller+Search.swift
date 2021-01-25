@@ -108,7 +108,7 @@ extension ViewController: UITextFieldDelegate{
 //                var enhance =
 //                enhance.scale = SIMD3<Float>(x: 2, y: 2, z: 1)
 //                node.move(to: enhance, relativeTo: node.parent, duration: 0.2)
-                var translation = node.transformMatrix(relativeTo: rootnode)
+                let translation = node.transformMatrix(relativeTo: rootnode)
                 var trans = Transform(matrix: translation)
                 trans.scale = SIMD3<Float>(x: 2, y: 2, z: 2)
 //                translation.columns.3.w = 2
@@ -117,8 +117,10 @@ extension ViewController: UITextFieldDelegate{
                 node.move(to: trans, relativeTo: rootnode, duration: 0.4)
             }
             else{
-//                let ori = node.scale.x
-                node.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
+                let translation = node.transformMatrix(relativeTo: rootnode)
+                var trans = Transform(matrix: translation)
+                trans.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
+                node.move(to: trans, relativeTo: rootnode, duration: 0.4)
             }
         }
     }
