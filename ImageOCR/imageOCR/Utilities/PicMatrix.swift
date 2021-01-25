@@ -178,5 +178,4 @@ class PicMatrix{
         view.session.add(anchor: anchor)
     }
 }
-//x:-0.106536895, y:-0.24927528, h:0.19478754982248456, w:0.11486377820200745
 

@@ -453,7 +453,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let pos = sceneView.projectPoint(bookTopPos)
             var pos2d = CGPoint()
             pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-            pos2d.y = CGFloat(pos.y-Float(textHeight))
+//            pos2d.y = CGFloat(pos.y-Float(textHeight))
+            pos2d.y = CGFloat(pos.y-250)
             DispatchQueue.main.async{
                 self.bookAbstractUI.updatePosition(position: pos2d)
             }
