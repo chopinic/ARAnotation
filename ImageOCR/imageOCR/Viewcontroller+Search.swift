@@ -105,12 +105,19 @@ extension ViewController: UITextFieldDelegate{
             elementId = getIdFromName(name)
 
             if ids.firstIndex(of: elementId) != nil{
-                var enhance = 
-                enhance.scale = SIMD3<Float>(x: 2, y: 2, z: 1)
-                node.move(to: enhance, relativeTo: node.parent, duration: 0.2)
+//                var enhance =
+//                enhance.scale = SIMD3<Float>(x: 2, y: 2, z: 1)
+//                node.move(to: enhance, relativeTo: node.parent, duration: 0.2)
+                var translation = node.transformMatrix(relativeTo: rootnode)
+                var trans = Transform(matrix: translation)
+                trans.scale = SIMD3<Float>(x: 2, y: 2, z: 2)
+//                translation.columns.3.w = 2
+//                translation.columns.3.y = Float(x)
+                
+                node.move(to: trans, relativeTo: rootnode, duration: 0.4)
             }
             else{
-                let ori = node.scale.x
+//                let ori = node.scale.x
                 node.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
             }
         }
@@ -153,9 +160,9 @@ extension ViewController: UITextFieldDelegate{
         removeHeadAnchor()
 
 
-        let z = -1*PicMatrix.itemDis
+        let z = -1*PicMatrix.showDis
         var absy =  0.0
-        let x =  0.0
+        let x =  -0.1
         let nowTrans = arView.session.currentFrame!.camera.transform
         elementWeights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: elementWeights.count ,by: 1){
@@ -188,10 +195,17 @@ extension ViewController: UITextFieldDelegate{
         }
     }
     
+    func calculateXDistance(_ pos1: CGPoint,_ pos2: CGPoint)->Double{
+//        return Double(pow(pow((pos1.x-pos2.x), 2)+pow((pos1.y-pos2.y), 2),0.5))
+        
+        return Double(sqrt(pow( pos1.x-pos2.x,2)))
+    }
     func calculateScreenDistance(_ pos1: CGPoint,_ pos2: CGPoint)->Double{
         return Double(pow(pow((pos1.x-pos2.x), 2)+pow((pos1.y-pos2.y), 2),0.5))
     }
-    
+    func calculateYDistance(_ pos1: CGPoint,_ pos2: CGPoint)->Double{
+        return Double(pow(pow(pos1.y-pos2.y, 2),0.5))
+    }
     @objc func stopAntEyeDisplay(){
         isAntUpdate = !isAntUpdate
     }

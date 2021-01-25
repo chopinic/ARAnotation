@@ -24,12 +24,14 @@ extension ViewController{
     @objc func tappedOnARView(_ sender: UITapGestureRecognizer) {
 //        print("touch")
         let touchLocation = sender.location(in: arView)
+        print(touchLocation)
 //        let results = arView.hitTest(touchLocation)
         guard let result = arView.entity(at: touchLocation)else{
             return
         }
 //        for result in results {
         let name = result.name
+        print(name)
         if name.hasPrefix("book@")&&isCoffee==false {
             showAbstract(id: getIdFromName(name))
         }

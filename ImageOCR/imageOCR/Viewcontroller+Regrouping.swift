@@ -44,16 +44,9 @@ extension ViewController{
         }
     }
     
-    
-    
-
-    
     func compareAttri(kind: Int, ele1: Element, ele2: Element )->Bool{
         return getAttri(kind: kind, ele: ele1)==getAttri(kind: kind, ele: ele2)
     }
-
-
-    
     
     func generateGroups(kind: Int) -> [[Int]] {
         var result = [[Int]]()
@@ -94,6 +87,15 @@ extension ViewController{
         return result
     }
     
+    func formHeadString(ori: String) -> String {
+        var lineori = ori
+        for i in stride(from: 15, to: ori.count, by: 15){
+            if(lineori.count-i<4){break}
+            lineori = lineori.prefix(i) + "\n" + lineori.suffix(lineori.count-i)
+        }
+        return lineori
+    }
+    
     func displayGroups(kind: Int = 1, finding: String = ""){
         shouldBeInPlace = false
         removeHeadAnchor()
@@ -119,59 +121,107 @@ extension ViewController{
             }
             if(isFind){
                 setMessage("Find group \(groupName) in all \(result.count) groups")
-
-            }
-            else{
+            }else{
                 setMessage("Find no group named \"\(finding)\" in all \(result.count) groups")
             }
         }else{
             setMessage("Find \(result.count) groups")
         }
-        var absx = 0.0
-        var y = -0.08
-        let z = -1.5*PicMatrix.itemDis
-        var maxy = -0.08;
-        var groupStarty = -0.08
-        for i in stride(from: 0, to: result.count, by: 1) {
-            for j in stride(from: 0, to: result[i].count, by: 1){
-                let id = result[i][j]
-                var nowNode : Entity
-                var nowElement = Element()
-                if isCoffee{
-                    nowElement = coffees[id]
-                    nowNode = arView.scene.findEntity(named: "coffee@\(id)")!
-                }else{
-                    nowElement = books[id]
-                    nowNode = arView.scene.findEntity(named: "book@\(id)")!
+        if(isCoffee == false){
+            var absy = Float(0.0)
+            var x = Float(-0.08)
+            let z = Float(-1.5*PicMatrix.showDis)
+            var maxx = Float(-0.08)
+            var groupStartx = Float(-0.08)
+            for i in stride(from: 0, to: result.count, by: 1) {
+                for j in stride(from: 0, to: result[i].count, by: 1){
+                    let id = result[i][j]
+                    let nowNode = arView.scene.findEntity(named: "book@\(id)")!
+                    let nowElement = books[id]
+                    var translation = matrix_identity_float4x4
+                    // set z
+                    translation.columns.3.z = z
+                    //set y
+                    if i % 2 == 0{translation.columns.3.y = absy}
+                    else{translation.columns.3.y = -1*absy}
+                    //set x
+                    translation.columns.3.x = x
+                    x += 0.03
+                    maxx = max(maxx, x)
+                    if j==0{
+                        translation.columns.3.y += 0.1
+                        let headString = getAttrName(kind: kind)+":\n"+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
+                        print(headString)
+                        let lineHeight: CGFloat = 0.05
+                        let font = MeshResource.Font.systemFont(ofSize: lineHeight)
+                        let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)
+                        let textMaterial = SimpleMaterial(color: .red, isMetallic: false)
+                        let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                        textModel.scale = SIMD3<Float>(x: 0.4, y: 0.4, z: 0.4)
+                        let textAnchor = AnchorEntity(world: nowTrans*translation)
+                        textAnchor.name = "head@\(i)"
+                        textAnchor.addChild(textModel)
+                        self.arView.scene.addAnchor(textAnchor)
+                        x+=0.13
+                        translation.columns.3.x = x
+                        translation.columns.3.y -= 0.1
+                        x+=0.03
+                    }
+                    nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
                 }
-                
-                var translation = matrix_identity_float4x4
-                translation.columns.3.z = Float(z)
-                if i % 2 == 0{translation.columns.3.x = Float(absx)}
-                else{translation.columns.3.x = Float(-1*absx)}
-                translation.columns.3.y = Float(y)
-                y += 0.03
-                maxy = max(maxy, y)
-                if j==0{
-                    translation.columns.3.y -= Float(PicMatrix.itemDis/4)
-                    translation.columns.3.x += Float(PicMatrix.itemDis/4)
-                    let headString = getAttrName(kind: kind)+": \n"+getAttri(kind: kind, ele: nowElement)
-                    print(headString)
-                    let headAnchor = HeadAnchor(text: headString, transform: nowTrans*translation)
-                    self.arView.session.add(anchor:headAnchor)
+                if i % 3 == 2{
+                    groupStartx = maxx+0.16
+                    absy = 0
                 }
-                nowNode.move(to: nowTrans*translation, relativeTo: nowNode, duration: 0.4)
-            }
-            if i % 3 == 2{
-                groupStarty = maxy+0.16
-                absx = 0
-            }
-            else if i % 3 == 0{
-                absx = 0.2
-            }
+                else if i % 3 == 0{
+                    absy = 0.2
+                }
 
-            y = groupStarty
+                x = groupStartx
 
+            }
+        }else{
+            if(picMatrix.count<=0){return}
+            var y = Float(0.07)
+            var x = Float(-0.1)
+            let z = Float(-1*picMatrix[0].itemDis)
+            for i in stride(from: 0, to: result.count, by: 1) {
+                for j in stride(from: 0, to: result[i].count, by: 1){
+                    let id = result[i][j]
+                    let nowNode = arView.scene.findEntity(named: "coffee@\(id)")!
+                    let nowElement = coffees[id]
+                    var translation = matrix_identity_float4x4
+                    // set z
+                    translation.columns.3.z = z
+                    //set y
+                    translation.columns.3.y = y
+                    //set x
+                    translation.columns.3.x = x
+                    y -= 0.01
+                    if j==0{
+                        translation.columns.3.y += 0.05
+                        translation.columns.3.x -= 0.02
+                        let headString = getAttrName(kind: kind)+":\n"+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
+                        print(headString)
+                        let lineHeight: CGFloat = 0.05
+                        let font = MeshResource.Font.systemFont(ofSize: lineHeight)
+                        let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)
+                        let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
+                        let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                        textModel.scale = SIMD3<Float>(x: 0.2, y: 0.2, z: 0.2)
+                        let textAnchor = AnchorEntity(world: nowTrans*translation)
+                        textAnchor.name = "head@\(i)"
+                        textAnchor.addChild(textModel)
+                        self.arView.scene.addAnchor(textAnchor)
+                        y-=0.05
+                        translation.columns.3.y = y
+                        y-=0.01
+                    }
+                    nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
+                }
+                x+=0.08
+                y = Float(0.07)
+            }
         }
     }
 }

@@ -35,7 +35,9 @@ class ViewController: UIViewController, ARSessionDelegate {
     var imageH = CGFloat()
     var imageW = CGFloat()
     var timer: Timer?
-    var radio: Float = 1
+    var trackedImgW = 0.4
+    var trackedImgH = 0.3
+    //var ratio = [Float]()
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
@@ -191,6 +193,12 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
     
     public func setForCoffee(cot:Int, hasResult: NSDictionary, isDebug: Bool){
+        let menuPic : Data = Data(base64Encoded: hasResult["menubase64"] as! String, options: .ignoreUnknownCharacters)!
+        let oriFilename = getDocumentsDirectory().appendingPathComponent("MenuOri@.png")
+        try! menuPic.write(to: oriFilename)
+        let emptyMenu : Data = Data(base64Encoded: hasResult["menubase64_nowords"] as! String, options: .ignoreUnknownCharacters)!
+        let emptyFileName = getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png")
+        try! emptyMenu.write(to: emptyFileName)
         if let resultbooks = hasResult["words_result"] {
             let coffeeArray = resultbooks as! NSArray
             print("Found \(coffeeArray.count) coffees")
@@ -215,24 +223,15 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }else{
                     var strBase64 = nowCoffeeDic["base64"] as! String
                     var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                    if let pic = UIImage(data: dataDecoded){
-                        if nowOrientation == UIInterfaceOrientation.portrait.rawValue{
-                            let temppic = pic.rotate(radians: -.pi/2)
-                            elementPics.append(temppic)
-                        }else{
-//                            let temppic = pic.rotate(radians: .pi/2)
-                            elementPics.append(pic)
-                        }
-                    }else{
-                        elementPics.append(UIImage(named: "coffee1.jpg")!.rotate(radians: -.pi/2))
-                    }
-                    
+                    let filename = getDocumentsDirectory().appendingPathComponent("coffee@\(coffees.count).png")
+                    try! dataDecoded.write(to: filename)
                     strBase64 = nowCoffeeDic["desbase64"] as! String
                     dataDecoded = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                    if let despic = UIImage(data: dataDecoded){
-                        elementPics.append(despic)
+                    nowCoffee.desPicid = elementPics.count
+                    if let pic = UIImage(data: dataDecoded){
+                        elementPics.append(pic)
                     }else{
-                        elementPics.append(UIImage(named: "component.jpg")!)
+                        elementPics.append(UIImage(named: "component.png")!)
                     }
                 }
                 nowCoffee.picid = elementPics.count-2
@@ -242,7 +241,9 @@ class ViewController: UIViewController, ARSessionDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-        self.resetAndAddAnchor()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.resetAndAddAnchor()
+        }
     }
 
     public func setForBooks(cot:Int, hasResult: NSDictionary, isDebug: Bool){
@@ -276,7 +277,6 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let parts = nowtempbook["part"] as! NSArray
                 for wordforlocs in parts {
                     let wordlocs = wordforlocs as! NSDictionary
-//                        let resloc = wordlocs["location"] as! NSDictionary
                     nowbook.kinds.append(wordlocs["type"] as! String)
                     nowbook.words.append(wordlocs["words"] as! String)
                 }
@@ -285,29 +285,61 @@ class ViewController: UIViewController, ARSessionDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-//        self.resetAndAddAnchor()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.resetAndAddAnchor()
+        }
+
     }
-    
+
     public func removeHeadAnchor(){
-//        if let anchorlist = sceneView.session.currentFrame?.anchors {
-//            for anchor in anchorlist {
-//                if let hanchor = anchor as? HeadAnchor{
-//                    sceneView.session.remove(anchor: hanchor)
-//                }
-//            }
-//        }
-        
         let childNodes = arView.scene.anchors
 
-        for node in childNodes {
-            let name = node.name
-            if name.hasPrefix("head@") {
-                arView.scene.removeAnchor(node)
+        while(true){
+            var hasHead = false
+            for node in childNodes {
+                let name = node.name
+                print(name)
+                if name.hasPrefix("head@") {
+                    arView.scene.removeAnchor(node)
+                    hasHead = true
+                    break;
+                }
             }
+            if(hasHead==false){break}
         }
     }
     
+    public func resetPicTracking(){
+        let fileName = "MenuOri@.png"
+        let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/" + fileName
+        guard let oriMenu = UIImage(contentsOfFile: path)else{
+            print("no original menu file")
+            return
+        }
+        trackedImgW = Double(oriMenu.size.width * oriMenu.scale)
+        trackedImgH = Double(oriMenu.size.height * oriMenu.scale)
+//        guard let oriMenu = UIImage(contentsOfFile: getDocumentsDirectory().appendingPathComponent("MenuOri@.png").absoluteString) else{
+//            print("no original menu file")
+//            return
+//        }
+        let oriMenuCIImage = CIImage(image: oriMenu)!
+        let oriMenuCgImage = convertCIImageToCGImage(inputImage: oriMenuCIImage)!
+        let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: 0.2)
+        arImage.name = "CGImage Test"
+
+        let configuration = ARWorldTrackingConfiguration()
+        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
+            if #available(iOS 13.4, *) {
+                configuration.sceneReconstruction = .meshWithClassification
+            }
+        }
+        configuration.detectionImages = [arImage]
+        arView.session.run(configuration)
+
+    }
+    
     public func resetAndAddAnchor(isReset: Bool = false){
+        resetPicTracking()
         if isReset{
             for i in stride(from: 0, to: books.count ,by: 1){
                 books[i].isDisplay = false
@@ -317,21 +349,10 @@ class ViewController: UIViewController, ARSessionDelegate {
                 coffees[i].isDisplay = false
             }
             
-//            if let anchorlist = sceneView.session.currentFrame?.anchors {
-//                for anchor in anchorlist {
-//                    if let imanchor = anchor as? BookAnchor{
-//                        sceneView.session.remove(anchor: imanchor)
-//                    }
-//                    else if let imanchor = anchor as? CoffeeAnchor{
-//                        sceneView.session.remove(anchor: imanchor)
-//                    }
-//                }
-//            }
             let childNodes = getEntityList()
             for node in childNodes {
                 let name = node.name
                 if name.hasPrefix("book@") {
-                    print("remove:\(name)")
                     arView.scene.removeAnchor(node)
                 }else if name.hasPrefix("coffee@"){
                     arView.scene.removeAnchor(node)
@@ -352,7 +373,9 @@ class ViewController: UIViewController, ARSessionDelegate {
             let currentBook = books[i]
             let rootLoc = currentBook.loc
 //            let picContents = elementPics[currentBook.picid]
-            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
+            let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+            books[i].size = size
+            print("\(i): \(size)")
             print("bookid: \(i)")
             var words = ""
             for str in currentBook.words {
@@ -360,17 +383,15 @@ class ViewController: UIViewController, ARSessionDelegate {
             }
             print(" words: \(words)")
             let book = AnchorEntity(world: trans)
-            book.addChild(createPlane(id: i, size: size))
+            book.addChild(createPlane(id: i, size: size, isCoffee: isCoffee))
             book.name = "book@\(i)"
+            book.generateCollisionShapes(recursive: true)
             arView.scene.addAnchor(book)
             
-            var translation = matrix_identity_float4x4
-            translation.columns.3.x = -Float(size.width)
-            translation.columns.3.y = Float(size.height)/2
-            let topPos = book.transform.matrix*translation
-            let top = SCNNode();
-            top.transform = SCNMatrix4(topPos)
-            books[i].uiPosVec = top.position-SCNVector3(book.position)
+//            let topPos = book.transform.matrix*translation
+//            let top = SCNNode();
+//            top.transform = SCNMatrix4(topPos)
+//            books[i].uiPosVec = top.position-SCNVector3(book.position)
         }
         
         for i in stride(from: 0, to: coffees.count ,by: 1){
@@ -379,60 +400,163 @@ class ViewController: UIViewController, ARSessionDelegate {
             }
             let nowMatrix = coffees[i].matrixId!-1
             coffees[i].isDisplay = true;
-            picMatrix[nowMatrix].addCoffeeAnchor(id:i,coffee:coffees[i])
+            let trans = picMatrix[nowMatrix].addCoffeeAnchor(id:i,coffee:coffees[i])
+            coffees[i].oriTrans = trans
+            let currentCoffee = coffees[i]
+            let rootLoc = currentCoffee.loc
+            let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+            coffees[i].size = size
+//            print("coffeeid: \(i) \(currentCoffee.name)")
+            let coffee = AnchorEntity(world: trans)
+            coffee.name = "coffee@\(i)"
+            coffee.addChild(createPlane(id: i, size: size, isCoffee: isCoffee))
+            coffee.generateCollisionShapes(recursive: true)
+            arView.scene.addAnchor(coffee)
         }
     }
     
     
-    
+
     
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]){
-        let anchor = anchors.first!;
-        if let bookAnchor = anchor as? BookAnchor{
+        guard let imageAnchor = anchors.first as? ARImageAnchor else{
+            return
         }
-//        }else if let coffeeAnchor = anchor as? CoffeeAnchor{
-//            let id = coffeeAnchor.id!;
-//            let currentCoffee = coffees[id]
-//            let rootLoc = currentCoffee.loc
-//            let picContents = elementPics[currentCoffee.picid]
-//            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(rootLoc.width),isW: true), height: PicMatrix.getActualLen(oriLen:Double(rootLoc.height),isW: false))
-//            print("coffeeid: \(id) \(coffees[id].name)")
-//            let coffee = createPlaneNode(size: size, rotation: 0, contents: picContents)
-//            coffee.name = "coffee@\(id)"
-//            coffee.transform = SCNMatrix4(anchor.transform)
-//            coffees[id].oriTrans = coffee.transform
-//            arView.scene.rootNode.addChildNode(coffee)
-//
-//            var translation = matrix_identity_float4x4
-//            translation.columns.3.y = Float(size.height/2)
-//            let topPos = anchor.transform*translation
-//            let top = SCNNode();
-//            top.transform = SCNMatrix4(topPos)
-//            coffees[id].uiPosVec = top.position-coffee.position
-//
-            
-//        }else if let headAnchor = anchor as? HeadAnchor{
-//
-//
-//            let text = SCNText(string: headAnchor.text, extrusionDepth: 0.1)
-//            text.font = UIFont.systemFont(ofSize: 1)
-//            text.isWrapped = true
-//            text.containerFrame = CGRect(x: 0, y: 0, width: 5, height: 7)
-//
-//            let material = SCNMaterial()
-//            material.diffuse.contents = UIColor.init(red: 1, green: 1, blue: 1, alpha: 1)
-//            text.materials = [material]
-//
-//            let textNode = SCNNode(geometry: text)
-//            textNode.name = "head@"
-//            textNode.transform = SCNMatrix4(headAnchor.transform)
-//            textNode.scale = SCNVector3(x: 0.02, y: 0.02, z: 0.02)
-//            textNode.constraints = [SCNBillboardConstraint()]
-//            sceneView.scene.rootNode.addChildNode(textNode)
-//        }
+        print("find img: \(imageAnchor.name)")
+
+        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png"))
+//        let rotationTrans =  imageAnchor.transform * Transform.init( rotation: simd_quaternion(0, .pi, 0, 1),translation: SIMD3(0,0,0.2)).matrix
+        let nowW = Float(picMatrix.last!.getActualLen(oriLen: trackedImgW, isW: true))
+        let nowH = Float(picMatrix.last!.getActualLen(oriLen: trackedImgH, isW: false))
+
+        let rotationTrans = imageAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
+        let anchor = AnchorEntity(world:getForwardTrans(ori: rotationTrans, dis: -1*nowH/2)
+)
+        var material = UnlitMaterial()
+        material.baseColor = MaterialColorParameter.texture(resource!)
+        material.tintColor = UIColor.white.withAlphaComponent(0.99)
+        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: nowW, height: nowH), materials: [material])
+        anchor.addChild(imagePlane)
+        anchor.name = "menu@"
+        arView.scene.anchors.append(anchor)
     }
     
     
+    
+    func session(_ session: ARSession, didUpdate anchors: [ARAnchor]){
+        for anchor in anchors{
+            if let imgAnchor = anchor as? ARImageAnchor{
+                if let childNode = arView.scene.findEntity(named: "menu@"){
+                    let nowH = Float(picMatrix.last!.getActualLen(oriLen: trackedImgH, isW: false))+0.05
+
+                    var rotationTrans = imgAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
+                    rotationTrans = getForwardTrans(ori: rotationTrans, dis: -1*nowH/2)
+
+                childNode.move(to: rotationTrans, relativeTo: rootnode, duration: 0.4)
+                }
+            }
+        }
+    }
+
+    
+    func session(_ session: ARSession, didUpdate frame: ARFrame){
+        if(bookAbstractUI.getIsHidden() == false){
+            guard let childNode = arView.scene.findEntity(named: "book@\(bookAbstractUI.id)")  else{
+                print("renderer: no such book \(bookAbstractUI.id)")
+                return
+            }
+            if let pos = arView.project(books[bookAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: nil))){
+//                print(pos)
+                var pos2d = CGPoint()
+                pos2d.x = pos.x-CGFloat(textWidth/2)
+                pos2d.y = pos.y-CGFloat(textHeight)
+                self.bookAbstractUI.updatePosition(position: pos2d)
+            }
+        }
+
+        if(coffeeAbstractUI.getIsHidden() == false){
+            guard let childNode = arView.scene.findEntity(named:  "coffee@\(coffeeAbstractUI.id)") else{
+                print("renderer: no such coffee \(coffeeAbstractUI.id)")
+                return
+            }
+            if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: nil))){
+                var pos2d = CGPoint()
+                pos2d.x = pos.x//+CGFloat(coffeeAbstractUI.imageW/2)
+                pos2d.y = pos.y-500//-CGFloat(coffeeAbstractUI.imageW/2)
+                coffeeAbstractUI.updatePosition(position: pos2d)
+            }
+        }
+
+        if(isAntUpdate){
+            viewCenterPoint = arView.center
+            isAntUpdateCot = (isAntUpdateCot+1)%5
+            var mindis = 100000.0
+            var minid = -1
+            for node in getEntityList() {
+                let name = node.name
+                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
+                    return
+                }
+                let elementId = getIdFromName(name)
+                guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
+                let point = CGPoint(x:pos.x,y:pos.y-arView.center.y/2-200)
+//                let centerP = CGPoint(x: 590, y: 400)
+                var dis = 0.0
+                if(isCoffee)
+                {dis = calculateScreenDistance(arView.center,point)}
+                else{dis = calculateXDistance(arView.center,point)}
+//                if(elementId == 1){
+//                    print("dis: \(dis)")}
+
+                if dis<800{
+//                    while(ratio.count<=elementId){
+//                        ratio.append(0.0)
+//                    }
+                    
+//                   node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:-1*ratio[elementId]/20), relativeTo: rootnode)
+                    let ratio = Float(min(1.5,(dis+25.0)/(dis+10)))
+//                    node.transform
+                    node.setScale(SIMD3<Float>(x:ratio/2+0.5,y:1,z:ratio), relativeTo: rootnode) //scale =
+//                    node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:ratio[elementId]/20), relativeTo: rootnode)
+                    mindis = min(mindis,calculateScreenDistance(arView.center,point))
+                    
+                    if mindis == calculateScreenDistance(arView.center,point){
+                        if isAntUpdateCot==0
+                        {minid = elementId}
+                    }
+                }
+                else if shouldBeInPlace{
+                    if isCoffee{
+                        node.transform = Transform(matrix: coffees[elementId].oriTrans)
+                    }else{
+                        node.transform = Transform(matrix: books[elementId].oriTrans)
+                    }
+                }
+            }
+            let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
+            if minid != -1 && minid != prevId{
+//                var node = Optional<AnchorEntity>(AnchorEntity())
+//                var prevNode = Optional<AnchorEntity>(AnchorEntity())
+//
+//                if isCoffee{
+//                    node = arView.scene.findEntity(named: "coffee@\(minid)") as? AnchorEntity
+//                    prevNode = arView.scene.findEntity(named: "coffee@\(prevId)") as? AnchorEntity
+//                }else{
+//                    node = arView.scene.findEntity(named: "book@\(minid)") as? AnchorEntity
+//                    prevNode = arView.scene.findEntity(named: "book@\(prevId)") as? AnchorEntity
+//                }
+//                var transForm = matrix_identity_float4x4
+//                transForm.columns.3.z = -0.02
+//                node?.move(to: (node?.transform.matrix)!*transForm, relativeTo: node, duration: 0.01)
+//                transForm.columns.3.z = 0.02
+//                prevNode?.move(to: (prevNode?.transform.matrix)!*transForm, relativeTo: prevNode, duration: 0.01)
+                showAbstract(id: minid)
+            }
+        }
+
+    }
+
+
     
 //    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
 //

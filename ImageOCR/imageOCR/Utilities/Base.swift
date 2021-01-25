@@ -23,7 +23,11 @@ public class Element{
     var matrixId: Int!=0
     var picid = -1
     var isDisplay: Bool!=false
-    var uiPosVec: SCNVector3?
+    var size = CGSize()
+//    var uiPos: SIMD3<Float>?
+    public func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
+        return SIMD3<Float>(x: 0, y: 0, z: 0)
+    }
     public func generateAbstract()->String{
         return "Element abstract"
     }
@@ -46,6 +50,18 @@ public class BookSt: Element{
     var relatedBook = ""
     var score: Int = 0
     var remark = ""
+    public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
+        var translation = matrix_identity_float4x4
+        translation.columns.3.y = Float(size.height)
+        translation.columns.3.x = Float(1.5*size.width)
+        translation = trans*translation
+        let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+        let bookToppos4 = translation*rootpos
+        let bookToppos = SIMD3<Float>(x:bookToppos4.x,y:bookToppos4.y,z:bookToppos4.z)
+
+        return bookToppos
+    }
+    
     
     public override func generateAbstract()->String{
         var abstractscore = ""
@@ -81,6 +97,19 @@ public class CoffeeSt: Element{
     var balance = ""
     var score: Int = 0
     var remark = ""
+    
+    public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
+        var translation = matrix_identity_float4x4
+//        translation.columns.3.y =
+        translation.columns.3.x = Float(size.width)
+        translation = trans*translation
+        let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+        let toppos4 = translation*rootpos
+        let toppos = SIMD3<Float>(x:toppos4.x,y:toppos4.y,z:toppos4.z)
+
+        return toppos
+    }
+
     
     public override func generateAbstract()->String{
         var abs = name+"\n"

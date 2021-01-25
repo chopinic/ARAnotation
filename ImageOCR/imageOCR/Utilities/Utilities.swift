@@ -12,6 +12,43 @@ import CoreML
 import UIKit
 import VideoToolbox
 
+public func convertCIImageToCGImage(inputImage: CIImage) -> CGImage? {
+    let context = CIContext(options: nil)
+    if let cgImage = context.createCGImage(inputImage, from: inputImage.extent) {
+     return cgImage
+    }
+    return nil
+}
+
+
+public func getForwardTrans(ori: simd_float4x4,dis:Float)->simd_float4x4{
+    var trans = matrix_identity_float4x4
+    trans.columns.3.z = dis;
+    return ori*trans
+}
+
+public func getDownTrans(ori: simd_float4x4,dis:Float)->simd_float4x4{
+    var trans = matrix_identity_float4x4
+    trans.columns.3.y = -1*dis;
+    return ori*trans
+}
+
+
+public func calcuPointPos(trans:simd_float4x4)->SIMD3<Float>{
+    var point1 = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+    point1 = trans*point1
+    return SIMD3<Float>(x: point1.x, y: point1.y, z: point1.z)
+}
+
+public func calcuPointDis(trans1:simd_float4x4 , trans2:simd_float4x4)->Float{
+    var point1 = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+    point1 = trans1*point1
+    var point2 = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+    point2 = trans2*point2
+    let dis = pow((point1.x-point2.x),2) + pow((point1.y-point2.y),2)  + pow((point1.z-point2.z),2)
+    return sqrt(dis)
+}
+
 func makeRotationMatrix(x:Float = 0,y:Float = 0,z:Float = 0)->simd_float4x4{
     return makeRotationMatrixX(angle: x)*makeRotationMatrixY(angle: y)*makeRotationMatrixZ(angle: z);
 }
@@ -126,23 +163,33 @@ func getDocumentsDirectory() -> URL {
 //    
 //    return createPlaneNode(size: size, geometry)
 //}
-func createPlane(id:Int,size: CGSize)->ModelEntity{
-//    print(getDocumentsDirectory().appendingPathComponent("book@\(id).png"))
-    do{
-        let resource = try TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("book@\(id).png"))
-            var material = UnlitMaterial()
-            material.baseColor = MaterialColorParameter.texture(resource)
-            material.tintColor = UIColor.white.withAlphaComponent(0.99)
+func createPlane(id:Int,size: CGSize, isCoffee: Bool)->ModelEntity{
+    if(isCoffee){
+        let resource = try! TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("coffee@\(id).png"))
+//        let coffeeDes = try? TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("coffeedes@\(id).png"))
+        var material = UnlitMaterial()
+        material.baseColor = MaterialColorParameter.texture(resource)
+        material.tintColor = UIColor.white.withAlphaComponent(0.99)
 
-            let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
 
-            imagePlane.position.y = 0.1
+        imagePlane.position.y = 0.1
+        imagePlane.name = "coffee@\(id)"
+        return imagePlane
 
-            return imagePlane
-    }catch{
-        return ModelEntity()
+        
+    }else{
+        let resource = try! TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("book@\(id).png"))
+        var material = UnlitMaterial()
+        material.baseColor = MaterialColorParameter.texture(resource)
+        material.tintColor = UIColor.white.withAlphaComponent(0.99)
+
+        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+
+        imagePlane.position.y = 0.1
+        imagePlane.name = "book@\(id)"
+        return imagePlane
     }
-    
 }
 
 

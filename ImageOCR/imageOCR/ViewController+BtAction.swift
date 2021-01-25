@@ -14,12 +14,10 @@ extension ViewController{
         if isCoffee{
             isCoffee = false
             setMessage("Set to book")
-            PicMatrix.itemDis = 0.4
         }
         else{
             isCoffee = true
             setMessage("Set to coffee")
-            PicMatrix.itemDis = 0.4
         }
     }
 
@@ -39,7 +37,8 @@ extension ViewController{
     }
     
     @objc func buttonTapDebug(){
-        resetAndAddAnchor()
+        resetPicTracking()
+//        resetAndAddAnchor()
 //        let nowBookDeal = PicMatrix()
 //        nowBookDeal.saveCurrentTrans(view: sceneView)
 //        picMatrix.append(nowBookDeal)
@@ -53,12 +52,12 @@ extension ViewController{
 
         
     @objc func buttonTapaddx(){
-        PicMatrix.addxOffSet()
+        PicMatrix.addCamAngle()
         resetAndAddAnchor(isReset: true)
     }
     
     @objc func buttonTapdecx(){
-        PicMatrix.decxOffSet()
+        PicMatrix.decCamAngle()
         resetAndAddAnchor(isReset: true)
     }
     
@@ -83,9 +82,12 @@ extension ViewController{
                 setMessage("no plane detected")
                 return
             }
+            let dis = calcuPointDis(trans1: result.worldTransform, trans2: (arView.session.currentFrame?.camera.transform)!)
+            print(dis)
             let nowMatrix = PicMatrix()
             let rotationTrans = makeRotationMatrix(x: -.pi/2)
             nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
+            nowMatrix.itemDis = Double(dis)
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
