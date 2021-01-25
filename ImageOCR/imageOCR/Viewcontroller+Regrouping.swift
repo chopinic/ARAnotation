@@ -89,7 +89,7 @@ extension ViewController{
     
     func formHeadString(ori: String) -> String {
         var lineori = ori
-        for i in stride(from: 15, to: ori.count, by: 15){
+        for i in stride(from: 12, to: ori.count, by: 12){
             if(lineori.count-i<4){break}
             lineori = lineori.prefix(i) + "\n" + lineori.suffix(lineori.count-i)
         }
@@ -128,7 +128,7 @@ extension ViewController{
             setMessage("Find \(result.count) groups")
         }
         if(isCoffee == false){
-            var absy = Float(0.0)
+            var absy = Float(0)
             var x = Float(-0.08)
             let z = Float(-1.5*PicMatrix.showDis)
             var maxx = Float(-0.08)
@@ -140,7 +140,7 @@ extension ViewController{
                     let nowElement = books[id]
                     var translation = matrix_identity_float4x4
                     // set z
-                    translation.columns.3.z = z
+                    translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
                     //set y
                     if i % 2 == 0{translation.columns.3.y = absy}
                     else{translation.columns.3.y = -1*absy}
@@ -149,7 +149,6 @@ extension ViewController{
                     x += 0.03
                     maxx = max(maxx, x)
                     if j==0{
-                        translation.columns.3.y += 0.1
                         let headString = getAttrName(kind: kind)+":\n"+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
                         print(headString)
                         let lineHeight: CGFloat = 0.05
@@ -164,7 +163,6 @@ extension ViewController{
                         self.arView.scene.addAnchor(textAnchor)
                         x+=0.13
                         translation.columns.3.x = x
-                        translation.columns.3.y -= 0.1
                         x+=0.03
                     }
                     nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
@@ -192,7 +190,7 @@ extension ViewController{
                     let nowElement = coffees[id]
                     var translation = matrix_identity_float4x4
                     // set z
-                    translation.columns.3.z = z
+                    translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
                     //set y
                     translation.columns.3.y = y
                     //set x

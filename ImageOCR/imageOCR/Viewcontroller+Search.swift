@@ -108,7 +108,8 @@ extension ViewController: UITextFieldDelegate{
 //                var enhance =
 //                enhance.scale = SIMD3<Float>(x: 2, y: 2, z: 1)
 //                node.move(to: enhance, relativeTo: node.parent, duration: 0.2)
-                let translation = node.transformMatrix(relativeTo: rootnode)
+                let dis = 0.001*Float(elementId%13)
+                let translation = getForwardTrans(ori: node.transformMatrix(relativeTo: rootnode), dis: dis)
                 var trans = Transform(matrix: translation)
                 trans.scale = SIMD3<Float>(x: 2, y: 2, z: 2)
 //                translation.columns.3.w = 2
@@ -117,7 +118,7 @@ extension ViewController: UITextFieldDelegate{
                 node.move(to: trans, relativeTo: rootnode, duration: 0.4)
             }
             else{
-                let translation = node.transformMatrix(relativeTo: rootnode)
+                let translation = getForwardTrans(ori: node.transformMatrix(relativeTo: rootnode), dis: -0.005)
                 var trans = Transform(matrix: translation)
                 trans.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
                 node.move(to: trans, relativeTo: rootnode, duration: 0.4)
@@ -164,7 +165,7 @@ extension ViewController: UITextFieldDelegate{
 
         let z = -1*PicMatrix.showDis
         var absy =  0.0
-        let x =  -0.1
+        let x =  0
         let nowTrans = arView.session.currentFrame!.camera.transform
         elementWeights.sort(by: {$0.weight > $1.weight})
         for i in stride(from: 0, to: elementWeights.count ,by: 1){
@@ -176,7 +177,8 @@ extension ViewController: UITextFieldDelegate{
                 nowNode = arView.scene.findEntity(named: "book@\(elementWeight.id)")!
             }
             var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(z)
+            translation.columns.3.z = Float(z)-(0.0001*Float(i%5))
+
             translation.columns.3.y = Float(x)
             if(i%2 != 0){
                 translation.columns.3.x = Float(absy)

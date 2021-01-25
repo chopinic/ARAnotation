@@ -52,12 +52,12 @@ extension ViewController{
 
         
     @objc func buttonTapaddx(){
-        PicMatrix.addCamAngle()
+        PicMatrix.addxOffSet()
         resetAndAddAnchor(isReset: true)
     }
     
     @objc func buttonTapdecx(){
-        PicMatrix.decCamAngle()
+        PicMatrix.decxOffSet()
         resetAndAddAnchor(isReset: true)
     }
     

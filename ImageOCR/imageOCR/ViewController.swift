@@ -497,18 +497,13 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let point = CGPoint(x:pos.x,y:pos.y)
 //                let centerP = CGPoint(x: 590, y: 400)
                 let dis = calculateScreenDistance(arView.center,point)
-                if(elementId == 1){
+                if(elementId == 0){
                     print("dis: \(dis)")}
 
                 if dis<800{
-//                    while(ratio.count<=elementId){
-//                        ratio.append(0.0)
-//                    }
-                    
-//                   node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:-1*ratio[elementId]/20), relativeTo: rootnode)
-                    let ratio = Float(min(1.5,(dis+25.0)/(dis+10)))
+                    let ratio = Float(min(2.3,(dis+28.0)/dis))
 //                    node.transform
-                    node.setScale(SIMD3<Float>(x:ratio/2+0.5,y:1,z:ratio), relativeTo: rootnode) //scale =
+                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode) //scale =
 //                    node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:ratio[elementId]/20), relativeTo: rootnode)
                     mindis = min(mindis,dis)
                     

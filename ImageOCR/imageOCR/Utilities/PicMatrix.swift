@@ -32,7 +32,7 @@ class PicMatrix{
     static var camHAngle: Double = 24
     static var imageW: Double = 3840
     static var imageH: Double  = 2880
-    static var xOffset: Float = 0.002
+    static var xOffset: Float = 0
     static var yOffset: Float = 0
 
     var prevTrans: simd_float4x4?
