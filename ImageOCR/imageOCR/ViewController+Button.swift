@@ -10,7 +10,9 @@ import UIKit
 extension ViewController{
     func createButton(title : String,negX: CGFloat = 0, negY : CGFloat, action: Selector?)->UIButton{
         let button = UIButton(frame: CGRect(x: arView.bounds.size.width/2-50+negX, y: arView.bounds.size.height-negY, width: 100, height: 50))
-        button.backgroundColor = UIColor.gray
+        button.backgroundColor = UIColor.init(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.5)
+        button.layer.cornerRadius = 10
+//        button
         button.setTitle(title, for: .normal)
         if action != nil{
             button.addTarget(self, action: action!, for: UIControlEvents.touchUpInside)

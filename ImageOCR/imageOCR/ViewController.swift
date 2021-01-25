@@ -50,7 +50,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     var shouldBeInPlace = false
     
     
-    var isCoffee = true
+    var isCoffee = false
     var coffees = [CoffeeSt]()
     var coffeeAbstractUI = UICoffeeAbstract()
 
@@ -76,7 +76,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         message.bounds.size.width = wholewidth-100
         message.center.x = wholeView.center.x
-        message.text = "Start scanning a book by press \"start\"!"
+        message.text = "Start scanning a book by press \"scan\"!"
         message.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
         message.delegate = self
 
@@ -124,7 +124,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
         // height 150
         createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
-        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
+//        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
         let antButton = createButton(title: "Ant",negX: 100, negY: 150, action: nil)
         antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
         antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
@@ -134,16 +134,16 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         // height 250
         //createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
-        createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
+//        createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
 
-        createDirectionButton()
+//        createDirectionButton()
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
         
         // height 300
-        createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
+//        createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
 
-        switchToCoffee()
-        switchToCoffee()
+//        switchToCoffee()
+//        switchToCoffee()
 
         DispatchQueue.main.async{
             self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
