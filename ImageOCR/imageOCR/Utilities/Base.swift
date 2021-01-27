@@ -94,14 +94,13 @@ public class CoffeeSt: Element{
     
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
-//        translation.columns.3.y =
-        translation.columns.3.x = Float(size.width)
+        translation.columns.3.y = -Float(size.height)
+        translation.columns.3.x = Float(size.width)-0.01
         translation = trans*translation
-        let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
-        let toppos4 = translation*rootpos
-        let toppos = SIMD3<Float>(x:toppos4.x,y:toppos4.y,z:toppos4.z)
-
-        return toppos
+//        let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+//        let toppos4 = translation*rootpos
+//        let toppos = SIMD3<Float>(x:toppos4.x,y:toppos4.y,z:toppos4.z)
+        return calcuPointPos(trans: translation)
     }
 
     

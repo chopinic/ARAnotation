@@ -235,10 +235,10 @@ extension ViewController: UITextFieldDelegate{
             }
             let id = getIdFromName(name)
             if self.isCoffee{
-                node.move(to: self.coffees[id].oriTrans, relativeTo: rootnode, duration: 0.4)
+                node.move(to: self.coffees[id].oriTrans, relativeTo: node.parent, duration: 0.4)
 // .transform =
             }else{
-                node.move(to: self.books[id].oriTrans, relativeTo: rootnode, duration: 0.4)
+                node.move(to: self.books[id].oriTrans, relativeTo: node.parent, duration: 0.4)
             }
 
         }

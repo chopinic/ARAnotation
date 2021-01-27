@@ -130,8 +130,8 @@ class PicMatrix{
     }
         
     public func addCoffeeAnchor(id:Int,coffee:CoffeeSt)->simd_float4x4{
-        guard let trans = prevTrans
-        else { return matrix_identity_float4x4}
+//        guard let trans = prevTrans
+//        else { return matrix_identity_float4x4}
         let width = Double(coffee.loc.width);
         let height = Double(coffee.loc.height);
         let picW : Double = Double(coffee.loc.left)+width/2;
@@ -150,11 +150,11 @@ class PicMatrix{
             zz+=0.001
         }
         var translation = matrix_identity_float4x4
-        translation.columns.3.z = 0
+        translation.columns.3.z = 0.01
         translation.columns.3.x = x
         translation.columns.3.y = y
-        let transform = trans * translation
-        return transform
+//        let transform = trans * translation
+        return translation
         
     }
     

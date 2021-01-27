@@ -89,9 +89,17 @@ extension ViewController{
     
     func formHeadString(ori: String) -> String {
         var lineori = ori
-        for i in stride(from: 12, to: ori.count, by: 12){
-            if(lineori.count-i<4){break}
-            lineori = lineori.prefix(i) + "\n" + lineori.suffix(lineori.count-i)
+        //英文 换行
+        if(isCoffee){
+            for i in stride(from: 12, to: ori.count, by: 12){
+                if(lineori.count-i<4){break}
+                lineori = lineori.prefix(i) + "\n" + lineori.suffix(lineori.count-i)
+            }
+        }else{//中文换行
+            for i in stride(from: 6, to: ori.count, by: 6){
+                if(lineori.count-i<2){break}
+                lineori = lineori.prefix(i) + "\n" + lineori.suffix(lineori.count-i)
+            }
         }
         return lineori
     }
@@ -158,7 +166,7 @@ extension ViewController{
                         let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
                         textModel.scale = SIMD3<Float>(x: 0.4, y: 0.4, z: 0.4)
                         let textAnchor = AnchorEntity(world: nowTrans*translation)
-                        textAnchor.name = "head@\(i)"
+                        textAnchor.name = "head@"
                         textAnchor.addChild(textModel)
                         self.arView.scene.addAnchor(textAnchor)
                         x+=0.13
@@ -180,9 +188,11 @@ extension ViewController{
             }
         }else{
             if(picMatrix.count<=0){return}
-            var y = Float(0.07)
-            var x = Float(-0.1)
-            let z = Float(-1*picMatrix[0].itemDis)
+            guard let menu = arView.scene.findEntity(named: "menu@")else{return}
+//            nowTrans = menu.transformMatrix(relativeTo: rootnode)
+            var y = Float(0.05)
+            var absx = Float(0)
+            let z = Float(0.01)
             for i in stride(from: 0, to: result.count, by: 1) {
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
@@ -191,13 +201,16 @@ extension ViewController{
                     var translation = matrix_identity_float4x4
                     // set z
                     translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
-                    //set y
+                    // set y
                     translation.columns.3.y = y
-                    //set x
-                    translation.columns.3.x = x
+                    // set x
+                    if(i%2==0){
+                        translation.columns.3.x = absx
+                    }else{
+                        translation.columns.3.x = -1*absx
+                    }
                     y -= 0.01
                     if j==0{
-                        translation.columns.3.y += 0.05
                         translation.columns.3.x -= 0.02
                         let headString = getAttrName(kind: kind)+":\n"+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
                         print(headString)
@@ -206,19 +219,21 @@ extension ViewController{
                         let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)
                         let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
                         let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                        textModel.name = "head@"
+                        textModel.transform = Transform(matrix: translation)
                         textModel.scale = SIMD3<Float>(x: 0.2, y: 0.2, z: 0.2)
-                        let textAnchor = AnchorEntity(world: nowTrans*translation)
-                        textAnchor.name = "head@\(i)"
-                        textAnchor.addChild(textModel)
-                        self.arView.scene.addAnchor(textAnchor)
-                        y-=0.05
+//                        let textAnchor = AnchorEntity(world: nowTrans*translation)
+//                        textAnchor.name = "head@\(i)"
+                        menu.addChild(textModel)
+//                        self.arView.scene.addAnchor(textAnchor)
+                        y-=0.01
                         translation.columns.3.y = y
                         y-=0.01
                     }
-                    nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
+                    nowNode.move(to: translation, relativeTo: nowNode.parent, duration: 0.4)
                 }
-                x+=0.08
-                y = Float(0.07)
+                if(i%2==0){absx+=0.08}
+                y = Float(0.05)
             }
         }
     }

@@ -5,9 +5,13 @@
 //  Created by 杨光 on 2020/11/18.
 //  Copyright © 2020 Ivan Nesterenko. All rights reserved.
 //
-
-import UIKit
+import Foundation
 import ARKit
+import RealityKit
+import CoreML
+import UIKit
+import VideoToolbox
+
 extension ViewController{
     
     @objc func switchToCoffee(){
@@ -155,27 +159,45 @@ extension ViewController{
         }
     }
     
-//    @objc func buttonTapCreateBigPlane(){
-//        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
-//            backnode.name = "trans@0"
-//            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0)
-//        }
-//        else if larViewde = sceneView.scene.rootNode.childNode(withName: "trans@0", recursively: false){
-//            backnode.name = "trans@1"
-//            backnode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8)
-//        }
-//        else{
-//            let nowTrans = sceneView.session.currentFrame!.camera.transform
-//            let size = CGSize(width: PicMatrix.getActualLen(oriLen:Double(43200),isW: true), height: PicMatrix.getActualLen(oriLen:Double(57600),isW: false))
-//            let transTip = createPlaneNode(size: size, rotation: 0, contents: UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 0.8))
-//            transTip.name = "trans@1"
-//            var translation = matrix_identity_float4x4
-//            translation.columns.3.z = Float(-10*PicMatrix.itemDis-0.01)
-//            transTip.transform = SCNMatrix4(nowTrans*translation)
-//            transTip.constraints = [SCNBillboardConstraint()]
-//            sceneView.scene.rootNode.addChildNode(transTip)
-//        }
-//    }
+    @objc func buttonTapCreateBigPlane(){
+        if let backnode = arView.scene.findEntity(named: "trans@1"){
+            backnode.name = "trans@0"
+            let size = CGSize(width: 5, height: 5)
+            var material = UnlitMaterial()
+            material.tintColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0)
+            backnode.removeChild(backnode.findEntity(named: "plane")!)
+            let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+            plane.name = "plane"
+            backnode.addChild(plane)
+        }
+        else if let backnode = arView.scene.findEntity(named: "trans@0"){
+            backnode.name = "trans@1"
+            let size = CGSize(width: 5, height: 5)
+            var material = UnlitMaterial()
+            material.tintColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.7)
+            backnode.removeChild(backnode.findEntity(named: "plane")!)
+            let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+            plane.name = "plane"
+            backnode.addChild(plane)
+        }
+        else{
+            let nowTrans = arView.session.currentFrame!.camera.transform
+            let size = CGSize(width: 5, height: 5)
+            var material = UnlitMaterial()
+            
+            material.tintColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.7)
+            let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+            plane.name = "plane"
+            let transTip = AnchorEntity()
+            transTip.name = "trans@1"
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-2)
+            transTip.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+            transTip.addChild(plane)
+            arView.scene.addAnchor(transTip)
+//            transTip.look(at: <#T##SIMD3<Float>#>, from: <#T##SIMD3<Float>#>, relativeTo: <#T##Entity?#>)
+        }
+    }
     
 }
 

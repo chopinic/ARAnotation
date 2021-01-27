@@ -77,7 +77,7 @@ public struct Internet {
     static func uploadImage(cot:Int, url: URL, capturedImage: CVPixelBuffer, controller: ViewController?){
         var cI = CIImage()
 
-        print(controller?.nowOrientation)
+//        print(controller?.nowOrientation)
         if(controller?.isCoffee == true){
             if controller?.nowOrientation == UIInterfaceOrientation.portrait.rawValue{
                 cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
@@ -90,7 +90,6 @@ public struct Internet {
         let tempUiImage = UIImage(ciImage: cI)
 
         if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
-            print("uploadImage function is on \(Thread.current)" )
             let imageData = data.base64EncodedString()
             var request = URLRequest(url: url)
             imgData = imageData

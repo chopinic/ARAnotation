@@ -35,8 +35,8 @@ class ViewController: UIViewController, ARSessionDelegate {
     var imageH = CGFloat()
     var imageW = CGFloat()
     var timer: Timer?
-    var trackedImgW = 0.4
-    var trackedImgH = 0.3
+//    var trackedImgW = 0.4
+//    var trackedImgH = 0.3
     //var ratio = [Float]()
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
@@ -113,11 +113,11 @@ class ViewController: UIViewController, ARSessionDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
-        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
-            if #available(iOS 13.4, *) {
-                configuration.sceneReconstruction = .meshWithClassification
-            }
-        }
+//        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
+//            if #available(iOS 13.4, *) {
+//                configuration.sceneReconstruction = .meshWithClassification
+//            }
+//        }
         arView.session.run(configuration)
         // height 100
         createButton( title: "scan",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
@@ -133,8 +133,8 @@ class ViewController: UIViewController, ARSessionDelegate {
 
         
         // height 250
-        //createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
-//        createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
+        createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
+        createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
 
 //        createDirectionButton()
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
@@ -241,8 +241,9 @@ class ViewController: UIViewController, ARSessionDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.resetAndAddAnchor()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.resetPicTracking()
+//            self.resetAndAddAnchor()
         }
     }
 
@@ -292,20 +293,21 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
 
     public func removeHeadAnchor(){
-        let childNodes = arView.scene.anchors
-
+//        let childNodes = arView.scene.anchors
         while(true){
-            var hasHead = false
-            for node in childNodes {
-                let name = node.name
-                print(name)
-                if name.hasPrefix("head@") {
-                    arView.scene.removeAnchor(node)
-                    hasHead = true
-                    break;
-                }
-            }
-            if(hasHead==false){break}
+//            var hasHead = false
+            guard let headNode = arView.scene.findEntity(named: "head@")else{break}
+            headNode.removeFromParent()
+//            for node in childNodes {
+//                let name = node.name
+//                print(name)
+//                if name.hasPrefix("head@") {
+//                    arView.scene.removeAnchor(node)
+//                    hasHead = true
+//                    break;
+//                }
+//            }
+//            if(hasHead==false){break}
         }
     }
     
@@ -317,30 +319,33 @@ class ViewController: UIViewController, ARSessionDelegate {
             print("no original menu file")
             return
         }
-        trackedImgW = Double(oriMenu.size.width * oriMenu.scale)
-        trackedImgH = Double(oriMenu.size.height * oriMenu.scale)
+        PicMatrix.imageW = Double(oriMenu.size.width * oriMenu.scale)
+        PicMatrix.imageH = Double(oriMenu.size.height * oriMenu.scale)
+//        trackedImgW = Double(oriMenu.size.width * oriMenu.scale)
+//        trackedImgH = Double(oriMenu.size.height * oriMenu.scale)
 //        guard let oriMenu = UIImage(contentsOfFile: getDocumentsDirectory().appendingPathComponent("MenuOri@.png").absoluteString) else{
 //            print("no original menu file")
 //            return
 //        }
+        let physicalWidth = picMatrix[0].getActualLen(oriLen: PicMatrix.imageW, isW: true)
         let oriMenuCIImage = CIImage(image: oriMenu)!
         let oriMenuCgImage = convertCIImageToCGImage(inputImage: oriMenuCIImage)!
-        let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: 0.2)
-        arImage.name = "CGImage Test"
+        let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(physicalWidth))
+        arImage.name = "Coffee Menu"
 
         let configuration = ARWorldTrackingConfiguration()
-        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
-            if #available(iOS 13.4, *) {
-                configuration.sceneReconstruction = .meshWithClassification
-            }
-        }
+//        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
+//            if #available(iOS 13.4, *) {
+//                configuration.sceneReconstruction = .meshWithClassification
+//            }
+//        }
         configuration.detectionImages = [arImage]
         arView.session.run(configuration)
 
     }
     
     public func resetAndAddAnchor(isReset: Bool = false){
-        resetPicTracking()
+//        resetPicTracking()
         if isReset{
             for i in stride(from: 0, to: books.count ,by: 1){
                 books[i].isDisplay = false
@@ -354,9 +359,9 @@ class ViewController: UIViewController, ARSessionDelegate {
             for node in childNodes {
                 let name = node.name
                 if name.hasPrefix("book@") {
-                    arView.scene.removeAnchor(node)
+                    arView.scene.removeAnchor(node as! HasAnchoring)
                 }else if name.hasPrefix("coffee@"){
-                    arView.scene.removeAnchor(node)
+                    node.removeFromParent()
                 }else{
                     continue;
                 }
@@ -390,6 +395,10 @@ class ViewController: UIViewController, ARSessionDelegate {
         }
         
         for i in stride(from: 0, to: coffees.count ,by: 1){
+            guard let menu = arView.scene.findEntity(named: "menu@") else{
+                return
+            }
+
             if coffees[i].isDisplay{
                 continue;
             }
@@ -401,12 +410,12 @@ class ViewController: UIViewController, ARSessionDelegate {
             let rootLoc = currentCoffee.loc
             let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
             coffees[i].size = size
-//            print("coffeeid: \(i) \(currentCoffee.name)")
-            let coffee = AnchorEntity(world: trans)
+            let coffee = createPlane(id: i, size: size, isCoffee: isCoffee)
+            coffee.transform = Transform(matrix: trans)
             coffee.name = "coffee@\(i)"
-            coffee.addChild(createPlane(id: i, size: size, isCoffee: isCoffee))
             coffee.generateCollisionShapes(recursive: true)
-            arView.scene.addAnchor(coffee)
+            menu.addChild(coffee)
+
         }
     }
     
@@ -417,23 +426,25 @@ class ViewController: UIViewController, ARSessionDelegate {
         guard let imageAnchor = anchors.first as? ARImageAnchor else{
             return
         }
-        print("find img: \(imageAnchor.name)")
-
         let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png"))
 //        let rotationTrans =  imageAnchor.transform * Transform.init( rotation: simd_quaternion(0, .pi, 0, 1),translation: SIMD3(0,0,0.2)).matrix
-        let nowW = Float(picMatrix.last!.getActualLen(oriLen: trackedImgW, isW: true))
-        let nowH = Float(picMatrix.last!.getActualLen(oriLen: trackedImgH, isW: false))
-
+        let nowW = Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageW, isW: true))
+        let nowH = Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageH, isW: false))
+        print("menu width: \(nowW), height:\(nowH)")
         let rotationTrans = imageAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
-        let anchor = AnchorEntity(world:getForwardTrans(ori: rotationTrans, dis: -1*nowH/2)
-)
+        let trans = getForwardTrans(ori: rotationTrans, dis: 0.1) //开始时是悬浮在上方10cm， update时向下移动到原位
+//        let trans = getForwardTrans(ori: rotationTrans, dis: 0)
+        let anchor = AnchorEntity(world:trans)
+        picMatrix[0].prevTrans = trans
+//        anchor.scale = SIMD3<Float>(x: 1.5, y: 1.5, z: 1.5)
         var material = UnlitMaterial()
         material.baseColor = MaterialColorParameter.texture(resource!)
         material.tintColor = UIColor.white.withAlphaComponent(0.99)
-        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: nowW, height: nowH), materials: [material])
+        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(nowW), height: Float(nowH)), materials: [material])
         anchor.addChild(imagePlane)
         anchor.name = "menu@"
         arView.scene.anchors.append(anchor)
+        resetAndAddAnchor()
     }
     
     
@@ -442,12 +453,11 @@ class ViewController: UIViewController, ARSessionDelegate {
         for anchor in anchors{
             if let imgAnchor = anchor as? ARImageAnchor{
                 if let childNode = arView.scene.findEntity(named: "menu@"){
-                    let nowH = Float(picMatrix.last!.getActualLen(oriLen: trackedImgH, isW: false))+0.05
+//                    let nowH = Float(picMatrix.last!.getActualLen(oriLen: trackedImgH, isW: false))+0.005
 
-                    var rotationTrans = imgAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
-                    rotationTrans = getForwardTrans(ori: rotationTrans, dis: -1*nowH/2)
-
-                childNode.move(to: rotationTrans, relativeTo: rootnode, duration: 0.4)
+                    let rotationTrans = imgAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
+//                    rotationTrans = getForwardTrans(ori: rotationTrans, dis: -1*nowH/2)
+                    childNode.move(to: rotationTrans, relativeTo: rootnode, duration: 0.4)
                 }
             }
         }
@@ -477,7 +487,7 @@ class ViewController: UIViewController, ARSessionDelegate {
             if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
                 var pos2d = CGPoint()
                 pos2d.x = pos.x//+CGFloat(coffeeAbstractUI.imageW/2)
-                pos2d.y = pos.y-500//-CGFloat(coffeeAbstractUI.imageW/2)
+                pos2d.y = pos.y-125//-CGFloat(coffeeAbstractUI.imageW/2)
                 coffeeAbstractUI.updatePosition(position: pos2d)
             }
         }
@@ -502,8 +512,7 @@ class ViewController: UIViewController, ARSessionDelegate {
 
                 if dis<800{
                     let ratio = Float(min(2.3,(dis+28.0)/dis))
-//                    node.transform
-                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode) //scale =
+                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
 //                    node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:ratio[elementId]/20), relativeTo: rootnode)
                     mindis = min(mindis,dis)
                     
@@ -522,122 +531,19 @@ class ViewController: UIViewController, ARSessionDelegate {
             }
             let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
             if minid != -1 && minid != prevId{
-//                var node = Optional<AnchorEntity>(AnchorEntity())
-//                var prevNode = Optional<AnchorEntity>(AnchorEntity())
-//
-//                if isCoffee{
-//                    node = arView.scene.findEntity(named: "coffee@\(minid)") as? AnchorEntity
-//                    prevNode = arView.scene.findEntity(named: "coffee@\(prevId)") as? AnchorEntity
-//                }else{
-//                    node = arView.scene.findEntity(named: "book@\(minid)") as? AnchorEntity
-//                    prevNode = arView.scene.findEntity(named: "book@\(prevId)") as? AnchorEntity
-//                }
-//                var transForm = matrix_identity_float4x4
-//                transForm.columns.3.z = -0.02
-//                node?.move(to: (node?.transform.matrix)!*transForm, relativeTo: node, duration: 0.01)
-//                transForm.columns.3.z = 0.02
-//                prevNode?.move(to: (prevNode?.transform.matrix)!*transForm, relativeTo: prevNode, duration: 0.01)
                 showAbstract(id: minid)
             }
+        }
+        if let backnode = arView.scene.findEntity(named: "trans@1"){
+            let nowTrans = arView.session.currentFrame!.camera.transform
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-2)
+            backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
         }
 
     }
 
 
-    
-//    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-//
-//        if let backnode = sceneView.scene.rootNode.childNode(withName: "trans@1", recursively: false){
-//            let trans = arView.session.currentFrame!.camera.transform
-//            var translation = matrix_identity_float4x4
-//            translation.columns.3.z = Float(-5)
-//            backnode.transform = SCNMatrix4(trans*translation)
-//
-//        }
-//
-//        if(bookAbstractUI.getIsHidden() == false){
-//            guard let childNode = sceneView.scene.rootNode.childNode(withName: "book@\(bookAbstractUI.id)", recursively: false) else{
-//                print("renderer: no such book \(bookAbstractUI.id)")
-//                return
-//            }
-//            let bookTopPos = childNode.position+books[bookAbstractUI.id].uiPosVec!
-//            let pos = sceneView.projectPoint(bookTopPos)
-//            var pos2d = CGPoint()
-//            pos2d.x = CGFloat(pos.x-Float(textWidth/2))
-//            pos2d.y = CGFloat(pos.y-Float(textHeight))
-//            DispatchQueue.main.async{
-//                self.bookAbstractUI.updatePosition(position: pos2d)
-//            }
-//        }
-//
-//        if(coffeeAbstractUI.getIsHidden() == false){
-//            guard let childNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(coffeeAbstractUI.id)", recursively: false) else{
-//                print("renderer: no such coffee \(coffeeAbstractUI.id)")
-//                return
-//            }
-//            let topPos = childNode.position+coffees[coffeeAbstractUI.id].uiPosVec!
-//            let pos = sceneView.projectPoint(topPos)
-//            var pos2d = CGPoint()
-//            pos2d.x = CGFloat(pos.x)
-//            pos2d.y = CGFloat(pos.y-Float(coffeeAbstractUI.imageW/2))
-//            coffeeAbstractUI.updatePosition(position: pos2d)
-//        }
-//
-//        if(isAntUpdate){
-//            isAntUpdateCot = (isAntUpdateCot+1)%5
-//            var mindis = 1000.0
-//            var minid = -1
-//            for node in sceneView.scene.rootNode.childNodes {
-//                guard let name = node.name else {
-//                    continue
-//                }
-////                print(name)
-//                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
-//                    return
-//                }
-//                let elementId = getIdFromName(name)
-////                print(elementId)
-//                let pos = sceneView.projectPoint(node.position)
-//                let point = CGPoint(x:CGFloat(pos.x),y:CGFloat(pos.y))
-//                let dis = calculateScreenDistance(viewCenterPoint,point)
-//                if dis<800{
-//                    let ratio = CGFloat(min(2.5,(dis+25.0)/dis))
-//                    let scale = SCNAction.scale(to: ratio, duration: 0)
-//                    node.runAction(scale)
-//                    mindis = min(mindis,dis)
-//                    if mindis == dis{
-//                        if isAntUpdateCot==0
-//                        {minid = elementId}
-//                    }
-//                }
-//                else if shouldBeInPlace{
-//                    if isCoffee{
-//                        node.transform = coffees[elementId].oriTrans
-//                    }else{
-//                        node.transform = books[elementId].oriTrans
-//                    }
-//                }
-//            }
-//            let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
-//            if minid != -1 && minid != prevId{
-//                var node = Optional<SCNNode>(SCNNode())
-//                var prevNode = Optional<SCNNode>(SCNNode())
-//
-//                if isCoffee{
-//                    node = sceneView.scene.rootNode.childNode(withName: "coffee@\(minid)", recursively: false)
-//                    prevNode = sceneView.scene.rootNode.childNode(withName: "coffee@\(prevId)", recursively: false)
-//                }else{
-//                    node = sceneView.scene.rootNode.childNode(withName: "book@\(minid)", recursively: false)
-//                    prevNode = sceneView.scene.rootNode.childNode(withName: "book@\(prevId)", recursively: false)
-//                }
-//
-//                node?.runAction(SCNAction.moveBy(x: 0, y: 0, z: 0.015, duration: 0))
-//                prevNode?.runAction(SCNAction.moveBy(x: 0, y: 0, z: -0.015, duration: 0))
-//                showAbstract(id: minid)
-//            }
-//        }
-//
-//    }
     
     override func didReceiveMemoryWarning(){
         super.didReceiveMemoryWarning()

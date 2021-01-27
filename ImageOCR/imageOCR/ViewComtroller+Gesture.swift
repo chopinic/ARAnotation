@@ -43,16 +43,16 @@ extension ViewController{
 
     }
     
-    func findById(id: Int)->AnchorEntity?{
+    func findById(id: Int)->Entity?{
         if(isCoffee){
-            return arView.scene.findEntity(named: "coffee@\(id)") as? AnchorEntity
+            return arView.scene.findEntity(named: "coffee@\(id)")
         }else{
-            return arView.scene.findEntity(named: "book@\(id)")as? AnchorEntity
+            return arView.scene.findEntity(named: "book@\(id)")
         }
     }
     
-    func getEntityList()->[AnchorEntity]{
-        var list = [AnchorEntity]()
+    func getEntityList()->[Entity]{
+        var list = [Entity]()
         if(isCoffee){
             for i in stride(from: 0, to: coffees.count, by: 1){
                 list.append(findById(id: i)!)
