@@ -143,9 +143,9 @@ class PicMatrix{
         y += PicMatrix.yOffset //+:ri
         var zz = z
         if(id%4==0){
-            zz+=0.005
+            zz+=0.0015
         }else if(id%4==1){
-            zz+=0.003
+            zz+=0.002
         }else if(id%4==2){
             zz+=0.001
         }
@@ -173,9 +173,9 @@ class PicMatrix{
         
         var zz = 0.0
         if(id%3==0){
-            zz+=0.005
+            zz+=0.0005
         }else if(id%3==1){
-            zz+=0.003
+            zz-=0.0005
         }
         var translation = matrix_identity_float4x4
         translation.columns.3.z = Float(zz)

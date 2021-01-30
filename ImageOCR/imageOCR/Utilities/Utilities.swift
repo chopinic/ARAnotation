@@ -12,6 +12,8 @@ import CoreML
 import UIKit
 import VideoToolbox
 
+
+
 public func convertCIImageToCGImage(inputImage: CIImage) -> CGImage? {
     let context = CIContext(options: nil)
     if let cgImage = context.createCGImage(inputImage, from: inputImage.extent) {
@@ -132,7 +134,7 @@ extension CVPixelBuffer {
     /// Returns a Core Graphics image from the pixel buffer's current contents.
     func toCGImage() -> CGImage? {
         var cgImage: CGImage?
-        VTCreateCGImageFromCVPixelBuffer(self, nil, &cgImage)
+        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
         
         if cgImage == nil { print("Error: Converting CVPixelBuffer to CGImage failed.") }
         return cgImage

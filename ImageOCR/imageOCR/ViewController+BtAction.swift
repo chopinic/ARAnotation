@@ -41,20 +41,22 @@ extension ViewController{
     }
     
     @objc func buttonTapDebug(){
-        resetPicTracking()
-//        resetAndAddAnchor()
-//        let nowBookDeal = PicMatrix()
-//        nowBookDeal.saveCurrentTrans(view: sceneView)
-//        picMatrix.append(nowBookDeal)
-//
-//        if isCoffee{
-//            setResult(cot: picMatrix.count, receive: DebugString.jsonStringCoffee ,isDebug: true);
-//        }else{
-//            setResult(cot: picMatrix.count, receive: DebugString.jsonString ,isDebug: true);
-//        }
+        if let anchor = arView.scene.findEntity(named: "cannon"){
+            let cannonAnim = anchor.children[0] as! Experience.Box
+            cannonAnim.notifications.scaleTrigger.post()
+            return
+        }
+        let cannonAnim = try! Experience.loadBox()
+        print("loading anim")
+        let anchor = AnchorEntity(world: arView.session.currentFrame!.camera.transform)
+        anchor.addChild(cannonAnim)
+        anchor.name = "cannon"
+
+//        cannonAnim.generateCollisionShapes(recursive: true)
+        arView.scene.anchors.append(anchor)
+
     }
 
-        
     @objc func buttonTapaddx(){
         PicMatrix.addxOffSet()
         resetAndAddAnchor(isReset: true)
@@ -96,7 +98,6 @@ extension ViewController{
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
             var url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
-            
             if isCoffee{
                 print("Start uploading coffee!")
                 url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
@@ -106,48 +107,11 @@ extension ViewController{
             utiQueue.async {
                 Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
             }
-            /*
-            let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.up)
-            let tempUiImage = UIImage(ciImage: cI)
-
-            if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
-                let _:NSURL = NSURL(string : "urlHere")!
-                let imageData = data.base64EncodedString()
-//                print(imageData)
-                print("Start uploading!")
-                setMessage("Waiting for \(picMatrix.count-receiveAnsCot) scan results")
-                let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
-                Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
-            }
- */
+           
         }
     }
     
-    
-//    @objc func buttonTapUploadCoffee(){
-//        if let capturedImage = sceneView.session.currentFrame?.capturedImage{
-//            let nowMatrix = PicMatrix()
-//            nowMatrix.saveCurrentTrans(view: sceneView)
-//            picMatrix.append(nowMatrix)
-//            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
-//            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-//            let cI = CIImage(cvPixelBuffer: capturedImage).oriented(.right)
-//            let tempUiImage = UIImage(ciImage: cI)
-//
-//            if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
-//                let imageData = data.base64EncodedString()
-//                print(imageData)
-//                print("Start uploading coffee!")
-//                let url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
-//                Internet.uploadImage(cot: picMatrix.count, url: url, imageData: imageData.data(using: .utf8)!,controller:self);
-//            }
-// 
-//        }
-//        
-//    }
-    
     @objc func buttonShowCoffeeAbs(){
-
         if coffeeAbstractUI.getIsHidden(){
             coffeeAbstractUI.id = 0
             coffeeAbstractUI.setImage(elementPics[coffees[0].desPicid])
@@ -195,7 +159,6 @@ extension ViewController{
             transTip.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
             transTip.addChild(plane)
             arView.scene.addAnchor(transTip)
-//            transTip.look(at: <#T##SIMD3<Float>#>, from: <#T##SIMD3<Float>#>, relativeTo: <#T##Entity?#>)
         }
     }
     

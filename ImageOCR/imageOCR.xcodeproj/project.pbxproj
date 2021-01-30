@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		091F13B92541DCB400FA31B3 /* ImageProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091F13B82541DCB400FA31B3 /* ImageProcess.swift */; };
 		091F13BC2541DE6400FA31B3 /* BookAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091F13BB2541DE6400FA31B3 /* BookAnchor.swift */; };
+		091F385925C4A6D3003F0041 /* Experience.rcproject in Sources */ = {isa = PBXBuildFile; fileRef = 091F385825C4A6D3003F0041 /* Experience.rcproject */; };
 		093B158B25805C3B0079B707 /* CoffeeAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093B158A25805C3B0079B707 /* CoffeeAnchor.swift */; };
 		093B158E2580735E0079B707 /* UICoffeeAbstract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093B158D2580735E0079B707 /* UICoffeeAbstract.swift */; };
 		0942A394255652B800ECC38C /* json.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0942A393255652B800ECC38C /* json.txt */; };
@@ -43,6 +44,7 @@
 /* Begin PBXFileReference section */
 		091F13B82541DCB400FA31B3 /* ImageProcess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcess.swift; sourceTree = "<group>"; };
 		091F13BB2541DE6400FA31B3 /* BookAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAnchor.swift; sourceTree = "<group>"; };
+		091F385825C4A6D3003F0041 /* Experience.rcproject */ = {isa = PBXFileReference; lastKnownFileType = file.rcproject; path = Experience.rcproject; sourceTree = "<group>"; };
 		093B158A25805C3B0079B707 /* CoffeeAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoffeeAnchor.swift; sourceTree = "<group>"; };
 		093B158D2580735E0079B707 /* UICoffeeAbstract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICoffeeAbstract.swift; sourceTree = "<group>"; };
 		0942A393255652B800ECC38C /* json.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = json.txt; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 		09B4D3D32582FAF400AC2A57 /* imgs */ = {
 			isa = PBXGroup;
 			children = (
+				091F385825C4A6D3003F0041 /* Experience.rcproject */,
 				09B4D3CF2582FAEE00AC2A57 /* coffee1.jpg */,
 				09B4D3CE2582FAEE00AC2A57 /* component.jpg */,
 				09A33C89252091CB001F97A4 /* test.png */,
@@ -206,6 +209,7 @@
 				TargetAttributes = {
 					E49C2DFA20BC53F700D6C6F3 = {
 						CreatedOnToolsVersion = 9.3.1;
+						LastSwiftMigration = 1230;
 					};
 				};
 			};
@@ -255,6 +259,7 @@
 				094C0D67253DC318006B381D /* Internet.swift in Sources */,
 				09DC14FC257B86AC006F195D /* Viewcontroller+Regrouping.swift in Sources */,
 				0976B0212564D03B00315782 /* ViewController+BtAction.swift in Sources */,
+				091F385925C4A6D3003F0041 /* Experience.rcproject in Sources */,
 				0976B01E2564CE3000315782 /* ViewController+Button.swift in Sources */,
 				0942A3A12556581D00ECC38C /* AddButton.swift in Sources */,
 				09FFD2F1254BE8FF003E55B1 /* Base.swift in Sources */,
@@ -430,7 +435,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ImageOcr.chopinic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -451,7 +456,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ImageOcr.chopinic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

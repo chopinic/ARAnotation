@@ -89,7 +89,7 @@ public struct Internet {
         else{ cI = CIImage(cvPixelBuffer: capturedImage).oriented(.left )}
         let tempUiImage = UIImage(ciImage: cI)
 
-        if let data = UIImageJPEGRepresentation(tempUiImage, 0.3 ){
+        if let data = tempUiImage.jpegData(compressionQuality: 0.3 ){
             let imageData = data.base64EncodedString()
             var request = URLRequest(url: url)
             imgData = imageData

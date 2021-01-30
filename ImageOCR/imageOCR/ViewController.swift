@@ -26,7 +26,6 @@ class ViewController: UIViewController, ARSessionDelegate {
     @IBOutlet var message: UITextField!
     var nowSelection: Int = 0
     var bookAttr = [String]()
-//    private var animationInfo: AnimationInfo?
     private var result: NSDictionary!
     var picMatrix = [PicMatrix]()
     var books = [BookSt]()
@@ -35,9 +34,6 @@ class ViewController: UIViewController, ARSessionDelegate {
     var imageH = CGFloat()
     var imageW = CGFloat()
     var timer: Timer?
-//    var trackedImgW = 0.4
-//    var trackedImgH = 0.3
-    //var ratio = [Float]()
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
     var nowEnhanceNodes = [SCNNode]()
@@ -100,14 +96,17 @@ class ViewController: UIViewController, ARSessionDelegate {
         arView.center = wholeView.center
         
         viewCenterPoint = arView.center
-//        let scene = SCNScene()
-//        sceneView.scene = scene
         arView.session.delegate = self
         arView.environment.sceneUnderstanding.options = []
         arView.debugOptions.insert(.showSceneUnderstanding)
         arView.renderOptions = [.disablePersonOcclusion, .disableDepthOfField, .disableMotionBlur]
         arViewGestureSetup()
-        wholeView.sendSubview(toBack: arView)
+        wholeView.sendSubviewToBack(arView)
+        let boxAnchor = try! Experience.loadBox()
+        
+        // Add the box anchor to the scene
+        arView.scene.anchors.append(boxAnchor)
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -124,7 +123,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
         // height 150
         createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
-//        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
+        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
         let antButton = createButton(title: "Ant",negX: 100, negY: 150, action: nil)
         antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
         antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
@@ -148,7 +147,6 @@ class ViewController: UIViewController, ARSessionDelegate {
         DispatchQueue.main.async{
             self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
         }
-//        createDirectionButton()
         let rootNode = AnchorEntity(world: matrix_identity_float4x4)
         rootNode.name = "rootnode@"
         arView.scene.addAnchor(rootNode)
@@ -167,7 +165,6 @@ class ViewController: UIViewController, ARSessionDelegate {
             loc.height = locDic["width"] as! Int
             loc.width = locDic["height"] as! Int
             loc.left = Int(PicMatrix.imageW) - (locDic["top"] as! Int) - loc.width
-//            loc.left = Int(PicMatrix.imageW) - (locDic["left"] as! Int)
             loc.top = (locDic["left"] as! Int)
         }
         return loc;
@@ -241,7 +238,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.resetPicTracking()
 //            self.resetAndAddAnchor()
         }
@@ -269,7 +266,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
                     if let pic = UIImage(data: dataDecoded){
                         let temppic = pic.rotate(radians: .pi/2)
-                        let data = UIImagePNGRepresentation(temppic)
+                        let data = temppic.pngData()
                         let filename = getDocumentsDirectory().appendingPathComponent("book@\(books.count).png")
                         try! data!.write(to: filename)
                     }
@@ -453,10 +450,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         for anchor in anchors{
             if let imgAnchor = anchor as? ARImageAnchor{
                 if let childNode = arView.scene.findEntity(named: "menu@"){
-//                    let nowH = Float(picMatrix.last!.getActualLen(oriLen: trackedImgH, isW: false))+0.005
-
                     let rotationTrans = imgAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
-//                    rotationTrans = getForwardTrans(ori: rotationTrans, dis: -1*nowH/2)
                     childNode.move(to: rotationTrans, relativeTo: rootnode, duration: 0.4)
                 }
             }
@@ -505,17 +499,13 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let elementId = getIdFromName(name)
                 guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
                 let point = CGPoint(x:pos.x,y:pos.y)
-//                let centerP = CGPoint(x: 590, y: 400)
                 let dis = calculateScreenDistance(arView.center,point)
                 if(elementId == 0){
                     print("dis: \(dis)")}
-
                 if dis<800{
                     let ratio = Float(min(2.3,(dis+28.0)/dis))
                     node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
-//                    node.setTransformMatrix(getForwardTrans(ori:node.transformMatrix(relativeTo: rootnode),dis:ratio[elementId]/20), relativeTo: rootnode)
                     mindis = min(mindis,dis)
-                    
                     if mindis == dis{
                         if isAntUpdateCot==0
                         {minid = elementId}
@@ -539,11 +529,12 @@ class ViewController: UIViewController, ARSessionDelegate {
             var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(-2)
             backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+            if let anno = arView.scene.findEntity(named: "cannon"){
+                anno.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+                print("find cannon")
+            }
         }
-
     }
-
-
     
     override func didReceiveMemoryWarning(){
         super.didReceiveMemoryWarning()
