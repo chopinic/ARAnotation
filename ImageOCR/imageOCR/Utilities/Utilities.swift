@@ -165,34 +165,54 @@ func getDocumentsDirectory() -> URL {
 //    
 //    return createPlaneNode(size: size, geometry)
 //}
-func createPlane(id:Int,size: CGSize, isCoffee: Bool)->ModelEntity{
-    if(isCoffee){
-        let resource = try! TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("coffee@\(id).png"))
-//        let coffeeDes = try? TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("coffeedes@\(id).png"))
-        var material = UnlitMaterial()
-        material.baseColor = MaterialColorParameter.texture(resource)
-        material.tintColor = UIColor.white.withAlphaComponent(0.99)
 
-        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+func createCoffeeFont(id: Int,coffeeName: String, size:CGSize)->ModelEntity{
+    let lineHeight: CGFloat = 0.05
+    let font = MeshResource.Font.systemFont(ofSize: lineHeight)
+    let textMesh = MeshResource.generateText(coffeeName, extrusionDepth: Float(lineHeight * 0.1), font: font)
+    let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
+    let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
+    textModel.name = "coffee@\(id)"
+    let bound = textMesh.bounds
+    let radius = Float(size.width)/(bound.boundingRadius*2)
+    textModel.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
+    
+    return textModel
+}
 
-        imagePlane.position.y = 0.1
-        imagePlane.name = "coffee@\(id)"
-        return imagePlane
 
-        
-    }else{
-        let resource = try! TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("book@\(id).png"))
-        var material = UnlitMaterial()
-        material.baseColor = MaterialColorParameter.texture(resource)
-        material.tintColor = UIColor.white.withAlphaComponent(0.99)
+func createPlane(id:Int,size: CGSize, isCoffee: Bool)->ModelEntity?{
+    do{
+        if(isCoffee){
+            let resource = try TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("coffee@\(id).png"))
+    //        let coffeeDes = try? TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("coffeedes@\(id).png"))
+            var material = UnlitMaterial()
+            material.baseColor = MaterialColorParameter.texture(resource)
+            material.tintColor = UIColor.white.withAlphaComponent(0.99)
 
-        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
-        
-//        imagePlane.position.y = 0.1
-        imagePlane.name = "book@\(id)"
-//        imagePlane.scale = SIMD3<Float>(2)
-        return imagePlane
+            let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+            imagePlane.name = "coffee@\(id)"
+            return imagePlane
+
+            
+        }else{
+            
+            guard let resource = try? TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("book@\(id).png"))else {return nil}
+            var material = UnlitMaterial()
+            material.baseColor = MaterialColorParameter.texture(resource)
+            material.tintColor = UIColor.white.withAlphaComponent(0.99)
+
+            let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+            
+    //        imagePlane.position.y = 0.1
+            imagePlane.name = "book@\(id)"
+    //        imagePlane.scale = SIMD3<Float>(2)
+            return imagePlane
+        }
     }
+    catch  {
+       return nil
+   }
 }
 
 

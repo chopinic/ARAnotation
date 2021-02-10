@@ -168,6 +168,13 @@ extension ViewController: UITextFieldDelegate{
         let x =  0
         let nowTrans = arView.session.currentFrame!.camera.transform
         elementWeights.sort(by: {$0.weight > $1.weight})
+        var translation = matrix_identity_float4x4
+        if(isCoffee==false){
+            translation.columns.3.z = Float(z)
+            translation.columns.3.y = -1.8
+            translation.columns.3.x = 0
+            loadBookShelf(nowTrans*translation)
+        }
         for i in stride(from: 0, to: elementWeights.count ,by: 1){
             let elementWeight = elementWeights[i]
             var nowNode : Entity
@@ -176,7 +183,6 @@ extension ViewController: UITextFieldDelegate{
             }else{
                 nowNode = arView.scene.findEntity(named: "book@\(elementWeight.id)")!
             }
-            var translation = matrix_identity_float4x4
             translation.columns.3.z = Float(z)-(0.0001*Float(i%5))
 
             translation.columns.3.y = Float(x)
@@ -185,17 +191,9 @@ extension ViewController: UITextFieldDelegate{
             }
             else{
                 translation.columns.3.x = Float(-1*absy)
-                absy += 0.03
+                absy += 0.055
             }
-//            let sortNode = SCNNode()
-//            sortNode.transform = SCNMatrix4(nowTrans*translation)
-//            let nowPosVec = sortNode.position
             nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
-//            let trans = SCNAction.move(to: nowPosVec, duration: 0.4)
-//            SCNAction.customAction(duration: 0.4) { (node, elapsedTime) in
-//                nowNode.transform = SCNMatrix4(nowTrans*translation)
-//            }
-//            nowNode.runAction(trans)
         }
     }
     
@@ -226,7 +224,7 @@ extension ViewController: UITextFieldDelegate{
         scaleNodes(ids: [])
         hideAbstract()
         removeHeadAnchor()
-
+        removeBookShelf()
         let childNodes = getEntityList()
         for node in childNodes {
             let name = node.name
@@ -246,4 +244,33 @@ extension ViewController: UITextFieldDelegate{
 
     }
 
+    func checkBookShelf()->Bool{
+        if let _ = arView.scene.findEntity(named: "bookShelf"){
+            return true
+        }
+        return false
+    }
+    func loadBookShelf(_ trans:simd_float4x4){
+        removeBookShelf()
+        let bookShelf = try! Entity.loadModel(named: "bookShelf")
+        let bookShelf1 = try! Entity.loadModel(named: "bookShelf")
+        bookShelf1.position = SIMD3<Float>(x: -1.22, y: 0, z: 0)
+        let bookShelf2 = try! Entity.loadModel(named: "bookShelf")
+        bookShelf2.position = SIMD3<Float>(x: 1.22, y: 0, z: 0)
+
+        print("loading entity")
+        let anchor = AnchorEntity(world: trans )
+        anchor.addChild(bookShelf)
+        anchor.addChild(bookShelf1)
+        anchor.addChild(bookShelf2)
+//        bookShelf.scale = SIMD3<Float>(x: 0.1, y: 0.1, z: 0.1)
+        anchor.name = "bookShelf"
+        arView.scene.anchors.append(anchor)
+        return
+    }
+    func removeBookShelf(){
+        if let anchor = arView.scene.findEntity(named: "bookShelf"){
+            anchor.removeFromParent()
+        }
+    }
 }

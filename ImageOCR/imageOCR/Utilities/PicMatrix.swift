@@ -43,7 +43,7 @@ class PicMatrix{
     
     static var actualPicH: Double = 0.26
     
-    static public var showDis: Double = 0.4
+    static public var showDis: Double = 0.8
     
     //static var xCoffeeOffset: Float = 0
     
@@ -132,10 +132,8 @@ class PicMatrix{
     public func addCoffeeAnchor(id:Int,coffee:CoffeeSt)->simd_float4x4{
 //        guard let trans = prevTrans
 //        else { return matrix_identity_float4x4}
-        let width = Double(coffee.loc.width);
-        let height = Double(coffee.loc.height);
-        let picW : Double = Double(coffee.loc.left)+width/2;
-        let picH : Double = Double(coffee.loc.top)+height/2;
+        let picW : Double = Double(coffee.loc.left)
+        let picH : Double = Double(coffee.loc.top)
         var x = Float(getActualOffset(offset: picW,isW: true))
         var y = Float(getActualOffset(offset: picH,isW: false))
         let z  = Float(-1*itemDis)

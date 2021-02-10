@@ -26,19 +26,23 @@ extension ViewController{
         let touchLocation = sender.location(in: arView)
         print(touchLocation)
 //        let results = arView.hitTest(touchLocation)
-        guard let result = arView.entity(at: touchLocation)else{
-            return
-        }
+        let results = arView.entities(at: touchLocation)
+        for result in results{
 //        for result in results {
-        let name = result.name
-        print(name)
-        if name.hasPrefix("book@")&&isCoffee==false {
-            showAbstract(id: getIdFromName(name))
+            let name = result.name
+            print(name)
+            if name.hasPrefix("book@")||name.hasPrefix("coffee@") {
+                showAbstract(id: getIdFromName(name))
+                break
+            }
+            if let faname = result.parent?.name{
+                if faname.hasPrefix("coffee@"){
+                    showAbstract(id: getIdFromName(faname))
+                    break
+                }
+            }
+
         }
-        if name.hasPrefix("coffee@")&&isCoffee {
-            showAbstract(id: getIdFromName(name))
-        }
-            
 //        }
 
     }

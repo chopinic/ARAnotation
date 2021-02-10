@@ -32,7 +32,7 @@ class UICoffeeAbstract {
         DispatchQueue.main.async{
             self.textUI.layer.cornerRadius = 15.0
             self.textUI.layer.borderWidth = 2.0
-            self.textUI.layer.borderColor = UIColor.red.cgColor
+            self.textUI.layer.borderColor = UIColor.gray.cgColor
             self.textUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
             self.textUI.frame = CGRect(x: 10, y: 10, width: CGFloat(self.textW), height: CGFloat(self.imageW))
             self.textUI.isHidden = self.isHidden
@@ -74,11 +74,4 @@ class UICoffeeAbstract {
             }
         }
     }
-    
-//    func getCenterPoint(_ point: CGPoint) -> CGPoint {
-//        let xCoord = CGFloat(point.x) - (frame.width) / 2
-//        let yCoord = CGFloat(point.y) - (frame.height) / 2
-//        return CGPoint(x: xCoord, y: yCoord)
-//    }
-
 }

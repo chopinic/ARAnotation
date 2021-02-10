@@ -91,6 +91,7 @@ extension ViewController{
         var lineori = ori
         //英文 换行
         if(isCoffee){
+            return lineori
             for i in stride(from: 12, to: ori.count, by: 12){
                 if(lineori.count-i<4){break}
                 lineori = lineori.prefix(i) + "\n" + lineori.suffix(lineori.count-i)
@@ -107,8 +108,8 @@ extension ViewController{
     func displayGroups(kind: Int = 1, finding: String = ""){
         shouldBeInPlace = false
         removeHeadAnchor()
-
         let nowTrans = arView.session.currentFrame!.camera.transform
+
         var result = generateGroups(kind: kind)
         var groupName = ""
         if(finding != ""){
@@ -137,30 +138,34 @@ extension ViewController{
         }
         if(isCoffee == false){
             var absy = Float(0)
-            var x = Float(-0.08)
-            let z = Float(-1.5*PicMatrix.showDis)
+            var x = Float(-0.4)
+            let z = Float(-1*PicMatrix.showDis)
             var maxx = Float(-0.08)
-            var groupStartx = Float(-0.08)
+            var groupStartx = x
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = z
+            translation.columns.3.y = -1.8
+            translation.columns.3.x = 0
+            loadBookShelf(nowTrans*translation)
             for i in stride(from: 0, to: result.count, by: 1) {
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
                     let nowNode = arView.scene.findEntity(named: "book@\(id)")!
                     let nowElement = books[id]
-                    var translation = matrix_identity_float4x4
                     // set z
                     translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
-                    //set y
+                    // set y
                     if i % 2 == 0{translation.columns.3.y = absy}
                     else{translation.columns.3.y = -1*absy}
-                    //set x
+                    // set x
                     translation.columns.3.x = x
-                    x += 0.03
+                    x += 0.05
                     maxx = max(maxx, x)
                     if j==0{
                         let headString = getAttrName(kind: kind)+":\n"+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
                         print(headString)
                         let lineHeight: CGFloat = 0.05
-                        let font = MeshResource.Font.systemFont(ofSize: lineHeight)
+                        let font = MeshResource.Font.systemFont(ofSize: lineHeight, weight: .bold)
                         let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)
                         let textMaterial = SimpleMaterial(color: .red, isMetallic: false)
                         let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
@@ -171,29 +176,30 @@ extension ViewController{
                         self.arView.scene.addAnchor(textAnchor)
                         x+=0.13
                         translation.columns.3.x = x
-                        x+=0.03
+                        x+=0.05
                     }
                     nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
                 }
                 if i % 3 == 2{
-                    groupStartx = maxx+0.16
+                    groupStartx = maxx+0.13
                     absy = 0
                 }
                 else if i % 3 == 0{
-                    absy = 0.2
+                    absy = 0.5
                 }
 
                 x = groupStartx
 
             }
-        }else{
+        }else{ //coffee
             if(picMatrix.count<=0){return}
             guard let menu = arView.scene.findEntity(named: "menu@")else{return}
 //            nowTrans = menu.transformMatrix(relativeTo: rootnode)
-            var y = Float(0.05)
-            var absx = Float(0)
+            var y = Float(0.06)
+            var absx = Float(0.09)
             let z = Float(0.01)
             for i in stride(from: 0, to: result.count, by: 1) {
+//            for i in stride(from: 0, to: result.count, by: 1) {
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
                     let nowNode = arView.scene.findEntity(named: "coffee@\(id)")!
@@ -205,25 +211,26 @@ extension ViewController{
                     translation.columns.3.y = y
                     // set x
                     if(i%2==0){
-                        translation.columns.3.x = absx
+                        translation.columns.3.x = absx-0.03
                     }else{
-                        translation.columns.3.x = -1*absx
+                        translation.columns.3.x = -1*absx-0.03
                     }
                     y -= 0.01
                     if j==0{
-                        translation.columns.3.x -= 0.02
-                        let headString = getAttrName(kind: kind)+":\n"+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
+                        let headString = getAttrName(kind: kind)+": "+formHeadString(ori: getAttri(kind: kind, ele: nowElement))
                         print(headString)
                         let lineHeight: CGFloat = 0.05
                         let font = MeshResource.Font.systemFont(ofSize: lineHeight)
                         let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)
-                        let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
+//                        let textMaterial = SimpleMaterial(color: UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 1), isMetallic: false)
+                        var textMaterial = UnlitMaterial()
+                        textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8)
+
                         let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
                         textModel.name = "head@"
                         textModel.transform = Transform(matrix: translation)
-                        textModel.scale = SIMD3<Float>(x: 0.2, y: 0.2, z: 0.2)
-//                        let textAnchor = AnchorEntity(world: nowTrans*translation)
-//                        textAnchor.name = "head@\(i)"
+                        let radius = Float(0.3)
+                        textModel.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
                         menu.addChild(textModel)
 //                        self.arView.scene.addAnchor(textAnchor)
                         y-=0.01
@@ -232,8 +239,8 @@ extension ViewController{
                     }
                     nowNode.move(to: translation, relativeTo: nowNode.parent, duration: 0.4)
                 }
-                if(i%2==0){absx+=0.08}
-                y = Float(0.05)
+                if(i%2==1){absx+=0.48}
+                y = Float(0.06)
             }
         }
     }

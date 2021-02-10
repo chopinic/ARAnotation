@@ -41,20 +41,20 @@ extension ViewController{
     }
     
     @objc func buttonTapDebug(){
-        if let anchor = arView.scene.findEntity(named: "cannon"){
-            let cannonAnim = anchor.children[0] as! Experience.Box
-            cannonAnim.notifications.scaleTrigger.post()
-            return
-        }
-        let cannonAnim = try! Experience.loadBox()
-        print("loading anim")
-        let anchor = AnchorEntity(world: arView.session.currentFrame!.camera.transform)
-        anchor.addChild(cannonAnim)
-        anchor.name = "cannon"
-
-//        cannonAnim.generateCollisionShapes(recursive: true)
-        arView.scene.anchors.append(anchor)
-
+        let booksur = try! Entity.loadModel(named: "booksur")
+        let bookpage = try! Entity.loadModel(named: "bookpage")
+        let book = AnchorEntity()
+        let bookModel = ModelEntity()
+        var material1 = UnlitMaterial()
+        var material2 = UnlitMaterial()
+        material1.tintColor = UIColor.red
+        material2.tintColor = UIColor.white
+        booksur.model?.materials = [material1]
+        bookpage.model?.materials = [material2]
+        bookModel.addChild(booksur)
+        bookModel.addChild(bookpage)
+        book.addChild(bookModel)
+        arView.scene.addAnchor(book)
     }
 
     @objc func buttonTapaddx(){
@@ -97,10 +97,10 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?en=0")!
+            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?en=0")!
             if isCoffee{
                 print("Start uploading coffee!")
-                url = URL(string: "http://buddyoj.com/VIS/AR/ARInterface.php?recognizeType=coffee")!
+                url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=coffee")!
             }
             setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
 
@@ -138,7 +138,7 @@ extension ViewController{
             backnode.name = "trans@1"
             let size = CGSize(width: 5, height: 5)
             var material = UnlitMaterial()
-            material.tintColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.7)
+            material.tintColor = UIColor.init(red: 0.7, green: 0.7, blue: 0.7, alpha: 0.9)
             backnode.removeChild(backnode.findEntity(named: "plane")!)
             let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
             plane.name = "plane"
@@ -149,7 +149,7 @@ extension ViewController{
             let size = CGSize(width: 5, height: 5)
             var material = UnlitMaterial()
             
-            material.tintColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.7)
+            material.tintColor = UIColor.init(red: 0.7, green: 0.7, blue: 0.7, alpha: 0.9)
             let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
             plane.name = "plane"
             let transTip = AnchorEntity()

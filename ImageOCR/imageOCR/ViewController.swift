@@ -73,7 +73,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         message.bounds.size.width = wholewidth-100
         message.center.x = wholeView.center.x
         message.text = "Start scanning a book by press \"scan\"!"
-        message.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+        message.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.7)
         message.delegate = self
 
         attrSelect.delegate = self
@@ -102,11 +102,13 @@ class ViewController: UIViewController, ARSessionDelegate {
         arView.renderOptions = [.disablePersonOcclusion, .disableDepthOfField, .disableMotionBlur]
         arViewGestureSetup()
         wholeView.sendSubviewToBack(arView)
-        let boxAnchor = try! Experience.loadBox()
         
-        // Add the box anchor to the scene
-        arView.scene.anchors.append(boxAnchor)
+        let emptyMenu = UIImage(named: "big_empty.png")!
+        let data = emptyMenu.pngData()
+        let filename = getDocumentsDirectory().appendingPathComponent("big_empty.jpg")
+        try! data!.write(to: filename)
 
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -238,10 +240,15 @@ class ViewController: UIViewController, ARSessionDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.resetPicTracking()
-//            self.resetAndAddAnchor()
+        var ready = false
+        while(ready==false){
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            Thread.sleep(forTimeInterval: 0.5)
+            ready = resetPicTracking()
+            print(ready)
+//            }
         }
+//        print("after async: \(ready)")
     }
 
     public func setForBooks(cot:Int, hasResult: NSDictionary, isDebug: Bool){
@@ -252,6 +259,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let nowtempbook = nowforbook as! NSDictionary
                 let nowbook = BookSt()
                 let bookloc = nowtempbook["location"] as! NSDictionary
+                nowbook.color = UIColor(red: (nowtempbook["r"] as! CGFloat)/255.0, green: (nowtempbook["g"] as! CGFloat)/255.0, blue: (nowtempbook["b"] as! CGFloat)/255.0, alpha: 1)
                 nowbook.loc = setLocation(locDic: bookloc)
                 nowbook.title = nowtempbook["title"] as! String
                 nowbook.author = nowtempbook["author"] as! String
@@ -283,7 +291,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 elementWeights.append(ElementWeight())
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.resetAndAddAnchor()
         }
 
@@ -292,38 +300,23 @@ class ViewController: UIViewController, ARSessionDelegate {
     public func removeHeadAnchor(){
 //        let childNodes = arView.scene.anchors
         while(true){
-//            var hasHead = false
             guard let headNode = arView.scene.findEntity(named: "head@")else{break}
             headNode.removeFromParent()
-//            for node in childNodes {
-//                let name = node.name
-//                print(name)
-//                if name.hasPrefix("head@") {
-//                    arView.scene.removeAnchor(node)
-//                    hasHead = true
-//                    break;
-//                }
-//            }
-//            if(hasHead==false){break}
         }
     }
     
-    public func resetPicTracking(){
-        if(isCoffee==false){return}
+    public func resetPicTracking() -> Bool{
+        if(isCoffee==false){return false}
         let fileName = "MenuOri@.png"
         let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/" + fileName
-        guard let oriMenu = UIImage(contentsOfFile: path)else{
+        guard var oriMenu = UIImage(contentsOfFile: path)else{
             print("no original menu file")
-            return
+            return false
         }
         PicMatrix.imageW = Double(oriMenu.size.width * oriMenu.scale)
         PicMatrix.imageH = Double(oriMenu.size.height * oriMenu.scale)
-//        trackedImgW = Double(oriMenu.size.width * oriMenu.scale)
-//        trackedImgH = Double(oriMenu.size.height * oriMenu.scale)
-//        guard let oriMenu = UIImage(contentsOfFile: getDocumentsDirectory().appendingPathComponent("MenuOri@.png").absoluteString) else{
-//            print("no original menu file")
-//            return
-//        }
+        oriMenu = UIImage(named: "big.jpg")!
+
         let physicalWidth = picMatrix[0].getActualLen(oriLen: PicMatrix.imageW, isW: true)
         let oriMenuCIImage = CIImage(image: oriMenu)!
         let oriMenuCgImage = convertCIImageToCGImage(inputImage: oriMenuCIImage)!
@@ -331,18 +324,12 @@ class ViewController: UIViewController, ARSessionDelegate {
         arImage.name = "Coffee Menu"
 
         let configuration = ARWorldTrackingConfiguration()
-//        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
-//            if #available(iOS 13.4, *) {
-//                configuration.sceneReconstruction = .meshWithClassification
-//            }
-//        }
         configuration.detectionImages = [arImage]
         arView.session.run(configuration)
-
+        return true
     }
     
-    public func resetAndAddAnchor(isReset: Bool = false){
-//        resetPicTracking()
+    public func resetAndAddAnchor(isReset: Bool = false) -> Bool{
         if isReset{
             for i in stride(from: 0, to: books.count ,by: 1){
                 books[i].isDisplay = false
@@ -383,9 +370,28 @@ class ViewController: UIViewController, ARSessionDelegate {
             for str in currentBook.words {
                 words+=str+" "
             }
-//            print(" words: \(words)")
             let book = AnchorEntity(world: trans)
-            book.addChild(createPlane(id: i, size: size, isCoffee: isCoffee))
+            guard let plane = createPlane(id: i, size: size, isCoffee: isCoffee) else{
+                return false
+            }
+            book.addChild(plane)
+            
+            let booksur = try! Entity.loadModel(named: "sur")
+            let bookpage = try! Entity.loadModel(named: "page")
+            var material1 = UnlitMaterial()
+            var material2 = UnlitMaterial()
+            material1.tintColor = books[i].color
+            material2.tintColor = UIColor.white
+            booksur.model?.materials = [material1]
+            bookpage.model?.materials = [material2]
+            
+            let bookBox = ModelEntity()
+            bookBox.addChild(booksur)
+            bookBox.addChild(bookpage)
+            bookBox.scale = SIMD3<Float>(x: Float(size.width/0.02),y:Float(size.height/0.26),z:0.7)
+            bookBox.position = SIMD3<Float>(x: 0, y: Float(-1*size.height/2), z: -0.001)
+            
+            book.addChild(bookBox)
             book.name = "book@\(i)"
             book.generateCollisionShapes(recursive: true)
             arView.scene.addAnchor(book)
@@ -393,7 +399,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         for i in stride(from: 0, to: coffees.count ,by: 1){
             guard let menu = arView.scene.findEntity(named: "menu@") else{
-                return
+                return false
             }
 
             if coffees[i].isDisplay{
@@ -407,33 +413,45 @@ class ViewController: UIViewController, ARSessionDelegate {
             let rootLoc = currentCoffee.loc
             let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
             coffees[i].size = size
-            let coffee = createPlane(id: i, size: size, isCoffee: isCoffee)
+//            let coffee = createCoffeeFont(id: i,coffeeName:coffees[i].name, size: size)
+            let coffee = ModelEntity()
+            let lineHeight: CGFloat = 0.05
+            let font = MeshResource.Font.systemFont(ofSize: lineHeight, weight: .bold)
+            let textMesh = MeshResource.generateText(coffees[i].name, extrusionDepth: Float(lineHeight * 0.1), font: font)
+            var textMaterial = UnlitMaterial()
+//            material.baseColor = MaterialColorParameter.texture(resource!)
+            textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8)
+
+//            let textMaterial = SimpleMaterial(color: UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8), isMetallic: false)
+            let coffeeFont = ModelEntity(mesh: textMesh, materials: [textMaterial])
+//            let bound = textMesh.bounds
+            let radius = Float(0.2) //Float(size.width)/(bound.boundingRadius*2)
+            
             coffee.transform = Transform(matrix: trans)
             coffee.name = "coffee@\(i)"
+            coffee.addChild(coffeeFont)
+            coffeeFont.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
             coffee.generateCollisionShapes(recursive: true)
             menu.addChild(coffee)
 
         }
+        return true
     }
     
-    
-
     
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]){
         guard let imageAnchor = anchors.first as? ARImageAnchor else{
             return
         }
-        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png"))
-//        let rotationTrans =  imageAnchor.transform * Transform.init( rotation: simd_quaternion(0, .pi, 0, 1),translation: SIMD3(0,0,0.2)).matrix
+        //        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png"))
+        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("big_empty.jpg"))
         let nowW = Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageW, isW: true))
         let nowH = Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageH, isW: false))
         print("menu width: \(nowW), height:\(nowH)")
         let rotationTrans = imageAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
         let trans = getForwardTrans(ori: rotationTrans, dis: 0.1) //开始时是悬浮在上方10cm， update时向下移动到原位
-//        let trans = getForwardTrans(ori: rotationTrans, dis: 0)
         let anchor = AnchorEntity(world:trans)
         picMatrix[0].prevTrans = trans
-//        anchor.scale = SIMD3<Float>(x: 1.5, y: 1.5, z: 1.5)
         var material = UnlitMaterial()
         material.baseColor = MaterialColorParameter.texture(resource!)
         material.tintColor = UIColor.white.withAlphaComponent(0.99)
@@ -499,9 +517,9 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let elementId = getIdFromName(name)
                 guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
                 let point = CGPoint(x:pos.x,y:pos.y)
-                let dis = calculateScreenDistance(arView.center,point)
-                if(elementId == 0){
-                    print("dis: \(dis)")}
+                var screenCenter = arView.center
+                if(isCoffee){screenCenter.x-=150}
+                let dis = calculateScreenDistance(screenCenter,point)
                 if dis<800{
                     let ratio = Float(min(2.3,(dis+28.0)/dis))
                     node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)

@@ -23,7 +23,7 @@ class UIBookAbstract {
             self.ui.isEditable = false
             self.ui.layer.cornerRadius = 15.0
             self.ui.layer.borderWidth = 2.0
-            self.ui.layer.borderColor = UIColor.red.cgColor
+            self.ui.layer.borderColor = UIColor.gray.cgColor
             self.ui.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
             self.ui.frame = CGRect(x: 10, y: 10, width: CGFloat(300), height: CGFloat(250))
         }
