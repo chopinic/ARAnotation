@@ -108,6 +108,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         let filename = getDocumentsDirectory().appendingPathComponent("big_empty.jpg")
         try! data!.write(to: filename)
 
+        switchToCoffee()
         
     }
     
@@ -143,8 +144,6 @@ class ViewController: UIViewController, ARSessionDelegate {
         // height 300
 //        createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
 
-//        switchToCoffee()
-//        switchToCoffee()
 
         DispatchQueue.main.async{
             self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
@@ -376,21 +375,7 @@ class ViewController: UIViewController, ARSessionDelegate {
             }
             book.addChild(plane)
             
-            let booksur = try! Entity.loadModel(named: "sur")
-            let bookpage = try! Entity.loadModel(named: "page")
-            var material1 = UnlitMaterial()
-            var material2 = UnlitMaterial()
-            material1.tintColor = books[i].color
-            material2.tintColor = UIColor.white
-            booksur.model?.materials = [material1]
-            bookpage.model?.materials = [material2]
-            
-            let bookBox = ModelEntity()
-            bookBox.addChild(booksur)
-            bookBox.addChild(bookpage)
-            bookBox.scale = SIMD3<Float>(x: Float(size.width/0.02),y:Float(size.height/0.26),z:0.7)
-            bookBox.position = SIMD3<Float>(x: 0, y: Float(-1*size.height/2), z: -0.001)
-            
+            let bookBox = loadBookModel(books[i].color,size)
             book.addChild(bookBox)
             book.name = "book@\(i)"
             book.generateCollisionShapes(recursive: true)
@@ -520,7 +505,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 var screenCenter = arView.center
                 if(isCoffee){screenCenter.x-=150}
                 let dis = calculateScreenDistance(screenCenter,point)
-                if dis<800{
+                if dis<400{
                     let ratio = Float(min(2.3,(dis+28.0)/dis))
                     node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
                     mindis = min(mindis,dis)
@@ -529,13 +514,13 @@ class ViewController: UIViewController, ARSessionDelegate {
                         {minid = elementId}
                     }
                 }
-                else if shouldBeInPlace{
-                    if isCoffee{
-                        node.transform = Transform(matrix: coffees[elementId].oriTrans)
-                    }else{
-                        node.transform = Transform(matrix: books[elementId].oriTrans)
-                    }
-                }
+//                else if shouldBeInPlace{
+//                    if isCoffee{
+//                        node.transform = Transform(matrix: coffees[elementId].oriTrans)
+//                    }else{
+//                        node.transform = Transform(matrix: books[elementId].oriTrans)
+//                    }
+//                }
             }
             let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
             if minid != -1 && minid != prevId{

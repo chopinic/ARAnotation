@@ -12,7 +12,38 @@ import CoreML
 import UIKit
 import VideoToolbox
 
+public func loadBookModel(_ outsideColor: UIColor, _ size: CGSize) ->ModelEntity{
+    let l_in = try! Entity.loadModel(named: "L_In")
+    let l_out = try! Entity.loadModel(named: "L_Out")
+    let r_in = try! Entity.loadModel(named: "R_In")
+    let r_out = try! Entity.loadModel(named: "R_Out")
+    var material1 = UnlitMaterial()
+    material1.baseColor = MaterialColorParameter.color(outsideColor)
+//    material1.tintColor = outsideColor
+    l_out.model?.materials = [material1]
+    r_out.model?.materials = [material1]
+    l_in.scale = SIMD3<Float>(x: Float(size.width/0.02),y:Float(size.height/0.26),z:Float(size.height/0.26))
+    r_in.scale = SIMD3<Float>(x: Float(size.width/0.02),y:Float(size.height/0.26),z:Float(size.height/0.26))
+    l_out.scale = SIMD3<Float>(x: Float(size.width/0.02),y:Float(size.height/0.26),z:Float(size.height/0.26))
+    r_out.scale = SIMD3<Float>(x: Float(size.width/0.02),y:Float(size.height/0.26),z:Float(size.height/0.26))
 
+    let left = ModelEntity()
+    let right = ModelEntity()
+    left.name = "left"
+    right.name = "right"
+    left.addChild(l_out)
+    right.addChild(r_out)
+    left.addChild(l_in)
+    right.addChild(r_in)
+
+    let bookBox = ModelEntity()
+    bookBox.addChild(left)
+    bookBox.addChild(right)
+    bookBox.position = SIMD3<Float>(x: 0, y: Float(-1*size.height/2), z: -0.001)
+    bookBox.name = "bookBox"
+
+    return bookBox
+}
 
 public func convertCIImageToCGImage(inputImage: CIImage) -> CGImage? {
     let context = CIContext(options: nil)

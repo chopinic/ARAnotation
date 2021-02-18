@@ -199,7 +199,6 @@ extension ViewController{
             var absx = Float(0.09)
             let z = Float(0.01)
             for i in stride(from: 0, to: result.count, by: 1) {
-//            for i in stride(from: 0, to: result.count, by: 1) {
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
                     let nowNode = arView.scene.findEntity(named: "coffee@\(id)")!

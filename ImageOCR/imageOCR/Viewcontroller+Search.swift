@@ -129,7 +129,56 @@ extension ViewController: UITextFieldDelegate{
     
 //    func
     
+    func openBook(_ id: Int){
+        for i in stride(from: 0, to: books.count, by: 1){
+            let book = findById(id: i) as! AnchorEntity
+
+            if books[i].isOpen == false{
+                books[i].tempTrans = book.transformMatrix(relativeTo: book.parent)
+            }
+            if id == i {
+                if books[i].isOpen == true{
+                    continue
+                }
+                
+                let bookBox = book.findEntity(named: "bookBox") as! ModelEntity
+                let left = bookBox.findEntity(named: "left")!
+                let right = bookBox.findEntity(named: "right")!
+                
+                var trans = arView.session.currentFrame!.camera.transform
+                var translation = matrix_identity_float4x4
+                translation.columns.3.z = Float(-0.34)
+
+                trans = trans * translation * makeRotationMatrixY(angle: .pi)
+                book.move(to: trans, relativeTo: book.parent, duration: 0.4)
+                
+                var rotation = left.transform.matrix * makeRotationMatrix(x: 0, y: -.pi/2, z: 0)
+                left.move(to: rotation, relativeTo: bookBox, duration: 0.8)
+                rotation = right.transform.matrix * makeRotationMatrix(x: 0, y: .pi/2, z: 0)
+                right.move(to: rotation, relativeTo: bookBox, duration: 0.8)
+                books[i].isOpen = true
+                continue
+            }
+
+            else if books[i].isOpen == true{
+                let bookBox = book.findEntity(named: "bookBox") as! ModelEntity
+                let left = bookBox.findEntity(named: "left")!
+                let right = bookBox.findEntity(named: "right")!
+                book.move(to: books[i].tempTrans, relativeTo: book.parent, duration: 0.4)
+
+                var rotation = left.transform.matrix * makeRotationMatrix(x: 0, y: .pi/2, z: 0)
+                left.move(to: rotation, relativeTo: bookBox, duration: 0.4)
+                rotation = right.transform.matrix * makeRotationMatrix(x: 0, y: -.pi/2, z: 0)
+                right.move(to: rotation, relativeTo: bookBox, duration: 0.4)
+                books[i].isOpen = false
+            }
+        }
+    }
+    
     func showAbstract(id: Int){
+        if id < 0{
+            hideAbstract()
+        }
         if isCoffee{
             coffeeAbstractUI.id = id
             coffeeAbstractUI.setImage(elementPics[coffees[id].desPicid])
@@ -225,6 +274,7 @@ extension ViewController: UITextFieldDelegate{
         hideAbstract()
         removeHeadAnchor()
         removeBookShelf()
+        openBook(-1)
         let childNodes = getEntityList()
         for node in childNodes {
             let name = node.name
@@ -253,9 +303,9 @@ extension ViewController: UITextFieldDelegate{
     func loadBookShelf(_ trans:simd_float4x4){
         removeBookShelf()
         let bookShelf = try! Entity.loadModel(named: "bookShelf")
-        let bookShelf1 = try! Entity.loadModel(named: "bookShelf")
+        let bookShelf1 = bookShelf.clone(recursive: true)
         bookShelf1.position = SIMD3<Float>(x: -1.22, y: 0, z: 0)
-        let bookShelf2 = try! Entity.loadModel(named: "bookShelf")
+        let bookShelf2 = bookShelf.clone(recursive: true)
         bookShelf2.position = SIMD3<Float>(x: 1.22, y: 0, z: 0)
 
         print("loading entity")

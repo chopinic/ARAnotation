@@ -27,24 +27,34 @@ extension ViewController{
         print(touchLocation)
 //        let results = arView.hitTest(touchLocation)
         let results = arView.entities(at: touchLocation)
+        var hasResult = false
         for result in results{
 //        for result in results {
             let name = result.name
             print(name)
             if name.hasPrefix("book@")||name.hasPrefix("coffee@") {
-                showAbstract(id: getIdFromName(name))
+                openBook(getIdFromName(name))
+                hasResult = true
+//                showAbstract(id: getIdFromName(name))
                 break
             }
             if let faname = result.parent?.name{
                 if faname.hasPrefix("coffee@"){
                     showAbstract(id: getIdFromName(faname))
+                    hasResult = true
                     break
                 }
             }
-
         }
-//        }
 
+        if hasResult == false{
+            print("no result at touch location")
+            if isCoffee{
+                hideAbstract()
+            }else{
+                openBook(-1)
+            }
+        }
     }
     
     func findById(id: Int)->Entity?{

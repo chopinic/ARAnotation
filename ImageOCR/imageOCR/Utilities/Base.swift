@@ -20,6 +20,7 @@ public struct Location{
 public class Element{
     var loc = Location()
     var oriTrans = simd_float4x4()
+    var tempTrans = simd_float4x4()
     var matrixId: Int!=0
     var picid = -1
     var isDisplay: Bool!=false
@@ -45,6 +46,7 @@ public class BookSt: Element{
     var relatedBook = ""
     var score: Int = 0
     var remark = ""
+    var isOpen = false
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
         translation.columns.3.y = Float(size.height)/2
