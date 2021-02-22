@@ -25,6 +25,8 @@ public class Element{
     var picid = -1
     var isDisplay: Bool!=false
     var size = CGSize()
+    var remark = ""
+
 //    var uiPos: SIMD3<Float>?
     public func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         return SIMD3<Float>(x: 0, y: 0, z: 0)
@@ -45,7 +47,6 @@ public class BookSt: Element{
     var publisher = ""
     var relatedBook = ""
     var score: Int = 0
-    var remark = ""
     var isOpen = false
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
@@ -86,14 +87,15 @@ public class CoffeeSt: Element{
     var desPicid = -1
     var name = ""
     var fragrance = ""
-    var aroma = ""
-    var acidity = ""
-    var body = ""
-    var aftertaste = ""
-    var flavor = ""
-    var balance = ""
+    var belong = ""
+    var milk = ""
+    var caffine = ""
+    var sugar = ""
+    var freshness = ""
+    var sweet = ""
+    var rich = ""
+    var sour = ""
     var score: Int = 0
-    var remark = ""
     
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
@@ -114,10 +116,10 @@ public class CoffeeSt: Element{
         }
         abs+="\n"
         abs = abs + "fragrance: "+fragrance+"\n"
-        abs = abs + "aroma: "+aroma+"\n"
-        abs = abs + "acidity: "+acidity+"\n"
-        abs = abs + "body: "+body+"\n"
-        abs = abs + "aftertaste: "+aftertaste+"\n"
+        abs = abs + "freshness: "+freshness+"\n"
+        abs = abs + "sweet: "+sweet+"\n"
+        abs = abs + "sour: "+sour+"\n"
+        abs = abs + "rich: "+rich+"\n"
         abs = abs + "remark: "+remark
 
         return abs

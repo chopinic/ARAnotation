@@ -40,7 +40,7 @@ extension ViewController: UITextFieldDelegate{
             {findString(lookFor:text)}
         }
         else{
-            displayGroups(kind: nowSelection, finding: text)
+            displayGroups(nowSelection, text)
         }
         textField.resignFirstResponder()
         return true
@@ -208,7 +208,7 @@ extension ViewController: UITextFieldDelegate{
         
         scaleNodes(ids: [])
         hideAbstract()
-        shouldBeInPlace = false
+//        shouldBeInPlace = false
         removeHeadAnchor()
 
 
@@ -243,6 +243,7 @@ extension ViewController: UITextFieldDelegate{
                 absy += 0.055
             }
             nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
+            books[i].tempTrans = nowTrans*translation
         }
     }
     
@@ -264,12 +265,13 @@ extension ViewController: UITextFieldDelegate{
     
     @objc func startAntEyeDisplay(){
         scaleNodes(ids: [], time: 0.0)
+        recStart = 0
 //        hideBookAbstract()
         isAntUpdate = !isAntUpdate
     }
     
     @objc func restoreDisplay(){
-        shouldBeInPlace = true
+//        shouldBeInPlace = true
         scaleNodes(ids: [])
         hideAbstract()
         removeHeadAnchor()
@@ -287,6 +289,7 @@ extension ViewController: UITextFieldDelegate{
 // .transform =
             }else{
                 node.move(to: self.books[id].oriTrans, relativeTo: node.parent, duration: 0.4)
+                books[id].tempTrans = books[id].oriTrans
             }
 
         }

@@ -36,14 +36,18 @@ class ViewController: UIViewController, ARSessionDelegate {
     var timer: Timer?
     var elementPics = [UIImage]()
     var bookAbstractUI = UIBookAbstract()
-    var nowEnhanceNodes = [SCNNode]()
+//    var nowEnhanceNodes = [SCNNode]()
     var textWidth = 300,textHeight = 250
     var rootnode = AnchorEntity()
-    
-    
+    var coffeeAdhoc = true
+    var rad = 9360.0
+    var boxrad = 8760.0
+    var recStart = 0
+    var nowGroups = [[Int]]()
+    var groupPosCha = [Double]()
+    var groupPosChaLimit = [Double]()
     var isAntUpdate = false
     var isAntUpdateCot = 0
-    var shouldBeInPlace = false
     
     
     var isCoffee = false
@@ -53,6 +57,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     // ui
     var receiveAnsCot = 0
     var nowOrientation = 0
+    var swapGestureStart = CGPoint()
     
     var utiQueue = DispatchQueue(label:"uploadImage", qos: .utility)
 
@@ -103,12 +108,12 @@ class ViewController: UIViewController, ARSessionDelegate {
         arViewGestureSetup()
         wholeView.sendSubviewToBack(arView)
         
-        let emptyMenu = UIImage(named: "big_empty.png")!
+        let emptyMenu = UIImage(named: "small_empty.png")!
         let data = emptyMenu.pngData()
         let filename = getDocumentsDirectory().appendingPathComponent("big_empty.jpg")
         try! data!.write(to: filename)
 
-        switchToCoffee()
+//        switchToCoffee()
         
     }
     
@@ -203,17 +208,16 @@ class ViewController: UIViewController, ARSessionDelegate {
             for nowforCoffee in coffeeArray{
                 let nowCoffeeDic = nowforCoffee as! NSDictionary
                 let nowCoffee = CoffeeSt()
-                let coffeeloc = nowCoffeeDic["location"] as! NSDictionary
-                nowCoffee.loc = setLocation(locDic: coffeeloc)
+//                let coffeeloc = nowCoffeeDic["location"] as! NSDictionary
+//                nowCoffee.loc = setLocation(locDic: coffeeloc)
                 nowCoffee.name = nowCoffeeDic["words"] as! String
                 nowCoffee.fragrance = nowCoffeeDic["fragrance"] as! String
-                nowCoffee.aroma = nowCoffeeDic["aroma"] as! String
-                nowCoffee.acidity = nowCoffeeDic["acidity"] as! String
-                nowCoffee.body = nowCoffeeDic["body"] as! String
-                nowCoffee.aftertaste = nowCoffeeDic["aftertaste"] as! String
-                nowCoffee.flavor = nowCoffeeDic["flavor"] as! String
-                nowCoffee.balance = nowCoffeeDic["balance"] as! String
-                nowCoffee.score = Int((nowCoffeeDic["score"] as! Double)*5)
+                nowCoffee.freshness = nowCoffeeDic["freshness"] as! String
+                nowCoffee.sweet = nowCoffeeDic["sweet"] as! String
+                nowCoffee.rich = nowCoffeeDic["rich"] as! String
+                nowCoffee.belong = nowCoffeeDic["belong"] as! String
+                nowCoffee.sour = nowCoffeeDic["sour"] as! String
+                nowCoffee.score = Int(nowCoffeeDic["score"] as! Double)
                 nowCoffee.remark = nowCoffeeDic["remark"] as! String
                 if(isDebug){
                     elementPics.append(UIImage(named: "coffee1.jpg")!)
@@ -314,7 +318,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         }
         PicMatrix.imageW = Double(oriMenu.size.width * oriMenu.scale)
         PicMatrix.imageH = Double(oriMenu.size.height * oriMenu.scale)
-        oriMenu = UIImage(named: "big.jpg")!
+        oriMenu = UIImage(named: "small.png")!
 
         let physicalWidth = picMatrix[0].getActualLen(oriLen: PicMatrix.imageW, isW: true)
         let oriMenuCIImage = CIImage(image: oriMenu)!
@@ -351,74 +355,87 @@ class ViewController: UIViewController, ARSessionDelegate {
             }
         }
         
-        for i in stride(from: 0, to: books.count ,by: 1){
-            if books[i].isDisplay{
-                continue;
-            }
-            let nowMatrix = books[i].matrixId!-1
-            books[i].isDisplay = true;
-            let trans = picMatrix[nowMatrix].addBookAnchor(id:i,book:books[i])
-            books[i].oriTrans = trans
-            let currentBook = books[i]
-            let rootLoc = currentBook.loc
-//            let picContents = elementPics[currentBook.picid]
-            let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
-            books[i].size = size
-            print("bookid: \(i),size \(size)")
-            var words = ""
-            for str in currentBook.words {
-                words+=str+" "
-            }
-            let book = AnchorEntity(world: trans)
-            guard let plane = createPlane(id: i, size: size, isCoffee: isCoffee) else{
-                return false
-            }
-            book.addChild(plane)
-            
-            let bookBox = loadBookModel(books[i].color,size)
-            book.addChild(bookBox)
-            book.name = "book@\(i)"
-            book.generateCollisionShapes(recursive: true)
-            arView.scene.addAnchor(book)
-        }
         
-        for i in stride(from: 0, to: coffees.count ,by: 1){
+        
+        if isCoffee{
             guard let menu = arView.scene.findEntity(named: "menu@") else{
                 return false
             }
 
-            if coffees[i].isDisplay{
-                continue;
+            for i in stride(from: 0, to: coffees.count ,by: 1){
+
+                if coffees[i].isDisplay{
+                    continue;
+                }
+                let nowMatrix = coffees[i].matrixId!-1
+                coffees[i].isDisplay = true;
+                let trans = picMatrix[nowMatrix].addCoffeeAnchor(id:i,coffee:coffees[i])
+                coffees[i].oriTrans = trans
+                let currentCoffee = coffees[i]
+                let rootLoc = currentCoffee.loc
+                let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+                coffees[i].size = size
+    //            let coffee = createCoffeeFont(id: i,coffeeName:coffees[i].name, size: size)
+                let coffee = ModelEntity()
+                let lineHeight: CGFloat = 0.05
+                let font = MeshResource.Font.systemFont(ofSize: lineHeight, weight: .bold)
+                let textMesh = MeshResource.generateText(coffees[i].name, extrusionDepth: Float(lineHeight * 0.1), font: font)
+                var textMaterial = UnlitMaterial()
+    //            material.baseColor = MaterialColorParameter.texture(resource!)
+                textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8)
+                let coffeeFont = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                let radius = Float(0.1) // Float(size.width)/(bound.boundingRadius*2)
+                
+                coffee.transform = Transform(matrix: trans)
+                coffee.name = "coffee@\(i)"
+                coffee.addChild(coffeeFont)
+                coffeeFont.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
+                coffee.generateCollisionShapes(recursive: true)
+                menu.addChild(coffee)
             }
-            let nowMatrix = coffees[i].matrixId!-1
-            coffees[i].isDisplay = true;
-            let trans = picMatrix[nowMatrix].addCoffeeAnchor(id:i,coffee:coffees[i])
-            coffees[i].oriTrans = trans
-            let currentCoffee = coffees[i]
-            let rootLoc = currentCoffee.loc
-            let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
-            coffees[i].size = size
-//            let coffee = createCoffeeFont(id: i,coffeeName:coffees[i].name, size: size)
-            let coffee = ModelEntity()
-            let lineHeight: CGFloat = 0.05
-            let font = MeshResource.Font.systemFont(ofSize: lineHeight, weight: .bold)
-            let textMesh = MeshResource.generateText(coffees[i].name, extrusionDepth: Float(lineHeight * 0.1), font: font)
-            var textMaterial = UnlitMaterial()
-//            material.baseColor = MaterialColorParameter.texture(resource!)
-            textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8)
-
-//            let textMaterial = SimpleMaterial(color: UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8), isMetallic: false)
-            let coffeeFont = ModelEntity(mesh: textMesh, materials: [textMaterial])
-//            let bound = textMesh.bounds
-            let radius = Float(0.2) //Float(size.width)/(bound.boundingRadius*2)
-            
-            coffee.transform = Transform(matrix: trans)
-            coffee.name = "coffee@\(i)"
-            coffee.addChild(coffeeFont)
-            coffeeFont.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
-            coffee.generateCollisionShapes(recursive: true)
-            menu.addChild(coffee)
-
+            displayGroups()
+            for i in stride(from: 0, to: SmallOffset.blockStartx.count, by: 1){
+                let size = CGSize(width: SmallOffset.blockWidth[i]/boxrad, height: SmallOffset.blockHeight[i]/boxrad)
+                var material = UnlitMaterial()
+                
+                material.tintColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.0)
+                let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+                plane.name =  "group@\(i)"
+                plane.position = SIMD3<Float>(x: Float(SmallOffset.blockStartx[i]/boxrad+(SmallOffset.blockWidth[i]/boxrad)/2-0.01), y: Float(SmallOffset.blockStarty[i]/boxrad-(SmallOffset.blockHeight[i]/boxrad)/2), z: -0.001)
+                plane.generateCollisionShapes(recursive: true)
+                menu.addChild(plane)
+            }
+        }else{
+            for i in stride(from: 0, to: books.count ,by: 1){
+                if books[i].isDisplay{
+                    continue;
+                }
+                let nowMatrix = books[i].matrixId!-1
+                books[i].isDisplay = true;
+                let trans = picMatrix[nowMatrix].addBookAnchor(id:i,book:books[i])
+                books[i].oriTrans = trans
+                let currentBook = books[i]
+                let rootLoc = currentBook.loc
+    //            let picContents = elementPics[currentBook.picid]
+                let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+                books[i].size = size
+                print("bookid: \(i),size \(size)")
+                var words = ""
+                for str in currentBook.words {
+                    words+=str+" "
+                }
+                let book = AnchorEntity(world: trans)
+                guard let plane = createPlane(id: i, size: size, isCoffee: isCoffee) else{
+                    return false
+                }
+                book.addChild(plane)
+                
+                let bookBox = loadBookModel(books[i].color,size)
+                book.addChild(bookBox)
+                book.name = "book@\(i)"
+                book.generateCollisionShapes(recursive: true)
+                arView.scene.addAnchor(book)
+            }
         }
         return true
     }
@@ -460,6 +477,9 @@ class ViewController: UIViewController, ARSessionDelegate {
         }
     }
 
+//    func scaleNode(_ name: String,_ radio: Float){
+//
+//    }
     
     func session(_ session: ARSession, didUpdate frame: ARFrame){
         if(bookAbstractUI.getIsHidden() == false){
@@ -481,47 +501,94 @@ class ViewController: UIViewController, ARSessionDelegate {
                 print("renderer: no such coffee \(coffeeAbstractUI.id)")
                 return
             }
-            if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
-                var pos2d = CGPoint()
-                pos2d.x = pos.x//+CGFloat(coffeeAbstractUI.imageW/2)
-                pos2d.y = pos.y-125//-CGFloat(coffeeAbstractUI.imageW/2)
-                coffeeAbstractUI.updatePosition(position: pos2d)
+            if childNode.position.z > 0{
+                if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
+                    var pos2d = CGPoint()
+                    pos2d.x = pos.x+125 // +CGFloat(coffeeAbstractUI.imageW/2)
+                    pos2d.y = pos.y-125 // -CGFloat(coffeeAbstractUI.imageW/2)
+                    coffeeAbstractUI.updatePosition(position: pos2d)
+                }
             }
         }
 
         if(isAntUpdate){
+            let scaleNodeLimit = 10
+            var nowScaleNum = 0
             viewCenterPoint = arView.center
             isAntUpdateCot = (isAntUpdateCot+1)%5
             var mindis = 100000.0
             var minid = -1
-            for node in getEntityList() {
-                let name = node.name
-                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
-                    return
-                }
-                let elementId = getIdFromName(name)
-                guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
-                let point = CGPoint(x:pos.x,y:pos.y)
-                var screenCenter = arView.center
-                if(isCoffee){screenCenter.x-=150}
-                let dis = calculateScreenDistance(screenCenter,point)
-                if dis<400{
-                    let ratio = Float(min(2.3,(dis+28.0)/dis))
-                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
-                    mindis = min(mindis,dis)
-                    if mindis == dis{
-                        if isAntUpdateCot==0
-                        {minid = elementId}
+            if isCoffee{
+                for i in stride(from: 0, to: coffees.count, by: 1) {
+                    let trans = coffees[i].tempTrans
+                    guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+                    let point = CGPoint(x:pos.x,y:pos.y)
+                    var screenCenter = arView.center
+                    screenCenter.x-=150
+                    let dis = calculateScreenDistance(screenCenter,point)
+                    if dis<400{
+                        let ratio = Float(min(2.3,(dis+28.0)/dis))
+                        let node = arView.scene.findEntity(named: "coffee@\(i)")!
+                        node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
+                        mindis = min(mindis,dis)
+                        nowScaleNum += 1
+                        if mindis == dis{
+                            minid = i
+                        }
                     }
+                    if nowScaleNum<scaleNodeLimit{return}
                 }
-//                else if shouldBeInPlace{
-//                    if isCoffee{
-//                        node.transform = Transform(matrix: coffees[elementId].oriTrans)
-//                    }else{
-//                        node.transform = Transform(matrix: books[elementId].oriTrans)
+            }
+            else{
+                if isAntUpdateCot%5 != 0{return}
+                var first = false
+                for j in stride(from: 0, to: books.count, by: 1) {
+                    let i = (j+recStart)%books.count
+                    let trans = books[i].tempTrans
+                    guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+                    let point = CGPoint(x:pos.x,y:pos.y)
+                    let screenCenter = arView.center
+                    let dis = calculateScreenDistance(screenCenter,point)
+                    if dis<350 {
+                        if first == false{
+                            print("recstart:\(recStart), first:\(i)")
+                            recStart = max(0, i-5)
+                        }
+                        first = true
+                        let ratio = Float(min(2.3,(dis+28.0)/dis))
+                        let node = arView.scene.findEntity(named: "book@\(i)")!
+                        node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
+                        nowScaleNum += 1
+                        mindis = min(mindis,dis)
+                        if mindis == dis{
+                            minid = i
+                        }
+                    }
+                    if nowScaleNum>scaleNodeLimit{ print("reach limit"); return }
+                }
+
+            }
+//            for node in getEntityList() {
+//                let name = node.name
+//                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
+//                    return
+//                }
+//                let elementId = getIdFromName(name)
+//                guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
+//                let point = CGPoint(x:pos.x,y:pos.y)
+//                var screenCenter = arView.center
+//                if(isCoffee){screenCenter.x-=150}
+//                let dis = calculateScreenDistance(screenCenter,point)
+//                if dis<400{
+//                    let ratio = Float(min(2.3,(dis+28.0)/dis))
+//                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
+//                    mindis = min(mindis,dis)
+//                    if mindis == dis{
+//                        if isAntUpdateCot==0
+//                        {minid = elementId}
 //                    }
 //                }
-            }
+//            }
             let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
             if minid != -1 && minid != prevId{
                 showAbstract(id: minid)

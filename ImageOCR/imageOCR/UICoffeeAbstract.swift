@@ -33,6 +33,7 @@ class UICoffeeAbstract {
             self.textUI.layer.cornerRadius = 15.0
             self.textUI.layer.borderWidth = 2.0
             self.textUI.layer.borderColor = UIColor.gray.cgColor
+            self.textUI.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.9)
             self.textUI.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
             self.textUI.frame = CGRect(x: 10, y: 10, width: CGFloat(self.textW), height: CGFloat(self.imageW))
             self.textUI.isHidden = self.isHidden

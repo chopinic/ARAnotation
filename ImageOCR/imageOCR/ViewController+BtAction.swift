@@ -41,20 +41,9 @@ extension ViewController{
     }
     
     @objc func buttonTapDebug(){
-        let booksur = try! Entity.loadModel(named: "booksur")
-        let bookpage = try! Entity.loadModel(named: "bookpage")
-        let book = AnchorEntity()
-        let bookModel = ModelEntity()
-        var material1 = UnlitMaterial()
-        var material2 = UnlitMaterial()
-        material1.tintColor = UIColor.red
-        material2.tintColor = UIColor.white
-        booksur.model?.materials = [material1]
-        bookpage.model?.materials = [material2]
-        bookModel.addChild(booksur)
-        bookModel.addChild(bookpage)
-        book.addChild(bookModel)
-        arView.scene.addAnchor(book)
+        rad = rad + 120
+        print("now rad:\(rad)")
+        displayGroups( 1,  "3")
     }
 
     @objc func buttonTapaddx(){
