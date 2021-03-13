@@ -18,11 +18,15 @@ extension ViewController: UIPickerViewDataSource, UIPickerViewDelegate{
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return bookAttr.count
+        if mode==0{return bookAttr.count}
+        if mode==1{return coffAttr.count}
+        return colorAttr.count
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) ->String? {
-        return bookAttr[row]
+        if mode==0{return bookAttr[row]}
+        if mode==1{return coffAttr[row]}
+        return colorAttr[row]
     }
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         nowSelection = row

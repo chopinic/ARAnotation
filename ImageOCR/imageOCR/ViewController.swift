@@ -24,11 +24,15 @@ class ViewController: UIViewController, ARSessionDelegate {
     @IBOutlet var inputText: UITextField!
     @IBOutlet var attrSelect: UIPickerView!
     @IBOutlet var message: UITextField!
-    var nowSelection: Int = 0
+    var nowSelection: Int = 1
     var bookAttr = [String]()
+    var coffAttr = [String]()
+    var colorAttr = [String]()
     private var result: NSDictionary!
     var picMatrix = [PicMatrix]()
     var books = [BookSt]()
+    var colors = [ColorSt]()
+    var coffees = [CoffeeSt]()
     var viewCenterPoint = CGPoint()
     var elementWeights = [ElementWeight]()
     var imageH = CGFloat()
@@ -40,27 +44,34 @@ class ViewController: UIViewController, ARSessionDelegate {
     var textWidth = 300,textHeight = 250
     var rootnode = AnchorEntity()
     var coffeeAdhoc = true
-    var rad = 9360.0
-    var boxrad = 8760.0
-    var recStart = 0
     var nowGroups = [[Int]]()
     var groupPosCha = [Double]()
     var groupPosChaLimit = [Double]()
     var isAntUpdate = false
     var isAntUpdateCot = 0
+    var cmpGroup = [Int]()
     
-    
-    var isCoffee = false
-    var coffees = [CoffeeSt]()
+    var mode = 0
     var coffeeAbstractUI = UICoffeeAbstract()
-
+    var colorAbstractUI = UIColorAbstract()
+    var coffeeNormalMaterial = UnlitMaterial()
+    var coffeeVagueMaterial = UnlitMaterial()
+    var isSquare = false
+//    var rad = 6000.0
+//    var boxrad = 6160.0
+    var coffeeOffset : Offset = SmallOffset()
     // ui
     var receiveAnsCot = 0
-    var nowOrientation = 0
     var swapGestureStart = CGPoint()
+    var uiButton = [UIButton]()
+    var bottonText = [[String]]()
+    var prevSearch = ""
+    var previousKind = 1
     
     var utiQueue = DispatchQueue(label:"uploadImage", qos: .utility)
 
+    var nowScaleNodes = [Int]()
+    var scanEntitys = [Entity]()
 
     
     
@@ -86,7 +97,15 @@ class ViewController: UIViewController, ARSessionDelegate {
         attrSelect.center.x = 55
         attrSelect.center.y = inputText.center.y
         attrSelect.dataSource = self
-        bookAttr = ["Title", "Publisher", "Author", "Score", "Relate"]
+        
+        bookAttr = ["Title", "Publisher", "Author", "Rating", "Price"]
+        coffAttr = ["Name", "Group","Rating", "Milk", "Caffine", "Sugar", "Calories", "Protein","Fat"]
+        colorAttr = ["Color", "Eyetype"]
+        
+        bottonText = [
+            ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan (Chinese)", "Scan (English)", "", "Select Target","Compare Chart","World Cloud","Hide Buttons"],
+        ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan Menu", "Scan Poster", "", "Select Target","Compare Chart","Word Cloud","Hide Buttons"],
+        ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan (Circle)", "Scan (Square)", "Virtual Preview", "","","","Hide Buttons"]]
 //        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
         
         self.arView.addSubview(bookAbstractUI.ui)
@@ -95,6 +114,12 @@ class ViewController: UIViewController, ARSessionDelegate {
         self.arView.addSubview(coffeeAbstractUI.ui)
         self.arView.addSubview(coffeeAbstractUI.textUI)
 
+        colorAbstractUI.setIsHidden(true)
+        self.arView.addSubview(colorAbstractUI.ui)
+        self.arView.addSubview(colorAbstractUI.textUI)
+
+        message.textColor = UIColor.black
+        message.textAlignment = .center
 
         arView.bounds.size.width = wholewidth
         arView.bounds.size.height = wholeHeight
@@ -110,38 +135,51 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         let emptyMenu = UIImage(named: "small_empty.png")!
         let data = emptyMenu.pngData()
-        let filename = getDocumentsDirectory().appendingPathComponent("big_empty.jpg")
+        let filename = getDocumentsDirectory().appendingPathComponent("small_empty.jpg")
         try! data!.write(to: filename)
-
-//        switchToCoffee()
         
+        let emptyMenuBig = UIImage(named: "big_empty.png")!
+        let dataBig = emptyMenuBig.pngData()
+        let filenameBig = getDocumentsDirectory().appendingPathComponent("big_empty.jpg")
+        try! dataBig!.write(to: filenameBig)
+
+
+        coffeeNormalMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.99)
+        coffeeVagueMaterial.tintColor = UIColor(red: 130.0/255, green: 90.0/255, blue: 55.0/255, alpha: 0.6)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
-//        if nowOrientation != UIInterfaceOrientation.portrait.rawValue{
-//            if #available(iOS 13.4, *) {
-//                configuration.sceneReconstruction = .meshWithClassification
-//            }
-//        }
         arView.session.run(configuration)
         // height 100
-        createButton( title: "scan",negX: -100, negY: 100, action: #selector(ViewController.buttonTapUpload))
-        createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
-        // height 150
-        createButton(title: "restore",negX: -100, negY: 150, action: #selector(ViewController.restoreDisplay))
-        createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDebug))
-        let antButton = createButton(title: "Ant",negX: 100, negY: 150, action: nil)
-        antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
-        antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
-
-        createButton(title: "data",negY: 200, action: #selector(ViewController.buttonTapData))
+//        uiBotton.append(createButton( title: "DScan", negY: 100, action: #selector(ViewController.buttonTapUploadDebug),0.1))
+////        createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
+//        // height 150
+//        uiBotton.append((createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDecRad),0.1)))
+        createButton(title: "data",negY: 200, action: #selector(ViewController.buttonTapData),0.1)
 
         
-        // height 250
-        createButton(title: "background",negX: -100,negY: 250, action: #selector(ViewController.buttonTapCreateBigPlane))
-        createButton(title: "switch",negX: 100, negY: 250, action: #selector(ViewController.switchToCoffee))
+//        uiBotton.append(createButton(title: "Background",negX: -500,negY: 300, action: #selector(ViewController.buttonTapCreateBigPlane)))
+        uiButton.append(createButton(title: "Switch",negX: -500, negY: 450, action: #selector(ViewController.switchMode)))
+        uiButton.append(createButton(title: "Reranking",negX: -500,negY: 380, action: #selector(ViewController.changeToSortDisplay)))
+        let antButton = createButton(title: "Scale",negX: -500, negY: 310, action: nil)
+        antButton.addTarget(self, action: #selector(ViewController.startAntEyeDisplay), for: .touchDown)
+        antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
+        uiButton.append(antButton)
+        uiButton.append(createButton(title: "Restore",negX: -500, negY: 240, action: #selector(ViewController.restoreDisplay)))
+        uiButton.append(createButton( title: "Scan",negX: -500, negY: 170, action: #selector(ViewController.buttonTapUpload)))
+        uiButton.append(createButton( title: "Sscan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapUploadLarge)))
+
+        
+
+        
+        uiButton.append(createButton(title: "Model",negX: 450,negY: 380, action: #selector(ViewController.buttonTapFaceDebug)))
+        uiButton.append(createButton(title: "Select",negX: 450,negY: 310, action: #selector(ViewController.buttonTapSelect)))
+        uiButton.append(createButton(title: "Chart",negX: 450,  negY: 240, action: #selector(ViewController.buttonTapCmp)))
+        uiButton.append(createButton(title: "Compare",negX: 450,negY: 170, action: #selector(ViewController.buttonTapPicCmp)))
+        uiButton.append(createButton(title: "Hide",negX: 450, negY: 100, action: #selector(ViewController.setHidden)))
+//        uiBotton.append(createButton(title: "Pic",negX: 500, negY: 50, action: #selector(ViewController.adHoc)))
 
 //        createDirectionButton()
 //        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
@@ -150,9 +188,12 @@ class ViewController: UIViewController, ARSessionDelegate {
 //        createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
 
 
-        DispatchQueue.main.async{
-            self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
-        }
+//        DispatchQueue.main.async{
+//            self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
+//        }
+        setButtonText()
+        setHidden(true)
+        
         let rootNode = AnchorEntity(world: matrix_identity_float4x4)
         rootNode.name = "rootnode@"
         arView.scene.addAnchor(rootNode)
@@ -161,7 +202,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     func setLocation(locDic: NSDictionary)->Location{
         var loc = Location()
-        if(isCoffee){
+        if(mode==1){
             loc.height = locDic["height"] as! Int
             loc.width = locDic["width"] as! Int
             loc.top = locDic["top"] as! Int
@@ -176,32 +217,94 @@ class ViewController: UIViewController, ARSessionDelegate {
         return loc;
     }
     
-    func setResult(cot:Int, receive: String, isDebug: Bool = false){
+    func setResult(cot:Int, receive: String, isDebug: Bool = false, _ temp: Bool = false){
         result = Internet.getDictionaryFromJSONString(jsonString: receive)
-        print("visit returns")
-        print("setResult function is on \(Thread.current)" )
+//        print("visit returns")
+//        print("setResult function is on \(Thread.current)" )
         receiveAnsCot+=1
         if let hasResult = result {
-            if isCoffee == false{
-                setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
+            if(temp==false){
+                if mode == 0{
+                    setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
+                }else if mode == 2{
+                    setForColor(cot:cot, hasResult: hasResult,isDebug: isDebug)
+                }else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
             }
-            else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
         }
         if(receiveAnsCot != picMatrix.count){
-            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
+            var subfix = "scan result"
+            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
+            setMessage("waiting for \(picMatrix.count-receiveAnsCot)"+subfix)
         }else{
             setMessage("Receive all scan results")
         }
 
     }
+    public func setForColor(cot:Int, hasResult: NSDictionary, isDebug: Bool){
+        if let colorResult = hasResult["result"] {
+            let colorArray = colorResult as! NSArray
+            print("Found \(colorArray.count) colors")
+            for nowforbook in colorArray{
+                let nowTempColor = nowforbook as! NSDictionary
+                let nowColor = ColorSt()
+                let loc = nowTempColor["location"] as! NSDictionary
+                nowColor.loc = setLocation(locDic: loc)
+                nowColor.remark = nowTempColor["remark"] as! String
+                nowColor.eyetype = nowTempColor["eyetype"] as! String
+                nowColor.shadowtype = nowTempColor["shadowtype"] as! String
+                print(nowColor.shadowtype)
+                nowColor.recommandplace = nowTempColor["recommandplace"] as! String
+                nowColor.benifits = nowTempColor["benifits"] as! String
+                nowColor.feature = nowTempColor["feature"] as! String
+                nowColor.tips = nowTempColor["tips"] as! String
+                let r = nowTempColor["r"] as! Double// NSString).doubleValue
+                let g = nowTempColor["g"] as! Double// NSString).doubleValue
+                let b = nowTempColor["b"] as! Double// NSString).doubleValue
+                nowColor.color = UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: 0.8)
+                var strBase64 = nowTempColor["base64"] as! String
+                var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+//                        let temppic = pic.rotate(radians: .pi/2)
+                var filename = getDocumentsDirectory().appendingPathComponent("color@\(colors.count).png")
+                try! dataDecoded.write(to: filename)
+
+                strBase64 = nowTempColor["tipsbase64"] as! String
+                dataDecoded = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+//                        let temppic = pic.rotate(radians: .pi/2)
+//                    filename = getDocumentsDirectory().appendingPathComponent("colorTips@\(colors.count).png")
+//                    try! dataDecoded.write(to: filename)
+                elementPics.append(UIImage(data: dataDecoded)!)
+                
+                nowColor.tPicId = elementPics.count-1
+                nowColor.matrixId = cot
+                colors.append(nowColor)
+                elementWeights.append(ElementWeight())
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.resetAndAddAnchor()
+        }
+
+
+    }
     
     public func setForCoffee(cot:Int, hasResult: NSDictionary, isDebug: Bool){
-        let menuPic : Data = Data(base64Encoded: hasResult["menubase64"] as! String, options: .ignoreUnknownCharacters)!
-        let oriFilename = getDocumentsDirectory().appendingPathComponent("MenuOri@.png")
-        try! menuPic.write(to: oriFilename)
-        let emptyMenu : Data = Data(base64Encoded: hasResult["menubase64_nowords"] as! String, options: .ignoreUnknownCharacters)!
-        let emptyFileName = getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png")
-        try! emptyMenu.write(to: emptyFileName)
+        if isDebug{
+            let menuPic = UIImage(named: "menuDebug.jpg")!.pngData()!
+            let oriFilename = getDocumentsDirectory().appendingPathComponent("MenuOri@.png")
+            try! menuPic.write(to: oriFilename)
+            
+//            let emptyMenu = UIImage(named: "menu_nowords.jpg")!.pngData()!
+//            let emptyFileName = getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png")
+//            try! emptyMenu.write(to: emptyFileName)
+        }else{
+            let menuPic : Data = Data(base64Encoded: hasResult["menubase64"] as! String, options: .ignoreUnknownCharacters)!
+            let oriFilename = getDocumentsDirectory().appendingPathComponent("MenuOri@.png")
+            try! menuPic.write(to: oriFilename)
+//            let emptyMenu : Data = Data(base64Encoded: hasResult["menubase64_nowords"] as! String, options: .ignoreUnknownCharacters)!
+//            let emptyFileName = getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png")
+//            try! emptyMenu.write(to: emptyFileName)
+        }
+            
         if let resultbooks = hasResult["words_result"] {
             let coffeeArray = resultbooks as! NSArray
             print("Found \(coffeeArray.count) coffees")
@@ -211,24 +314,38 @@ class ViewController: UIViewController, ARSessionDelegate {
 //                let coffeeloc = nowCoffeeDic["location"] as! NSDictionary
 //                nowCoffee.loc = setLocation(locDic: coffeeloc)
                 nowCoffee.name = nowCoffeeDic["words"] as! String
-                nowCoffee.fragrance = nowCoffeeDic["fragrance"] as! String
-                nowCoffee.freshness = nowCoffeeDic["freshness"] as! String
-                nowCoffee.sweet = nowCoffeeDic["sweet"] as! String
-                nowCoffee.rich = nowCoffeeDic["rich"] as! String
+                nowCoffee.milk = nowCoffeeDic["milk"] as! Double
+                nowCoffee.caffine = nowCoffeeDic["caffine"] as! Double
+                nowCoffee.water = nowCoffeeDic["water"] as! Double
+//                nowCoffee.fragrance = nowCoffeeDic["fragrance"] as! String
+//                nowCoffee.freshness = nowCoffeeDic["freshness"] as! String
+//                nowCoffee.sweet = nowCoffeeDic["sweet"] as! String
+//                nowCoffee.rich = nowCoffeeDic["rich"] as! String
+//                nowCoffee.sour = nowCoffeeDic["sour"] as! String
                 nowCoffee.belong = nowCoffeeDic["belong"] as! String
-                nowCoffee.sour = nowCoffeeDic["sour"] as! String
-                nowCoffee.score = Int(nowCoffeeDic["score"] as! Double)
+                
+                nowCoffee.sugar = nowCoffeeDic["sugar"] as! Double
+                nowCoffee.calories = nowCoffeeDic["calories"] as! Double //?? Double(coffees.count*10)
+                nowCoffee.fat = nowCoffeeDic["fat"] as! Double //?? Double(coffees.count*10)
+                nowCoffee.protein = nowCoffeeDic["protein"] as! Double //?? Double(coffees.count*10)
+                nowCoffee.score = nowCoffeeDic["score"] as! Double
                 nowCoffee.remark = nowCoffeeDic["remark"] as! String
+                
                 if(isDebug){
-                    elementPics.append(UIImage(named: "coffee1.jpg")!)
-                    elementPics.append(UIImage(named: "component.jpg")!)
-                }else{
-                    var strBase64 = nowCoffeeDic["base64"] as! String
-                    var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                    let filename = getDocumentsDirectory().appendingPathComponent("coffee@\(coffees.count).png")
+                    let dataDecoded = UIImage(named: "component.png")!.pngData()!
+                    let filename = getDocumentsDirectory().appendingPathComponent("coffeedes@\(coffees.count).png")
                     try! dataDecoded.write(to: filename)
-                    strBase64 = nowCoffeeDic["desbase64"] as! String
-                    dataDecoded = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                    nowCoffee.desPicid = elementPics.count
+                    elementPics.append(UIImage(named: "component.png")!)
+                }else{
+//                    var strBase64 = nowCoffeeDic["base64"] as! String
+//                    var dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+//                    var filename = getDocumentsDirectory().appendingPathComponent("coffee@\(coffees.count).png")
+//                    try! dataDecoded.write(to: filename)
+                    let strBase64 = nowCoffeeDic["desbase64"] as! String
+                    let dataDecoded = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                    let filename = getDocumentsDirectory().appendingPathComponent("coffeedes@\(coffees.count).png")
+                    try! dataDecoded.write(to: filename)
                     nowCoffee.desPicid = elementPics.count
                     if let pic = UIImage(data: dataDecoded){
                         elementPics.append(pic)
@@ -264,14 +381,22 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let bookloc = nowtempbook["location"] as! NSDictionary
                 nowbook.color = UIColor(red: (nowtempbook["r"] as! CGFloat)/255.0, green: (nowtempbook["g"] as! CGFloat)/255.0, blue: (nowtempbook["b"] as! CGFloat)/255.0, alpha: 1)
                 nowbook.loc = setLocation(locDic: bookloc)
-                nowbook.title = nowtempbook["title"] as! String
+                nowbook.title = nowtempbook["titleocr"] as? String ?? "Default Title"
+                if nowbook.title == "Default"{
+                    nowbook.title = nowtempbook["title"] as! String
+                }
+                nowbook.isbn = nowtempbook["isbn"] as! String
                 nowbook.author = nowtempbook["author"] as! String
                 nowbook.publisher = nowtempbook["publisher"] as! String
-                nowbook.relatedBook = nowtempbook["relatebooks"] as! String
-                nowbook.score = Int((nowtempbook["score"] as! Double)*5)
-                nowbook.remark = nowtempbook["remark"] as! String
+//                nowbook.price = (nowtempbook["pages"] as! NSString).doubleValue / 5
+                nowbook.price = (nowtempbook["pages"] as? Double ?? Double(books.count) )/5
+//                nowbook.relatedBook = "relatebooks"//nowtempbook["relatebooks"] as! String
+                nowbook.score = (nowtempbook["average"] as! NSString).doubleValue * 5//Int((nowtempbook["score"] as! Double)*5)
+                nowbook.remark = nowtempbook["summary"] as! String
                 if(isDebug){
-                    elementPics.append(UIImage(named: "test2.png")!)
+                    let data = UIImage(named: "bookDebug.png")!.pngData()
+                    let filename = getDocumentsDirectory().appendingPathComponent("book@\(books.count).png")
+                    try! data!.write(to: filename)
                 }else{
                     let strBase64 = nowtempbook["base64"] as! String
                     let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
@@ -286,9 +411,10 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let parts = nowtempbook["part"] as! NSArray
                 for wordforlocs in parts {
                     let wordlocs = wordforlocs as! NSDictionary
-                    nowbook.kinds.append(wordlocs["type"] as! String)
+//                    nowbook.kinds.append(wordlocs["type"] as! String)
                     nowbook.words.append(wordlocs["words"] as! String)
                 }
+                if isDebug{nowbook.words.append("\(books.count)")}
                 nowbook.matrixId = cot;
                 books.append(nowbook);
                 elementWeights.append(ElementWeight())
@@ -309,59 +435,90 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
     
     public func resetPicTracking() -> Bool{
-        if(isCoffee==false){return false}
+        if(mode==0){return false}
         let fileName = "MenuOri@.png"
         let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/" + fileName
         guard var oriMenu = UIImage(contentsOfFile: path)else{
-            print("no original menu file")
+            setMessage("no original menu file")
             return false
         }
         PicMatrix.imageW = Double(oriMenu.size.width * oriMenu.scale)
         PicMatrix.imageH = Double(oriMenu.size.height * oriMenu.scale)
-        oriMenu = UIImage(named: "small.png")!
+        print("pic width: \(PicMatrix.imageW), pic height: \(PicMatrix.imageH)")
+//        if PicMatrix.imageW < PicMatrix.imageH{
+//            oriMenu = UIImage(named: "big.jpg")!
+//        }else{
+//        }
 
         let physicalWidth = picMatrix[0].getActualLen(oriLen: PicMatrix.imageW, isW: true)
+        print(physicalWidth)
+
+        let oriMenuBig = UIImage(named: "bigPic.jpeg")!.cgImage!
+//        let oriMenuCIImageBig = CIImage(image: oriMenuBig)!
+//        let oriMenuCgImageBig = convertCIImageToCGImage(inputImage: oriMenuCIImageBig)!
+        let arImageBig = ARReferenceImage(oriMenuBig, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(1.2))
+        arImageBig.name = "big"
+        
+        oriMenu = UIImage(named: "small.jpg")!
         let oriMenuCIImage = CIImage(image: oriMenu)!
         let oriMenuCgImage = convertCIImageToCGImage(inputImage: oriMenuCIImage)!
-        let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(physicalWidth))
-        arImage.name = "Coffee Menu"
+        let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(physicalWidth))  
+        arImage.name = "small"
 
+        
         let configuration = ARWorldTrackingConfiguration()
-        configuration.detectionImages = [arImage]
+        configuration.detectionImages = [arImage,arImageBig]
         arView.session.run(configuration)
         return true
     }
     
     public func resetAndAddAnchor(isReset: Bool = false) -> Bool{
         if isReset{
+            scanEntitys = [Entity]()
             for i in stride(from: 0, to: books.count ,by: 1){
                 books[i].isDisplay = false
             }
             
             for i in stride(from: 0, to: coffees.count ,by: 1){
                 coffees[i].isDisplay = false
+                print("reset for \(i)")
             }
-            
-            let childNodes = getEntityList()
-            for node in childNodes {
-                let name = node.name
-                if name.hasPrefix("book@") {
-                    arView.scene.removeAnchor(node as! HasAnchoring)
-                }else if name.hasPrefix("coffee@"){
+            for i in stride(from: 0, to: colors.count ,by: 1){
+                colors[i].isDisplay = false
+            }
+
+            if let menu = arView.scene.findEntity(named: "menu@"){
+                for node in menu.children{
+                    if node.name == "small" || node.name == "large"  {
+                        continue
+                    }
                     node.removeFromParent()
-                }else{
-                    continue;
+                }
+            }
+            else{
+                let childNodes = getEntityList()
+                for node in childNodes {
+                    let name = node.name
+                    if name.hasPrefix("book@") {
+                        arView.scene.removeAnchor(node as! HasAnchoring)
+                    }else if name.hasPrefix("color@"){
+                        node.removeFromParent()
+                    }else{
+                        continue;
+                    }
                 }
             }
         }
         
         
         
-        if isCoffee{
+        if mode==1{
             guard let menu = arView.scene.findEntity(named: "menu@") else{
                 return false
             }
-
+            if menu.findEntity(named: "small") != nil{
+                print("find small")
+            }
             for i in stride(from: 0, to: coffees.count ,by: 1){
 
                 if coffees[i].isDisplay{
@@ -378,13 +535,21 @@ class ViewController: UIViewController, ARSessionDelegate {
     //            let coffee = createCoffeeFont(id: i,coffeeName:coffees[i].name, size: size)
                 let coffee = ModelEntity()
                 let lineHeight: CGFloat = 0.05
-                let font = MeshResource.Font.systemFont(ofSize: lineHeight, weight: .bold)
+                let font = MeshResource.Font.systemFont(ofSize: lineHeight)
                 let textMesh = MeshResource.generateText(coffees[i].name, extrusionDepth: Float(lineHeight * 0.1), font: font)
+                let bound = textMesh.bounds
                 var textMaterial = UnlitMaterial()
     //            material.baseColor = MaterialColorParameter.texture(resource!)
-                textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.8)
+                textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.99)
                 let coffeeFont = ModelEntity(mesh: textMesh, materials: [textMaterial])
-                let radius = Float(0.1) // Float(size.width)/(bound.boundingRadius*2)
+                coffeeFont.name = "font"
+//                coffeeFont.model?.materials.first =
+                var radius = Float(0.15)
+                if menu.findEntity(named: "big") != nil{
+                    radius = Float(0.7)
+                }
+                coffees[i].size.width = CGFloat(bound.boundingRadius*radius)
+                coffeeFont.position = SIMD3<Float>(x: Float(-1*coffees[i].size.width/2), y: 0, z: 0)
                 
                 coffee.transform = Transform(matrix: trans)
                 coffee.name = "coffee@\(i)"
@@ -392,18 +557,63 @@ class ViewController: UIViewController, ARSessionDelegate {
                 coffeeFont.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
                 coffee.generateCollisionShapes(recursive: true)
                 menu.addChild(coffee)
+                scanEntitys.append(coffee)
             }
-            displayGroups()
-            for i in stride(from: 0, to: SmallOffset.blockStartx.count, by: 1){
-                let size = CGSize(width: SmallOffset.blockWidth[i]/boxrad, height: SmallOffset.blockHeight[i]/boxrad)
+            if isReset{displayGroups(previousKind, prevSearch, false)}
+            else{displayGroups()}
+
+//            if menu.findEntity(named: "small") != nil{
+            for i in stride(from: 0, to: coffeeOffset.blockStartx.count, by: 1){
+                let size = CGSize(width: coffeeOffset.blockWidth[i]/coffeeOffset.boxrad, height: coffeeOffset.blockHeight[i]/coffeeOffset.boxrad)
                 var material = UnlitMaterial()
                 
                 material.tintColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.0)
                 let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
                 plane.name =  "group@\(i)"
-                plane.position = SIMD3<Float>(x: Float(SmallOffset.blockStartx[i]/boxrad+(SmallOffset.blockWidth[i]/boxrad)/2-0.01), y: Float(SmallOffset.blockStarty[i]/boxrad-(SmallOffset.blockHeight[i]/boxrad)/2), z: -0.001)
+                plane.position = SIMD3<Float>(x: Float(coffeeOffset.blockStartx[i]/coffeeOffset.boxrad+(coffeeOffset.blockWidth[i]/coffeeOffset.boxrad)/2), y: Float(coffeeOffset.blockStarty[i]/coffeeOffset.boxrad-(coffeeOffset.blockHeight[i]/coffeeOffset.boxrad)/2), z: -0.005)
                 plane.generateCollisionShapes(recursive: true)
                 menu.addChild(plane)
+            }
+//            }else{
+//                for i in stride(from: 0, to: BigOffset.blockStartx.count, by: 1){
+//                    let size = CGSize(width: BigOffset.blockWidth[i]/boxrad, height: BigOffset.blockHeight[i]/boxrad)
+//                    var material = UnlitMaterial()
+//
+//                    material.tintColor = UIColor.init(red: 1, green: 0, blue: 0, alpha: 0.5)
+//                    let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
+//                    plane.name =  "group@\(i)"
+//                    plane.position = SIMD3<Float>(x: Float((BigOffset.blockStartx[i]+BigOffset.blockWidth[i]/2)/boxrad), y: Float((BigOffset.blockStarty[i]-BigOffset.blockHeight[i]/2)/boxrad), z: 0.005)
+//                    plane.generateCollisionShapes(recursive: true)
+//                    print("add plane\(i)")
+//                    menu.addChild(plane)
+//                }
+//                print()
+//            }
+        } else if mode == 2 {
+            for i in stride(from: 0, to: colors.count ,by: 1){
+                if colors[i].isDisplay{
+                    continue;
+                }
+                let nowMatrix = colors[i].matrixId!-1
+                colors[i].isDisplay = true;
+                let trans = picMatrix[nowMatrix].addBookAnchor(id:i,element:colors[i])
+                colors[i].oriTrans = trans
+                colors[i].tempTrans = trans
+                let currentColor = colors[i]
+                let rootLoc = currentColor.loc
+    //            let picContents = elementPics[currentBook.picid]
+                let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+                colors[i].size = size
+                let color = AnchorEntity(world: trans)
+                guard let plane = createPlane(id: i, size: size, mode: mode, isSquare) else{
+                    return false
+                }
+                color.addChild(plane)
+                color.name = "color@\(i)"
+                color.generateCollisionShapes(recursive: true)
+                
+                arView.scene.addAnchor(color)
+                scanEntitys.append(color)
             }
         }else{
             for i in stride(from: 0, to: books.count ,by: 1){
@@ -412,8 +622,9 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }
                 let nowMatrix = books[i].matrixId!-1
                 books[i].isDisplay = true;
-                let trans = picMatrix[nowMatrix].addBookAnchor(id:i,book:books[i])
+                let trans = picMatrix[nowMatrix].addBookAnchor(id:i,element:books[i])
                 books[i].oriTrans = trans
+                books[i].tempTrans = trans
                 let currentBook = books[i]
                 let rootLoc = currentBook.loc
     //            let picContents = elementPics[currentBook.picid]
@@ -425,7 +636,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     words+=str+" "
                 }
                 let book = AnchorEntity(world: trans)
-                guard let plane = createPlane(id: i, size: size, isCoffee: isCoffee) else{
+                guard let plane = createPlane(id: i, size: size, mode: mode) else{
                     return false
                 }
                 book.addChild(plane)
@@ -435,6 +646,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 book.name = "book@\(i)"
                 book.generateCollisionShapes(recursive: true)
                 arView.scene.addAnchor(book)
+                scanEntitys.append(book)
             }
         }
         return true
@@ -445,10 +657,18 @@ class ViewController: UIViewController, ARSessionDelegate {
         guard let imageAnchor = anchors.first as? ARImageAnchor else{
             return
         }
+        print(imageAnchor.referenceImage.name)
+        var nowW = 0.43//Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageW, isW: true))
+        var nowH = 0.30//Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageH, isW: false))
+
+        var resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("small_empty.jpg"))
+        if imageAnchor.referenceImage.name == "big"{
+            resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("big_empty.jpg"))
+            nowW = 1.35
+            nowH = 2
+            coffeeOffset = BigOffset()
+        }
         //        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png"))
-        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("big_empty.jpg"))
-        let nowW = Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageW, isW: true))
-        let nowH = Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageH, isW: false))
         print("menu width: \(nowW), height:\(nowH)")
         let rotationTrans = imageAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
         let trans = getForwardTrans(ori: rotationTrans, dis: 0.1) //开始时是悬浮在上方10cm， update时向下移动到原位
@@ -460,6 +680,9 @@ class ViewController: UIViewController, ARSessionDelegate {
         let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(nowW), height: Float(nowH)), materials: [material])
         anchor.addChild(imagePlane)
         anchor.name = "menu@"
+        let identify = AnchorEntity()
+        identify.name = imageAnchor.referenceImage.name!
+        anchor.addChild(identify)
         arView.scene.anchors.append(anchor)
         resetAndAddAnchor()
     }
@@ -501,26 +724,38 @@ class ViewController: UIViewController, ARSessionDelegate {
                 print("renderer: no such coffee \(coffeeAbstractUI.id)")
                 return
             }
-            if childNode.position.z > 0{
+            if childNode.position.z >= 0{
                 if let pos = arView.project(coffees[coffeeAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
                     var pos2d = CGPoint()
                     pos2d.x = pos.x+125 // +CGFloat(coffeeAbstractUI.imageW/2)
-                    pos2d.y = pos.y-125 // -CGFloat(coffeeAbstractUI.imageW/2)
+                    pos2d.y = pos.y // -CGFloat(coffeeAbstractUI.imageW/2)
                     coffeeAbstractUI.updatePosition(position: pos2d)
                 }
             }
         }
+        
+        if(colorAbstractUI.getIsHidden() == false){
+            guard let childNode = arView.scene.findEntity(named:  "color@\(colorAbstractUI.id)") else{
+                print("renderer: no such color \(colorAbstractUI.id)")
+                return
+            }
+                if let pos = arView.project(colors[colorAbstractUI.id].uiPos(childNode.transformMatrix(relativeTo: rootnode))){
+                    var pos2d = CGPoint()
+                    pos2d.x = pos.x // +CGFloat(coffeeAbstractUI.imageW/2)
+                    pos2d.y = pos.y // -CGFloat(coffeeAbstractUI.imageW/2)
+                    colorAbstractUI.updatePosition(position: pos2d)
+                }
+        }
+
 
         if(isAntUpdate){
-            let scaleNodeLimit = 10
-            var nowScaleNum = 0
             viewCenterPoint = arView.center
-            isAntUpdateCot = (isAntUpdateCot+1)%5
+            isAntUpdateCot = (isAntUpdateCot+1)%1000
             var mindis = 100000.0
             var minid = -1
-            if isCoffee{
+            if mode==1{
                 for i in stride(from: 0, to: coffees.count, by: 1) {
-                    let trans = coffees[i].tempTrans
+                    let trans = scanEntitys[i].transformMatrix(relativeTo: rootnode)
                     guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
                     let point = CGPoint(x:pos.x,y:pos.y)
                     var screenCenter = arView.center
@@ -531,85 +766,103 @@ class ViewController: UIViewController, ARSessionDelegate {
                         let node = arView.scene.findEntity(named: "coffee@\(i)")!
                         node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
                         mindis = min(mindis,dis)
-                        nowScaleNum += 1
                         if mindis == dis{
                             minid = i
                         }
                     }
-                    if nowScaleNum<scaleNodeLimit{return}
                 }
-            }
-            else{
-                if isAntUpdateCot%5 != 0{return}
-                var first = false
-                for j in stride(from: 0, to: books.count, by: 1) {
-                    let i = (j+recStart)%books.count
-                    let trans = books[i].tempTrans
+            } else if mode == 2 {
+                for i in stride(from: 0, to: colors.count, by: 1) {
+                    let trans = scanEntitys[i].transformMatrix(relativeTo: rootnode)
                     guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
                     let point = CGPoint(x:pos.x,y:pos.y)
-                    let screenCenter = arView.center
+                    var screenCenter = arView.center
+                    screenCenter.x-=150
                     let dis = calculateScreenDistance(screenCenter,point)
-                    if dis<350 {
-                        if first == false{
-                            print("recstart:\(recStart), first:\(i)")
-                            recStart = max(0, i-5)
-                        }
-                        first = true
-                        let ratio = Float(min(2.3,(dis+28.0)/dis))
-                        let node = arView.scene.findEntity(named: "book@\(i)")!
+                    if dis<400{
+                        let ratio = Float(min(1.5,(dis+28.0)/(10+dis)))
+                        let node = arView.scene.findEntity(named: "color@\(i)")!
                         node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
-                        nowScaleNum += 1
                         mindis = min(mindis,dis)
                         if mindis == dis{
                             minid = i
                         }
                     }
-                    if nowScaleNum>scaleNodeLimit{ print("reach limit"); return }
                 }
 
+            }else{
+                if isAntUpdateCot%(books.count/8+1) == 0{
+                    updateNearbyNodes()
+                }
+                for i in stride(from: 0, to: nowScaleNodes.count, by: 1) {
+                    let trans = books[nowScaleNodes[i]].tempTrans
+                    guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+                    let point = CGPoint(x:pos.x,y:pos.y)
+                    let screenCenter = arView.center
+                    let dis = calculateScreenDistance(screenCenter,point)
+                    let ratio = Float(min(2,(dis+28.0)/dis))
+//                    print("now ratio:\(ratio), nowdis:\(dis)")
+                    
+                    let node = scanEntitys[nowScaleNodes[i]]
+                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
+                    mindis = min(mindis,dis)
+                    if mindis == dis{
+                        minid = nowScaleNodes[i]
+                    }
+                }
             }
-//            for node in getEntityList() {
-//                let name = node.name
-//                guard isCoffee&&name.hasPrefix("coffee@") || isCoffee==false&&name.hasPrefix("book@") else {
-//                    return
-//                }
-//                let elementId = getIdFromName(name)
-//                guard let pos = arView.project(calcuPointPos(trans: node.transformMatrix(relativeTo: rootnode))) else{continue}
-//                let point = CGPoint(x:pos.x,y:pos.y)
-//                var screenCenter = arView.center
-//                if(isCoffee){screenCenter.x-=150}
-//                let dis = calculateScreenDistance(screenCenter,point)
-//                if dis<400{
-//                    let ratio = Float(min(2.3,(dis+28.0)/dis))
-//                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
-//                    mindis = min(mindis,dis)
-//                    if mindis == dis{
-//                        if isAntUpdateCot==0
-//                        {minid = elementId}
-//                    }
-//                }
-//            }
-            let prevId = isCoffee ? coffeeAbstractUI.id : bookAbstractUI.id
+            var prevId = bookAbstractUI.id
+            if mode == 2 {prevId = colorAbstractUI.id}
+            else if mode==1 {prevId = coffeeAbstractUI.id}
             if minid != -1 && minid != prevId{
+                if mode==2{
+                    var translation = matrix_identity_float4x4
+                    if prevId != -1
+                    {
+                        translation.columns.3.z = Float(0.0005*Float(prevId%13))
+                        scanEntitys[prevId].setTransformMatrix(colors[prevId].tempTrans, relativeTo: rootnode)
+                    }
+                    translation.columns.3.z = Float(0.01)
+                    scanEntitys[minid].setTransformMatrix(colors[minid].tempTrans*translation, relativeTo: rootnode)
+                }
                 showAbstract(id: minid)
             }
         }
         if let backnode = arView.scene.findEntity(named: "trans@1"){
             let nowTrans = arView.session.currentFrame!.camera.transform
             var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-2)
+            translation.columns.3.z = Float(-10)
             backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
-            if let anno = arView.scene.findEntity(named: "cannon"){
-                anno.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
-                print("find cannon")
+        }
+        if let backnode = arView.scene.findEntity(named: "cmp@1"){
+            let nowTrans = arView.session.currentFrame!.camera.transform
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-0.25)
+            translation.columns.3.y = Float(-0.02)
+            backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+        }
+    }
+    
+    
+    func updateNearbyNodes(){
+        nowScaleNodes = [Int]()
+        for i in stride(from: 0, to: books.count, by: 1) {
+            let trans = books[i].tempTrans
+            guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+            let point = CGPoint(x:pos.x,y:pos.y)
+            let screenCenter = arView.center
+            let dis = calculateScreenDistance(screenCenter,point)
+//            print("book\(i): \(dis)")
+            if dis<250 {
+                nowScaleNodes.append(i)
             }
         }
     }
+
     
     override func didReceiveMemoryWarning(){
         super.didReceiveMemoryWarning()
         result = nil
-//        picMatrix
     }
     
     

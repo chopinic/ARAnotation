@@ -7,49 +7,120 @@
 //
 
 import Foundation
-protocol offset{
-    static var blockStartx :  [Double] { get set }
-    static var blockStarty :  [Double] { get set }
-    static var blockWidth :  [Double] { get set }
-    static var blockHeight :  [Double] { get set }
+protocol Offset{
+    var rad : Double { get set}
+    var boxrad : Double { get set}
+    var blockStartx :  [Double] { get  }
+    var blockStarty :  [Double] { get  }
+    var blockWidth :  [Double] { get  }
+    var blockHeight :  [Double] { get  }
 
-    static var xx : [Double] { get set }
-    static var yy : [Double] { get set }
-    static var step: Double { get }
+    var xx : [Double] { get  }
+    var yy : [Double] { get }
+    var step: Double { get }
 }
-struct BigOffset: offset {
-    static var blockStartx = [Double]()
+struct BigOffset: Offset {
+    var boxrad: Double = 3000
     
-    static var blockStarty = [Double]()
+    var rad: Double = 3000
     
-    static var blockWidth = [Double]()
+    var blockStartx: [Double]
     
-    static var blockHeight = [Double]()
+    var blockStarty: [Double]
     
-    static var step: Double = 100
+    var blockWidth: [Double]
     
-    static var xx = [Double]()
+    var blockHeight: [Double]
     
-    static var yy = [Double]()
+    var xx: [Double]
+    
+    var yy: [Double]
+    
+    var picW = 5998.0
+    var picH = 3820.0
+
+    var step: Double = 200
+    
+    init() {
+        xx=[1880-picW/2,3290-picW/2,1880-picW/2,3290-picW/2,3290-picW/2]
+        yy = [picH/2+130,picH/2+130,picH/2-2250,picH/2-2250,picH/2-3650]
+        blockStartx = [1630-picW/2,3140-picW/2,1630-picW/2,3140-picW/2,3140-picW/2]
+        blockStarty = [picH/2+80,picH/2+80,picH/2-2300,picH/2-2300,picH/2-3700]
+        blockWidth = [1070,1070,1070,1070,1070]
+        blockHeight = [1490,1490,1160,1160,550]
+    }
+//    var xx//: [Double] = [720-picW/2,2210-picW/2,720-picW/2,2210-picW/2,2210-picW/2]
+//
+//    var yy: [Double] = [picH/2-1020,picH/2-1020,picH/2-3250,picH/2-3270,picH/2-4680]
+//
+//    var blockStartx: [Double] = [1630-picW/2,3140-picW/2,1630-picW/2,3140-picW/2,3140-picW/2]
+//
+//    var blockStarty: [Double]  =
+//
+//    var blockWidth: [Double] = [1070,1070,1070,1070,1070]
+//
+//    var blockHeight: [Double] = [1490,1490,1160,1160,550]
+//
+}
+
+struct SmallOffset: Offset {
+    var rad: Double = 6000.0
+    
+    var boxrad: Double = 6100.0
+    
+    var blockStartx: [Double]
+    
+    var blockStarty: [Double]
+    
+    var blockWidth: [Double]
+    
+    var blockHeight: [Double]
+    
+    var xx: [Double]
+    
+    var yy: [Double]
+    
+    var picW = 2480.0
+    var picH = 1755.0
+
+    var step: Double = 80
+    
+    init() {
+        xx=[250-picW/2,810-picW/2,1360-picW/2,1930-picW/2,1930-picW/2]
+        yy = [picH/2-520,picH/2-520,picH/2-520,picH/2-520,picH/2-1331]
+        blockStartx = [142-picW/2,690-picW/2,1250-picW/2,1830-picW/2,1830-picW/2]
+        blockStarty = [picH/2-615,picH/2-615,picH/2-615,picH/2-615,picH/2-1455]
+        blockWidth = [520,520,520,520,512]
+        blockHeight = [790,790,630,630,320]
+    }
+
+//    var xx: [Double] = [250-picW/2,810-picW/2,1360-picW/2,1930-picW/2,1930-picW/2]
+//
+////    var yy: [Double] = [picH/2-370,picH/2-370,picH/2-370,picH/2-370,picH/2-1200]
+//    var yy: [Double] = [picH/2-520,picH/2-520,picH/2-520,picH/2-520,picH/2-1331]
+//
+//    var blockStartx: [Double] = [142-picW/2,690-picW/2,1250-picW/2,1830-picW/2,1830-picW/2]
+//
+////    var blockStarty: [Double]  = [picH/2-465,picH/2-465,picH/2-465,picH/2-465,picH/2-1295]
+//    var blockStarty: [Double]  = [picH/2-615,picH/2-615,picH/2-615,picH/2-615,picH/2-1455]
+//
+//    var blockWidth: [Double] = [520,520,520,520,512]
+//
+//    var blockHeight: [Double] = [790,790,630,630,320]
     
 }
 
-struct SmallOffset: offset {
-    static var picW = 2480.0
-    static var picH = 1755.0
 
-    static var step: Double = 80
-    
-    static var xx: [Double] = [180-picW/2,740-picW/2,1300-picW/2,1880-picW/2,1880-picW/2]
-    
-    static var yy: [Double] = [picH/2-390,picH/2-390,picH/2-390,picH/2-390,picH/2-1230]
-    
-    static var blockStartx: [Double] = [142-picW/2,690-picW/2,1250-picW/2,1830-picW/2,1830-picW/2]
-    
-    static var blockStarty: [Double]  = [picH/2-452,picH/2-452,picH/2-452,picH/2-452,picH/2-1290]
-    
-    static var blockWidth: [Double] = [520,520,520,520,512]
-    
-    static var blockHeight: [Double] = [790,790,630,630,320]
-    
-}
+//big ori:
+//var xx: [Double] = [720-picW/2,2210-picW/2,720-picW/2,2210-picW/2,2210-picW/2]
+//
+//var yy: [Double] = [picH/2-1020,picH/2-1020,picH/2-3250,picH/2-3270,picH/2-4680]
+//
+//var blockStartx: [Double] = [530-picW/2,2040-picW/2,530-picW/2,2040-picW/2,2040-picW/2]
+//
+//var blockStarty: [Double]  = [picH/2-1020,picH/2-1020,picH/2-3400,picH/2-3400,picH/2-4800]
+//
+//var blockWidth: [Double] = [1070,1070,1070,1070,1070]
+//
+//var blockHeight: [Double] = [1490,1490,1160,1160,550]
+

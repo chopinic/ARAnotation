@@ -26,6 +26,7 @@ public class Element{
     var isDisplay: Bool!=false
     var size = CGSize()
     var remark = ""
+    var score: Double = 0
 
 //    var uiPos: SIMD3<Float>?
     public func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
@@ -42,12 +43,12 @@ public class BookSt: Element{
     var locations = [Location]()
     var kinds = [String]()
     var color = UIColor.gray
+    var isbn = ""
     var title = ""
     var author = ""
     var publisher = ""
-    var relatedBook = ""
-    var score: Int = 0
     var isOpen = false
+    var price = 160.0
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
         translation.columns.3.y = Float(size.height)/2
@@ -66,12 +67,14 @@ public class BookSt: Element{
         for _ in stride(from: 0, to: score ,by: 1){
             abstractscore+="⭐️"
         }
-        var abstract = ""
-        for bookStr in words {
-            abstract+=bookStr
-            abstract+="\n"
-        }
-        abstract+="Rating: "+abstractscore+"\n\n"
+        var abstract = title+"\n"
+//        for bookStr in words {
+//            abstract+=bookStr
+//            abstract+="\n"
+//        }
+//        abstract
+        abstract+="Rating: "+abstractscore+"\n"
+        abstract+="Price: \(price)\n\n"
         abstract+="Reviewer's words:\n  "+remark
         return abstract
     }
@@ -86,21 +89,23 @@ public class CoffeeSt: Element{
 //    var picid = -1
     var desPicid = -1
     var name = ""
-    var fragrance = ""
     var belong = ""
-    var milk = ""
-    var caffine = ""
-    var sugar = ""
+    var calories = 30.0
+    var fat = 0.0
+    var protein = 0.0
+    var milk = 0.2
+    var caffine = 0.2
+    var sugar = 0.2
+    var water = 0.2
     var freshness = ""
     var sweet = ""
     var rich = ""
     var sour = ""
-    var score: Int = 0
     
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
         translation.columns.3.y = -Float(size.height)
-        translation.columns.3.x = Float(size.width)
+//        translation.columns.3.x = Float(size.width/2)
         translation = trans*translation
 //        let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
 //        let toppos4 = translation*rootpos
@@ -115,12 +120,13 @@ public class CoffeeSt: Element{
             abs+="⭐️"
         }
         abs+="\n"
-        abs = abs + "fragrance: "+fragrance+"\n"
-        abs = abs + "freshness: "+freshness+"\n"
-        abs = abs + "sweet: "+sweet+"\n"
-        abs = abs + "sour: "+sour+"\n"
-        abs = abs + "rich: "+rich+"\n"
-        abs = abs + "remark: "+remark
+        abs+="Protein: "+String(protein)+" g\n"
+        abs+="Fat: "+String(fat)+" g\n"
+        abs+="Calories: "+String(calories)+" cal\n"
+//        abs+=abs+"Protein: "+protein+"g"
+//        abs+=abs+"Protein: "+protein+"g"
+//        abs = abs+ "rich: "+rich+"\n"
+        abs = abs + "Remark: "+remark
 
         return abs
     }
@@ -152,5 +158,39 @@ extension SCNVector3 {
     }
     static func -(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
         return SCNVector3(left.x-right.x,left.y-right.y,left.z-right.z)
+    }
+}
+
+public class ColorSt: Element{
+    var shadowtype = ""
+    var eyetype = ""
+    var locations = [Location]()
+    var recommandplace = ""
+    var benifits = ""
+    var feature = ""
+    var tips = ""
+    var tPicId = -1
+    var color = UIColor()
+
+    public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
+        var translation = matrix_identity_float4x4
+//        translation.columns.3.y = Float(size.height)/2
+        translation.columns.3.x = Float(size.width)/2
+        translation = trans*translation
+        let rootpos = SIMD4<Float>(x: 0, y: 0, z: 0, w: 1)
+        let bookToppos4 = translation*rootpos
+        let bookToppos = SIMD3<Float>(x:bookToppos4.x,y:bookToppos4.y,z:bookToppos4.z)
+
+        return bookToppos
+    }
+    
+    
+    public override func generateAbstract()->String{
+        var abstract = shadowtype+"\n"
+        abstract+="Recommand Place: "+recommandplace+"\n"
+//        abstract+="benifits: "+benifits+"\n"
+//        abstract+="Feature: "+feature+"\n"
+        abstract+="Remark:\n  "+remark
+        return abstract
     }
 }

@@ -148,7 +148,7 @@ class PicMatrix{
             zz+=0.001
         }
         var translation = matrix_identity_float4x4
-        translation.columns.3.z = 0.01
+        translation.columns.3.z = 0.006
         translation.columns.3.x = x
         translation.columns.3.y = y
 //        let transform = trans * translation
@@ -156,14 +156,14 @@ class PicMatrix{
         
     }
     
-    public func addBookAnchor(id:Int,book:BookSt)->simd_float4x4{
+    public func addBookAnchor(id:Int,element:Element)->simd_float4x4{
 //        print("addBookAnchor function is on \(Thread.current)" )
         guard let trans = prevTrans
         else { return matrix_identity_float4x4}
-        let width = Double(book.loc.width)
-        let height = Double(book.loc.height)
-        let picW : Double = Double(book.loc.left)+width/2
-        let picH : Double = Double(book.loc.top)+height/2
+        let width = Double(element.loc.width)
+        let height = Double(element.loc.height)
+        let picW : Double = Double(element.loc.left)+width/2
+        let picH : Double = Double(element.loc.top)+height/2
         var x = Float(getActualOffset(offset: picW,isW: true))
         var y = Float(getActualOffset(offset: picH,isW: false))
         x += PicMatrix.xOffset //-:left

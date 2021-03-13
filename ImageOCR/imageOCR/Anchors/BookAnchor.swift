@@ -9,20 +9,3 @@
 import Foundation
 import ARKit
 
-class BookAnchor: ARAnchor{
-    open var id:Int?
-    
-    required init(anchor: ARAnchor) {
-        super.init(anchor: anchor)
-    }
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-    
-    init(id:Int,transform:simd_float4x4) {
-        super.init(transform: transform)
-        self.id = id
-    }
-
-    
-}
