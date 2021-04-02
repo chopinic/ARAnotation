@@ -1,0 +1,545 @@
+\begin{thebibliography}{10}
+
+\bibitem{aframe}
+\url{https://aframe.io/}.
+
+\bibitem{webvr}
+\url{https://webvr.info/}.
+
+\bibitem{WIMPUI}
+\url{https://www.interaction-design.org/literature/book/the-glossary-of-human-computer-interaction/wimp}.
+
+\bibitem{ARKit}
+\url{https://developer.apple.com/cn/augmented-reality/arkit/}.
+
+\bibitem{ArCore}
+Arcore.
+\newblock \url{https://developers.google.cn/ar/}.
+
+\bibitem{Yonas1978}
+Y.~A., G.~LT., and H.~JL.
+\newblock Development of sensitivity to information provided by cast shadows in
+  pictures.
+\newblock {\em Perception}, 7(3):333--341, 1978.
+
+\bibitem{Amin2015}
+D.~Amin and S.~Govilkar.
+\newblock Comparative study of augmented reality sdks.
+\newblock {\em International Journal on Computational Science \& Applications},
+  5(1):11--26, 2015.
+
+\bibitem{Butscher2018}
+S.~Butscher, S.~Hubenschmid, J.~Müller, J.~Fuchs, and H.~Reiterer.
+\newblock Clusters, trends, and outliers.
+\newblock In {\em Proceedings of the 2018 {CHI} Conference on Human Factors in
+  Computing Systems}. {ACM}, apr 2018. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1145\discretionary{/}{%
+}{/}3173574\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}3173664}}
+
+
+\bibitem{Carrera2018}
+C.~C. Carrera, J.~L.~S. Perez, and J.~de~la Torre~Cantero.
+\newblock Teaching with ar as a tool for relief visualization: usability and
+  motivation study.
+\newblock {\em International Research in Geographical and Environmental
+  Education}, 27(1):69--84, 2018. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1080\discretionary{/}{%
+}{/}10382046\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2017\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1285135}}
+
+
+\bibitem{Chen2020}
+Z.~Chen, Y.~Su, Y.~Wang, Q.~Wang, H.~Qu, and Y.~Wu.
+\newblock Marvist: Authoring glyph-based visualization in mobile augmented
+  reality.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  26(8):2645--2658, 2020. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2019\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2892415}}
+
+
+\bibitem{Chen2020a}
+Z.~Chen, W.~Tong, Q.~Wang, B.~Bach, and H.~Qu.
+\newblock Augmenting static visualizations with paparvis designer.
+\newblock In {\em Proceedings of the 2020 CHI Conference on Human Factors in
+  Computing Systems}, pp. 1--12, 2020.
+
+\bibitem{Chiu2009}
+M.-C. Chiu, S.-P. Chang, Y.-C. Chang, H.-H. Chu, C.-H.~C. Cheryl, F.-H. Hsiao,
+  and J.-C. Ko.
+\newblock Playful bottle: a mobile social persuasion system to motivate healthy
+  water intake.
+\newblock In {\em Proceedings of the 11th international conference on
+  Ubiquitous computing}, pp. 185--194, 2009.
+
+\bibitem{Furmanski2002}
+F.~Chris, A.~Ronald, and D.~Mike.
+\newblock Augmented-reality visualizations guided by cognition: Perceptual
+  heuristics for combining visible and obscured information.
+\newblock In {\em Proceedings. International Symposium on Mixed and Augmented
+  Reality}, pp. 215--320. IEEE, 2002.
+
+\bibitem{Bichlmeier2007}
+B.~Christoph, S.~Tobias, H.~S. M., and N.~Nassir.
+\newblock Improving depth perception in medical ar.
+\newblock In {\em Bildverarbeitung f{\"u}r die Medizin 2007}, pp. 217--221.
+  Springer, 2007.
+
+\bibitem{Cordeil2019}
+M.~Cordeil, A.~Cunningham, B.~Bach, C.~Hurter, B.~H. Thomas, K.~Marriott, and
+  T.~Dwyer.
+\newblock Iatk: An immersive analytics toolkit.
+\newblock In {\em 2019 IEEE Conference on Virtual Reality and 3D User
+  Interfaces (VR)}, pp. 200--209, 2019. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}VR\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2019\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}8797978}}
+
+
+\bibitem{Cushnan2013}
+D.~Cushnan and H.~E. Habbak.
+\newblock {\em Developing ar games for ios and android}.
+\newblock Packt Publishing Ltd, 2013.
+
+\bibitem{Mendez2009}
+M.~Erick and S.~Dieter.
+\newblock Importance masks for revealing occluded objects in augmented reality.
+\newblock In {\em Proceedings of the 16th ACM Symposium on Virtual Reality
+  Software and Technology}, pp. 247--248, 2009.
+
+\bibitem{Evans2017}
+G.~Evans, J.~Miller, M.~I. Pena, A.~MacAllister, and E.~Winer.
+\newblock Evaluating the microsoft hololens through an augmented reality
+  assembly application.
+\newblock In {\em Degraded environments: sensing, processing, and display
+  2017}, vol. 10197, p. 101970V. International Society for Optics and
+  Photonics, 2017.
+
+\bibitem{Fogg1998}
+B.~J. Fogg.
+\newblock Persuasive computers: perspectives and research directions.
+\newblock In {\em Proceedings of the SIGCHI conference on Human factors in
+  computing systems}, pp. 225--232, Jan. 1998.
+
+\bibitem{Geroimenko2012}
+V.~{Geroimenko}.
+\newblock Augmented reality technology and art: The analysis and visualization
+  of evolving conceptual models.
+\newblock In {\em 2012 16th International Conference on Information
+  Visualisation}, pp. 445--453, 2012. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}IV\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2012\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}77}}
+
+
+\bibitem{Goh2016}
+C.-L. Goh and S.~Nakatake.
+\newblock A sensor-based data visualization system for training blood pressure
+  measurement by auscultatory method.
+\newblock {\em IEICE TRANSACTIONS on Information and Systems}, 99(4):936--943,
+  2016.
+
+\bibitem{Herr2017}
+D.~Herr, J.~Reinhardt, R.~Kr{\"u}ger, G.~Reina, and T.~Ertl.
+\newblock Immersive visual analytics for modular factory layout planning.
+\newblock In {\em Proc. IEEE VIS Workshop Immersive Analytics}, 2017.
+
+\bibitem{Huang2016}
+D.~Huang.
+\newblock {\em Visualizing personal data in context: an on-calendar design
+  strategy for behaviour feedback}.
+\newblock PhD thesis, 2016.
+
+\bibitem{Huang2014}
+D.~Huang, M.~Tory, B.~A. Aseniero, L.~Bartram, S.~Bateman, S.~Carpendale,
+  A.~Tang, and R.~Woodbury.
+\newblock Personal visualization and personal visual analytics.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  21(3):420--433, 2014.
+
+\bibitem{Li2010}
+L.~Ian, D.~Anind, and F.~Jodi.
+\newblock A stage-based model of personal informatics systems.
+\newblock In {\em Proceedings of the SIGCHI conference on human factors in
+  computing systems}, pp. 557--566, 2010.
+
+\bibitem{Li2010a}
+L.~Ian, F.~Jodi, and D.~Anind.
+\newblock Know thyself: monitoring and reflecting on facets of one's life.
+\newblock In {\em CHI'10 Extended Abstracts on Human Factors in Computing
+  Systems}, pp. 4489--4492, 2010.
+
+\bibitem{Davison2003}
+D.~A. J.
+\newblock Real-time simultaneous localisation and mapping with a single camera.
+\newblock In {\em Computer Vision, IEEE International Conference on}, vol.~3,
+  pp. 1403--1403. IEEE Computer Society, Nice, France, 2003.
+
+\bibitem{Davison2007}
+D.~A. J., R.~I. D., M.~N. D., and S.~Olivier.
+\newblock Monoslam: Real-time single camera slam.
+\newblock {\em IEEE transactions on pattern analysis and machine intelligence},
+  29(6):1052--1067, 2007.
+
+\bibitem{Danziger2008}
+D.~M. J.
+\newblock {\em Information visualization for the people}.
+\newblock PhD thesis, Massachusetts Institute of Technology, Department of
+  Comparative Media Studies, 2008.
+
+\bibitem{Kjeldskov2012}
+K.~J., M.~B. Skov, P.~Jeni, and P.~Rahuvaran.
+\newblock Using mobile phones to support sustainability: a field study of
+  residential electricity consumption.
+\newblock In {\em Proceedings of the SIGCHI Conference on Human Factors in
+  Computing Systems}, pp. 2347--2356, 2012.
+
+\bibitem{Jansen2015}
+Y.~Jansen, P.~Dragicevic, P.~Isenberg, J.~Alexander, A.~Karnik, J.~Kildal,
+  S.~Subramanian, and K.~Hornb{\ae}k.
+\newblock Opportunities and challenges for data physicalization.
+\newblock In {\em Proceedings of the 33rd Annual ACM Conference on Human
+  Factors in Computing Systems}, pp. 3227--3236, 2015.
+
+\bibitem{Jansen2013}
+Y.~Jansen and P.~D. J.-D. Fekete.
+\newblock Evaluating the efficiency of physical visualizations.
+\newblock In {\em Proceedings of the SIGCHI Conference on Human Factors in
+  Computing Systems}, pp. 2593--2602, 2013.
+
+\bibitem{Jansen2015a}
+Y.~Jansen and K.~Hornb{\ae}k.
+\newblock A psychophysical investigation of size as a physical variable.
+\newblock {\em IEEE transactions on visualization and computer graphics},
+  22(1):479--488, 2015.
+
+\bibitem{Wither2005}
+W.~Jason and H.~Tobias.
+\newblock Pictorial depth cues for outdoor augmented reality.
+\newblock In {\em Ninth IEEE International Symposium on Wearable Computers
+  (ISWC'05)}, pp. 92--99. IEEE, 2005.
+
+\bibitem{Hirokazu2002}
+H.~K.
+\newblock Artoolkit: Library for vision-based augmented reality.
+\newblock {\em Technical Report of Ieice Prmu}, 101:79--86, 2002.
+
+\bibitem{Keselman2017}
+L.~Keselman, J.~I. Woodfill, A.~Grunnet-Jepsen, and A.~Bhowmik.
+\newblock Intel realsense stereoscopic depth cameras.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition Workshops}, pp. 1--10, 2017.
+
+\bibitem{Khot2014}
+R.~A. Khot, L.~Hjorth, and F.~Mueller.
+\newblock Understanding physical activity through 3d printed material
+  artifacts.
+\newblock In {\em Proceedings of the SIGCHI conference on human factors in
+  computing systems}, pp. 3835--3844, 2014.
+
+\bibitem{Lee2021a}
+B.~Lee, D.~Brown, B.~Lee, C.~Hurter, S.~Drucker, and T.~Dwyer.
+\newblock Data visceralization: Enabling deeper understanding of data using
+  virtual reality.
+\newblock {\em {IEEE} Transactions on Visualization and Computer Graphics},
+  27(2):1095--1105, feb 2021. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}tvcg\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2020\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}3030435}}
+
+
+\bibitem{Lee2021}
+B.~Lee, X.~Hu, M.~Cordeil, A.~Prouzeau, B.~Jenny, and T.~Dwyer.
+\newblock Shared surfaces and spaces: Collaborative data visualisation in a
+  co-located immersive environment.
+\newblock {\em {IEEE} Transactions on Visualization and Computer Graphics},
+  27(2):1171--1181, feb 2021. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}tvcg\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2020\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}3030450}}
+
+
+\bibitem{Lee2012}
+G.~A. {Lee}, A.~{Dünser}, {Seungwon Kim}, and M.~{Billinghurst}.
+\newblock Cityviewar: A mobile outdoor ar application for city visualization.
+\newblock In {\em 2012 IEEE International Symposium on Mixed and Augmented
+  Reality - Arts, Media, and Humanities (ISMAR-AMH)}, pp. 57--64, 2012. doi:
+  {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}ISMAR\discretionary{%
+}{-}{-}AMH\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2012\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}6483989}}
+
+
+\bibitem{Leutenegger2015}
+S.~Leutenegger, S.~Lynen, M.~Bosse, R.~Siegwart, and P.~Furgale.
+\newblock Keyframe-based visual--inertial odometry using nonlinear
+  optimization.
+\newblock {\em The International Journal of Robotics Research}, 34(3):314--334,
+  2015.
+
+\bibitem{Li2018}
+D.~Li, H.~Mei, Y.~Shen, S.~Su, W.~Zhang, J.~Wang, M.~Zu, and W.~Chen.
+\newblock Echarts: a declarative framework for rapid construction of web-based
+  visualization.
+\newblock {\em Visual Informatics}, 2(2):136--146, 2018.
+
+\bibitem{Liberty2018}
+J.~Liberty, J.~Gallowayy, P.~Japikse, and J.~Hartwell.
+\newblock {\em Building Your First Windows 10 UWP App}.
+\newblock Windows 10 Development with XAML and C\# 7, 2018.
+
+\bibitem{Ling2018}
+O.~Y. Ling, L.~B. Theng, A.~Chai, and C.~McCarthy.
+\newblock A model for automatic recognition of vertical texts in natural scene
+  images.
+\newblock In {\em 2018 8th IEEE International Conference on Control System,
+  Computing and Engineering (ICCSCE)}, pp. 170--175, 2018. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}ICCSCE\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2018\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}8685019}}
+
+
+\bibitem{Liu2019}
+Y.~Liu, L.~Chu, G.~Chen, Z.~Wu, Z.~Chen, B.~Lai, and Y.~Hao.
+\newblock Paddleseg, end-to-end image segmentation kit based on paddlepaddle.
+\newblock \url{https://github.com/PaddlePaddle/PaddleSeg}, 2019.
+
+\bibitem{Liu2021a}
+Y.~Liu, L.~Chu, G.~Chen, Z.~Wu, Z.~Chen, B.~Lai, and Y.~Hao.
+\newblock Paddleseg: A high-efficient development toolkit for image
+  segmentation, 2021.
+
+\bibitem{MarderEppstein2016}
+Marder-Eppstein and Eitan.
+\newblock Project tango.
+\newblock In {\em ACM SIGGRAPH 2016 Real-Time Live!}, pp. 25--25. 2016.
+
+\bibitem{Mcauley2015}
+J.~McAuley, C.~Targett, Q.~Shi, and A.~van~den Hengel.
+\newblock Image-based recommendations on styles and substitutes.
+\newblock {\em ACM}, pp. 43--52, 2015.
+
+\bibitem{Monigatti2010}
+P.~Monigatti, M.~Apperley, and B.~Rogers.
+\newblock Power and energy visualization for the micro-management of household
+  electricity consumption.
+\newblock In {\em Proceedings of the International Conference on Advanced
+  Visual Interfaces}, pp. 325--328. ACM, New York, USA, 2010.
+
+\bibitem{Allen1999}
+A.~B. P.
+\newblock Shadows as sources of cues for distance of shadow-casting objects.
+\newblock {\em Perceptual and motor skills}, 89(2):571--584, 1999.
+
+\bibitem{Parisi2012}
+T.~Parisi.
+\newblock {\em WebGL: up and running}.
+\newblock " O'Reilly Media, Inc.", 2012.
+
+\bibitem{Mamassian1998}
+M.~Pascal, K.~D. C., and K.~Daniel.
+\newblock The perception of cast shadows.
+\newblock {\em Trends in cognitive sciences}, 2(8):288--295, 1998.
+
+\bibitem{Pedretti2002}
+A.~Pedretti, L.~Villa, and G.~Vistoli.
+\newblock Vega: a versatile program to convert, handle and visualize molecular
+  structure on windows-based pcs.
+\newblock {\em Journal of Molecular Graphics and Modelling}, 21(1):47--49,
+  2002.
+
+\bibitem{Pousman2007}
+Z.~Pousman, J.~Stasko, and M.~Mateas.
+\newblock Casual information visualization: Depictions of data in everyday
+  life.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  13(6):1145--1152, 2007. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2007\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}70541}}
+
+
+\bibitem{Reipschlager2021}
+P.~Reipschlager, T.~Flemisch, and R.~Dachselt.
+\newblock Personal augmented reality for information visualization on large
+  interactive displays.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  27(2):1182–1192, Feb 2021. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}tvcg\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2020\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}3030460}}
+
+
+\bibitem{Ren2014}
+D.~{Ren}, T.~{Höllerer}, and X.~{Yuan}.
+\newblock ivisdesigner: Expressive interactive design of information
+  visualizations.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  20(12):2092--2101, 2014. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2014\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2346291}}
+
+
+\bibitem{Rhee2020}
+T.~Rhee, S.~Thompson, D.~Medeiros, R.~dos Anjos, and A.~Chalmers.
+\newblock Augmented virtual teleportation for high-fidelity telecollaboration.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  26(5):1923--1933, 2020. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2020\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2973065}}
+
+
+\bibitem{Jones2011}
+J.~E. S. and S.~Soatto.
+\newblock Visual-inertial navigation, mapping and localization: A scalable
+  real-time causal approach.
+\newblock {\em The International Journal of Robotics Research}, 30(4):407--430,
+  2011.
+
+\bibitem{Satyanarayan2017}
+A.~Satyanarayan, D.~Moritz, K.~Wongsuphasawat, and J.~Heer.
+\newblock Vega-lite: A grammar of interactive graphics.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  23(1):341--350, 2017. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2016\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2599030}}
+
+
+\bibitem{Shreiner2013}
+D.~Shreiner, G.~Sellers, J.~Kessenich, and B.~Licea-Kane.
+\newblock {\em OpenGL programming guide: The Official guide to learning OpenGL,
+  version 4.3}.
+\newblock Addison-Wesley, 2013.
+
+\bibitem{Sicat2019}
+R.~Sicat, J.~Li, J.~Choi, M.~Cordeil, W.-K. Jeong, B.~Bach, and H.~Pfister.
+\newblock Dxr: A toolkit for building immersive data visualizations.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  25(1):715--725, 2019. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2018\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2865152}}
+
+
+\bibitem{Stusak2014}
+S.~Stusak, A.~Tabard, F.~Sauka, R.~A. Khot, and A.~Butz.
+\newblock Activity sculptures: Exploring the impact of physical visualizations
+  on running activity.
+\newblock {\em IEEE transactions on visualization and computer graphics},
+  20(12):2201--2210, 2014.
+
+\bibitem{Kim2010}
+K.~Sunyoung and P.~Eric.
+\newblock Inair: sharing indoor air quality measurements and visualizations.
+\newblock In {\em Proceedings of the SIGCHI Conference on Human Factors in
+  Computing Systems}, pp. 1861--1870, 2010.
+
+\bibitem{Tsuda2006}
+T.~Takahiro, Y.~Haruyoshi, K.~Yoshinari, and O.~Yuichi.
+\newblock Visualization methods for outdoor see-through vision.
+\newblock {\em IEICE transactions on information and systems},
+  89(6):1781--1789, 2006.
+
+\bibitem{Wagner2003}
+D.~Wagner and D.~Schmalstieg.
+\newblock Artoolkit on the pocketpc platform.
+\newblock In {\em 2003 IEEE International Augmented Reality Toolkit Workshop},
+  pp. 14--15, 2003. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}ART\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2003\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1320418}}
+
+
+\bibitem{Willett2017}
+W.~Willett, Y.~Jansen, and P.~Dragicevic.
+\newblock Embedded data representations.
+\newblock {\em {IEEE} Transactions on Visualization and Computer Graphics},
+  23(1):461--470, jan 2017. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}tvcg\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2016\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2598608}}
+
+
+\bibitem{Wongsuphasawat2016}
+K.~Wongsuphasawat, D.~Moritz, A.~Anand, J.~Mackinlay, B.~Howe, and J.~Heer.
+\newblock Voyager: Exploratory analysis via faceted browsing of visualization
+  recommendations.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  22(1):649--658, 2016. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TVCG\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2015\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2467191}}
+
+
+\bibitem{Zhang2017}
+H.~Zhang, J.~Xue, and K.~Dana.
+\newblock Deep ten: Texture encoding network.
+\newblock In {\em 2017 IEEE Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, pp. 2896--2905, 2017. doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}CVPR\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2017\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}309}}
+
+
+\bibitem{Zhu2013}
+N.~Q. Zhu.
+\newblock {\em Data visualization with D3. js cookbook}.
+\newblock Packt Publishing Ltd, 2013.
+
+\bibitem{Zhu2020}
+Q.~Zhu, B.~Du, and P.~Yan.
+\newblock Boundary-weighted domain adaptive neural network for prostate mr
+  image segmentation.
+\newblock {\em IEEE Transactions on Medical Imaging}, 39(3):753--763, 2020.
+  doi: {{%
+10\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}1109\discretionary{/}{%
+}{/}TMI\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2019\hspace{.1pt}\discretionary{.}{%
+}{.}\hspace{.4pt}2935018}}
+
+
+\end{thebibliography}

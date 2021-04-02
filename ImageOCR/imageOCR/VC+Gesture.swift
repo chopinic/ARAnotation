@@ -59,7 +59,7 @@ extension ViewController{
             }
             if id >= nowGroups.count {return}
             if groupPosCha[id] < 0 && dis < 0{return}
-            if groupPosCha[id] > groupPosChaLimit[id] && dis > 0{return}
+            if groupPosCha[id] > 1.5*groupPosChaLimit[id] && dis > 0{return}
 
             groupPosCha[id] += Double(dis)
             moveGroup(id,dis)
@@ -93,7 +93,7 @@ extension ViewController{
 //                    groupVisCot[id] -= 1
             }else{
 //                if pos.z != 0.005{
-                    pos.z = 0.005
+                    pos.z = 0.01
 //                    groupVisCot[id] += 1
             }
             coffee.setPosition(pos, relativeTo: coffee.parent)
@@ -111,7 +111,9 @@ extension ViewController{
             let name = result.name
             print(name)
             if name.hasPrefix("book@"){
-                openBook(getIdFromName(name))
+                let id = getIdFromName(name)
+                if id < 0{continue}
+                openBook(id)
                 hasResult = true
                 break
             }else if name.hasPrefix("color@"){

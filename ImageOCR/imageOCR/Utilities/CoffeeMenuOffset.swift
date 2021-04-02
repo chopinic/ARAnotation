@@ -39,7 +39,7 @@ struct BigOffset: Offset {
     var picW = 5998.0
     var picH = 3820.0
 
-    var step: Double = 200
+    var step: Double = 170
     
     init() {
         xx=[1880-picW/2,3290-picW/2,1880-picW/2,3290-picW/2,3290-picW/2]
@@ -83,13 +83,13 @@ struct SmallOffset: Offset {
     var picW = 2480.0
     var picH = 1755.0
 
-    var step: Double = 80
+    var step: Double = 75
     
     init() {
-        xx=[250-picW/2,810-picW/2,1360-picW/2,1930-picW/2,1930-picW/2]
-        yy = [picH/2-520,picH/2-520,picH/2-520,picH/2-520,picH/2-1331]
-        blockStartx = [142-picW/2,690-picW/2,1250-picW/2,1830-picW/2,1830-picW/2]
-        blockStarty = [picH/2-615,picH/2-615,picH/2-615,picH/2-615,picH/2-1455]
+        xx=[250-picW/2,810-picW/2,1360-picW/2,1950-picW/2,1950-picW/2]
+        yy = [picH/2-520,picH/2-520,picH/2-520,picH/2-520,picH/2-1311]
+        blockStartx = [142-picW/2,690-picW/2,1250-picW/2,1830-picW/2,1850-picW/2]
+        blockStarty = [picH/2-615,picH/2-615,picH/2-615,picH/2-615,picH/2-1405]
         blockWidth = [520,520,520,520,512]
         blockHeight = [790,790,630,630,320]
     }

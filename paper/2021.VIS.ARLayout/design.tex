@@ -1,0 +1,179 @@
+\section{Design Rationale}
+\label{sec:design}
+We illustrate the design goal, design considerations and design details of \textit{ARLayout} in this section.
+% This part mainly discusses the design rationale of \textit{ARLayout},
+% including the considerations and the details of \textit{ARLayout}.
+
+\subsection{Design Goals}
+% Based on the characteristics of ARLayout,
+% combined with user’s interaction experience,
+
+The target users of \textit{ARLayout} are the people who are not the experts in a given domain.
+The ``users'' or ``target users'' in this paper refer to this group of users,
+if they are not specially specified.
+
+We summarize the following four design goals of \textit{ARLayout} according
+to the requirements collected from the daily life of the target users:
+% These design considerations will be refined over time under the guidance of an iterative strategy.
+
+\begin{itemize}
+\item G1: enable the target users to search/filter massive physical targets,
+and then highlight the results to guide them where they are in reality.
+\item G2: enable the users to re-group the physical targets according to their grouping comparison tasks.
+\item G3: enable the users to re-rank/sort the physical targets according to their ordinal or quantitative comparison tasks.  %// add & cut in coding space.
+\item G4: provide extra augmented information in AR environments according to their tasks.
+\end{itemize}
+
+
+
+\subsection{Design Considerations and Design Details}
+
+We also summarize the design considerations and design details of \textit{ARLayout}
+towards the design goal (G1-G4):
+
+First, the tool should be designed to enable the target users to search/filter the massive physical targets
+by one or multiple fuzzy keywords input by voice, because voice input is simple-to-use in the public's PV context,
+such as a library, a bookstore, or a coffee shop.
+The input method by virtual keyboard should be also provided when it is not convenient to input a voice.
+The search results should be \textbf{highlighted by visual cues} to guide the users where they are in reality.
+Specifically, we use flashing to highlight the search results and further
+provide an AR-based \textbf{fisheye deformation design} to highlight their positions in reality.
+
+Second, the tool should be designed to enable the users to re-group the physical targets
+according to their grouping comparison tasks (\textbf{visual re-layouts}),
+e.g., re-grouping them according to one/multiple of their nominal, ordinal or quantitative attributes,
+because grouping can help users better compare target candidates according to the experience in our daily life.
+
+Third, the tool should be designed to enable the users to re-rank the disordered physical targets,
+or re-rank them according to one or multiple additional attributes (\textbf{visual re-layouts}).
+For example, books in a library are usually sorted by classification number or index number,
+which can not satisfy users' kinds of ranking needs, e.g., sorting them by the rating, price,
+publisher or publish year.
+Similarly, the books in a bookstore are often sorted by user groups,
+more information like ratings and prices are ignored.
+As a result, readers may spend a great deal of time finding an ideal book on the bookshelves.
+
+Fourth, in people's daily life, the provided information alongside a target is usually not enough.
+For example, we can see the title of a book, the name and the price of a cup of coffee.
+However, the rating of a coffee, a book or a food,
+and the ingredients or drinks, foods, fruits are often not provided clearly
+to make comparisons.
+Therefore, the tool should be designed to display extra information which is often hidden from users
+or is inconvenient for them to compare.
+Actually, this kind of augmented information can be provided by \textbf{juxtaposition}
+or using \textbf{small multiples} to help them make a better choice.
+Except for the re-layouts, the sorted information such as the price and the rating can be visualized by
+\textbf{bar charts} or \textbf{line charts} in AR.
+
+The extra textual information such as the textual ratings
+or detailed textual descriptions about the current targets can be visualized
+by using \textbf{word cloud} in the style of \textbf{small multiples} to show their keywords,
+which are generated from online review.
+Besides, it is significant that the re-layout effects
+could be integrated into reality without confusion.
+In addition, users may be non-experts unfamiliar with programming or AR.
+The inaccurate recognition, rough interaction and tedious interface
+will add their cognitive burden in a messy situation.
+Therefore, \textit{ARLayout} will provide an intuitive interface
+with concise interactions to avoid causing visual clutter and discomfort.
+
+
+\begin{figure}[htp]
+%\setlength{\abovecaptionskip}{0.05cm}
+%\setlength{\belowcaptionskip}{-0.4cm}
+    \centering
+    \includegraphics[width=\linewidth]{images/design_overview.eps}
+    \caption{
+        The structural design of ARLayout,
+        including simplified data processing, data transmission, and data presentation process.
+    }
+    \label{fig:design_overview}
+\end{figure}
+
+
+
+\subsection{Design Details: System Workflow Design}
+
+As shown in~\autoref{fig:design_overview}, \textit{ARLayout} consists of two parts.
+The first part is the mobile client, which is used to take pictures or record a real-time video and then renders objects in AR.
+The second part is the server, which is employed to process almost all of the data.
+The overall processing are described as follows:
+The mobile client constantly takes pictures or record a real-time video of massive targets and sends them to the server.
+The remote server processes those pictures or key frames, recognizing target objects in them in real-time,
+and sends targets' data back to the mobile client,
+which displays them in new layouts.
+This workflow design has two considerations:
+
+
+\textbf{Separation of heavy computing and AR presentation}:
+Unlike traditional applications,
+\textit{ARLayout} shifts most of the computational intensive tasks to the server.
+The mobile client only needs to send the requests in multi-thread to ensure real-time target recognition.
+This enables \textit{ARLayout} to handle a large amount of data
+% which makes it response faster and more efficiency
+without adding a heavy burden to the user’s mobile device or influencing user's interaction experience.
+In the library/bookstore scenario, for example, more than \textbf{a thousand} books can be recognized in AR
+with panoramic pictures.
+
+\textbf{Separate processing of text and texture}:
+The text and texture in one picture usually contains most of our desired information.
+We apply different neural network to process these two kinds of data.
+% Most information are contained in text or texture
+% For the text and texture in the image, are combined into structured data,
+% using different neural network processing.
+This makes our model not only suitable for situations where information is expressed more in text,
+such as library or cafe,
+but also for situations where texture contains more information,
+such as eyeshadows in cosmetics shops.
+For more implementation details, please refer to Section~\ref{sec:implementation}.
+
+
+
+% These three methods changes targets' attributes into position information
+% to one criterion that's easily perceived by human eyes,
+%  that's inefficiently perceived by human eyes to another
+% which exploits the capabilities of human's visual system,
+% These three methods helps
+%as shown in~\autoref{fig:design_relayout}.
+% e.g., re-ranking books by their prices encodes books' quantitative information to position infomation,
+% enabling the user to easily compare the prices of them.
+
+
+%\textbf{Searching}.
+%\textit{ARLayout} allows the user to achieve
+%preseted information of targets automatically in different scenarios.
+%Visual feedback will be provided after each search,
+%such as magnifying and highlighting the querying results.
+%In this way, the targets' nominal and quantitative attributes
+%are tranformed to highlight colors and scaled volumes,
+%which makes the information easily perceived by the user.
+%
+%
+%\textbf{Re-grouping}.
+%\textit{ARLayout} allows the user to arbitrarily group target objects
+%according to the preset dimensions in the scenario.
+%Different groups are placed separately with group name shown by the side,
+%e.g., book groups placed on different layers of the bookshelves, or coffee names in different areas of the menu.
+%% For example, the user can choose to re-group books by their publishers,
+%% authors or other attributes.
+%% \textit{ARLayout} creates new bookshelves and displays different groups on different layers,
+%% which encodes books' nominal information (publisher) with position.
+%
+%\textbf{Re-ranking}.
+%\textit{ARLayout} allows the user to sort targets based on information in different dimensions.
+%Sorted targets are lined up in certain order in front of the user,
+%making the finding and comparing process intuitive and clear.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

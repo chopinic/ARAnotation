@@ -39,6 +39,8 @@ public class Element{
 
 // book struct
 public class BookSt: Element{
+//    var shouldDisplay = true
+    var entityId = -1
     var words = [String]()
     var locations = [Location]()
     var kinds = [String]()
@@ -68,12 +70,15 @@ public class BookSt: Element{
             abstractscore+="⭐️"
         }
         var abstract = title+"\n"
+        abstract += "Rating: "+abstractscore+"\n"
+        abstract += "Publisher: "+publisher+"\n"
+        abstract += "isbn: "+isbn+"\n"
 //        for bookStr in words {
 //            abstract+=bookStr
 //            abstract+="\n"
 //        }
 //        abstract
-        abstract+="Rating: "+abstractscore+"\n"
+//        abstract+="Rating: "+abstractscore+"\n"
         abstract+="Price: \(price)\n\n"
         abstract+="Reviewer's words:\n  "+remark
         return abstract
@@ -88,19 +93,22 @@ public class CoffeeSt: Element{
 //    var matrixId: Int!=0
 //    var picid = -1
     var desPicid = -1
+    var desPerPicid = -1
     var name = ""
     var belong = ""
     var calories = 30.0
     var fat = 0.0
     var protein = 0.0
     var milk = 0.2
-    var caffine = 0.2
+    var price = 0.0
+    var caffeine = 0.2
     var sugar = 0.2
     var water = 0.2
     var freshness = ""
     var sweet = ""
     var rich = ""
     var sour = ""
+    var order = -1
     
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
@@ -120,6 +128,7 @@ public class CoffeeSt: Element{
             abs+="⭐️"
         }
         abs+="\n"
+        abs+="Price: "+String(price)+"\n"
         abs+="Protein: "+String(protein)+" g\n"
         abs+="Fat: "+String(fat)+" g\n"
         abs+="Calories: "+String(calories)+" cal\n"
@@ -164,6 +173,7 @@ extension SCNVector3 {
 public class ColorSt: Element{
     var shadowtype = ""
     var eyetype = ""
+    var scheme = 0
     var locations = [Location]()
     var recommandplace = ""
     var benifits = ""

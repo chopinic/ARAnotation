@@ -1,0 +1,116 @@
+\section{Discussion and Future Work}
+\label{sec:discussion}
+
+
+
+\subsection{Limitations}
+There are some limitations of \textit{ARLayout},
+we list them as follows:
+
+
+% \textbf{Targets recognition limitation}
+% \textit{ARLayout} is capable of recognizing targets with text on it, or in different colors.
+% However, if multiple
+
+
+\textbf{Performance limitation}
+
+We used the latest 11-inch 2021 ipad-pro with A12Z processor, which is a top end configuration nowadays.
+The ARKit framework performs well when the number of AR targets is below 200 in AR space.
+However, as targets number increases, the frame rate drops.
+This situation appears more in the library/bookstore scenario, where the number of books often exceeds 1000.
+Though several experiments, we found that the frame rate stabilizes at 60 per second
+when the number of AR books is below 200, and decreases to 30 frames per second
+if it exceeds 230. Further more, if AR books' number increases to 320, the frame rate
+will drop significantly to below 15, with high possibility of delay in interaction response.
+As a result, while \textit{ARLayout} recognizes almost all the books scanned by the user,
+we recommend the user to first filter out unrelated books by fuzzy searching before actually
+visualizing those books in the AR space.
+
+\textbf{Image resolution limitation}. \textit{ARLayout} recognizes objects by images taken from the mobile device.
+Ideally, the user only need to take one panoramic picture that contains all the targets objects.
+However, targets' details may not be recognized if they are too small in the picture.
+For example, in the library/bookstore scenario, instead of scanning all layers of the bookshelves,
+the user may walk closer to the bookshelves and scan one layer at one time
+due to lack of light or limited imaging quality.
+
+
+\subsection{Future Work}
+We plan to optimize the following aspects of \textit{ARLayout} in future work:
+
+\textbf{More scenario support}
+Currently \textit{ARLayout} is capable of recognizing books, coffee names or eyeshadows.
+In the future, we plan to expand its usage scenarios to other similar ones like chooing drinks, cups, fruits, etc.
+Because targets with text on it, or in different colors and shapes can be well recognized by trained neural network.
+During targets recognition, targets' additional information is aquired from the database,
+so an interface for fast data import can be implemented
+in future work to meet the data requirements of more scenarios.
+
+
+
+% \textbf{Interface for data import}
+% During targets recognition, targets' additional information is aquired from the database.
+% which means that in similar usage scenario,
+% \textit{ARLayout} can also provide data support through pattern matching algorithm.
+% In other words,
+% an interface for fast data import can be implemented
+% in future work to meet the data requirements of more scenarios.
+
+%\textbf{Automatic scenario recognition}
+%When using the current ARLayout,
+%users need to classify the current scenario type,
+%and then choose the corresponding recognition mode,
+%which often leads to inconvenience in using.
+%The complexity of the scenario requires
+%\textit{ARLayout} to be designed with scenario understanding
+%to avoid the difficulty of describing the current scenario type
+%when users facing an unknown scenario.
+%Recently, the research on computer vision on visualization
+%has provided AI's scenario automatic recognition function,
+%which make it possible for environment adaptive visualization~\cite{Andreu2011}.
+
+\textbf{Real-time position sync between virtuality and reality}. The current \textit{ARLayout} gets good results in the re-layout of static scenarios
+with the help of OCR and image processing algorithm
+and is able to accept simple changes in the scenario,
+such as following the targets shaking,
+but there is still a long way to go with the dynamic scenarios.
+For example, it is extremely difficult for the current \textit{ARLayout} to use AR
+to dynamically capture the changes of players in a football match.
+But the basic algorithm of AR,
+such as plane tracking and 3-D targets recognition,
+have reached quite performance requirements.
+Therefore, the difficulty of moving \textit{ARLayout} from static scenario to dynamic scenario
+depends on the real-time data processing.
+We are trying to use a better architecture,
+such as abandoning the server to save data transmission time,
+building a lightweight neural network etc.
+
+\textbf{Detailed Texture Recognition in AR}. Some of user study participants
+consider it could be better to use the same texture to show the AR effects,
+especially in the eyeshadow scenario.
+At present, the preview effect of eyeshadow only stays at the transfer of RGB value.
+Further study with more focus on texture recognition is therefore suggested.
+A Deep Texture Encoding Network (DeepTEN) with a novel Encoding Layer
+integrated on top of convolutional layers offers possibilities to solve this problem~\cite{Zhang2017}.
+
+% \textbf{Relatedwork Comparison}
+% The most related work of \textit{ARLayout} are some authoring tools towards AR or VR visualizations.
+% As shown in Table~\ref{tab:discussion_relatedwork_cmp},
+% we compare them from eight aspects:
+% highlight(fisheye), collabration, searching, re-grouping, re-ranking,
+% massive targets, glyph vis, augmented infomation.
+% We summarize them into six criterias:
+% more intuitive interaction, personal or collaborated,
+% layout changes or keep origin layout,
+% a few targets or massive targets, whether glyph used,
+% use the original information or add more information.
+
+% \begin{table}[htp]
+%     \centering
+%     \includegraphics[width=\linewidth]{images/discussion_relatedwork_cmp.eps}
+%     \caption{
+%         Comparison to the most related recent work about authoring tools
+%         towards AR or VR visualizations.
+%     }
+%     \label{tab:discussion_relatedwork_cmp}
+% \end{table}

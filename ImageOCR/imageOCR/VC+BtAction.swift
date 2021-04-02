@@ -14,8 +14,91 @@ import VideoToolbox
 
 extension ViewController{
     
-    @objc func setHidden(_ show: Bool = false){
-        let hideButton = uiButton[uiButton.count-1]
+    func checkIfHidden(){
+        (uiButton["scan"] as! UIButton).isHidden = false
+
+
+
+        (uiButton["switch"] as! UIButton).isHidden = true
+        (uiButton["background"] as! UIButton).isHidden = true
+//        (uiButton["switch"] as! UIButton).isHidden = false
+//        (uiButton["switch"] as! UIButton).isHidden = false
+//        (uiButton["switch"] as! UIButton).isHidden = false
+
+        if scanEntitys.count > 0 || isInRegroupView{
+            (uiButton["reranking"] as! UIButton).isHidden = false
+            (uiButton["fisheye"] as! UIButton).isHidden = false
+            (uiButton["restore"] as! UIButton).isHidden = false
+        }else{
+            (uiButton["fisheye"] as! UIButton).isHidden = true
+            (uiButton["restore"] as! UIButton).isHidden = true
+            (uiButton["reranking"] as! UIButton).isHidden = true
+        }
+        
+        if mode == 0{
+            (uiButton["background"] as! UIButton).isHidden = false
+            if isFiltered{
+                (uiButton["model"] as! UIButton).isHidden = true
+            }else{
+                (uiButton["model"] as! UIButton).isHidden = false
+            }
+            if isInRegroupView{
+                (uiButton["select"] as! UIButton).isHidden = false
+                (uiButton["reranking"] as! UIButton).isHidden = false
+
+            }else{
+                (uiButton["select"] as! UIButton).isHidden = true
+                (uiButton["reranking"] as! UIButton).isHidden = true
+            }
+                        
+            if cmpGroup.count > 0{
+                (uiButton["chart"] as! UIButton).isHidden = false
+                (uiButton["compare"] as! UIButton).isHidden = false
+            }else{
+                (uiButton["chart"] as! UIButton).isHidden = true
+                (uiButton["compare"] as! UIButton).isHidden = true
+            }
+        }
+
+        if mode == 1{
+            (uiButton["select"] as! UIButton).isHidden = false
+            (uiButton["sscan"] as! UIButton).isHidden = false
+            (uiButton["sscan"] as! UIButton).isHidden = true
+            (uiButton["reranking"] as! UIButton).isHidden = false
+
+            if cmpGroup.count > 0{
+                (uiButton["chart"] as! UIButton).isHidden = false
+                (uiButton["compare"] as! UIButton).isHidden = false
+            }else{
+                (uiButton["chart"] as! UIButton).isHidden = true
+                (uiButton["compare"] as! UIButton).isHidden = true
+
+            }
+
+        }
+        if mode == 2{
+            (uiButton["select"] as! UIButton).isHidden = false
+            (uiButton["sscan"] as! UIButton).isHidden = false
+            (uiButton["scan"] as! UIButton).isHidden = true
+            (uiButton["reranking"] as! UIButton).isHidden = true
+            (uiButton["background"] as! UIButton).isHidden = false
+            (uiButton["select"] as! UIButton).isHidden = true
+        }
+    }
+    
+    
+
+    
+    func setInitHidden(){
+        for i in stride(from: 0, to: uiButton.count-1, by: 1){
+            (uiButton[uiKeys[i]] as! UIButton).isHidden = true
+        }
+        (uiButton["scan"] as! UIButton).isHidden = true
+    }
+    
+    
+    @objc func setHiddenAfterSwitch(_ show: Bool = false){
+        let hideButton = uiButton["hide"] as! UIButton
         var toHide = false
         if show == true{
             hideButton.setTitle("Hide Buttons",for: .normal)
@@ -30,12 +113,16 @@ extension ViewController{
         }
         for i in stride(from: 0, to: uiButton.count-1, by: 1){
 //            if uiBotton[i].
-            if uiButton[i].title(for: .normal) == ""{
-                uiButton[i].isHidden = true
+            if (uiButton[uiKeys[i]] as! UIButton).title(for: .normal) == ""{
+                (uiButton[uiKeys[i]] as! UIButton).isHidden = true
             }else{
-                uiButton[i].isHidden = toHide
+                (uiButton[uiKeys[i]] as! UIButton).isHidden = toHide
+                if(toHide==false){
+                    checkIfHidden()
+                }
             }
         }
+        toggleFlash(mode)
     }
     
     @objc func adHoc(){
@@ -53,7 +140,7 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?en=1")!
+            let url = URL(string: "http://106.12.176.27/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
             setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
 
             utiQueue.async {
@@ -65,7 +152,7 @@ extension ViewController{
     
     func setButtonText(){
         for i in stride(from: 0, to: uiButton.count, by: 1){
-            uiButton[i].setTitle(bottonText[mode][i], for: .normal)
+            (uiButton[uiKeys[i]] as! UIButton).setTitle(bottonText[mode][i], for: .normal)
         }
     }
     
@@ -76,7 +163,7 @@ extension ViewController{
         }
         mode = (mode+1)%3
         setButtonText()
-        setHidden(true)
+        setHiddenAfterSwitch(true)
         if mode==0{
             setMessage("Set to book")
             attrSelect.reloadAllComponents()
@@ -96,16 +183,37 @@ extension ViewController{
     }
     
     @objc func buttonTapTimer(){
+        if mode != 0{
+            //            buttonTapUploadLarge()
+            buttonTapUpload()
+            return
+        }
         if let nowTimer = timer{
             if nowTimer.isValid{
                 nowTimer.invalidate()
+                (uiButton["scan"] as! UIButton).backgroundColor = UIColor.init(red: 0.2, green: 0.2, blue: 0.2, alpha:0.5)
                 return
             }
         }
-        timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
+        (uiButton["scan"] as! UIButton).backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.5)
+
     }
     
-    @objc func buttonTapFaceDebug(){
+    @objc func buttonTapLoadModel(){
+        if mode == 0{
+            isFiltered = true
+//            var cot = 0
+//            for i in stride(from: 0, to: books.count, by: 1){
+//                if books[i].isDisplay == false{
+//                    books[i].entityId = cot
+//                    cot+=1
+//                }
+//            }
+            
+            resetAndAddAnchor()
+            return
+        }
         guard mode == 2 else{
             print("Not in eye shadow mode")
             setMessage("Not in eye shadow mode")
@@ -115,7 +223,11 @@ extension ViewController{
             setMessage("Selet an eye shadow first")
             return
         }
+//        let resource = try? TextureResource.load(contentsOf:getDocumentsDirectory().appendingPathComponent("color@\(colorAbstractUI.id).png"))
         var shadowColor = UnlitMaterial()
+//        shadowColor.baseColor = MaterialColorParameter.texture(resource!)
+//        shadowColor.tintColor = UIColor.white.withAlphaComponent(0.99)
+
         shadowColor.tintColor = colors[colorAbstractUI.id].color
 
         if let prevFace = arView.scene.findEntity(named: "face"){
@@ -153,31 +265,33 @@ extension ViewController{
     }
 
     
-    @objc func buttonTapUploadDebug(){
-        if let capturedImage = arView.session.currentFrame?.capturedImage{
-            guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
-                setMessage("no plane detected")
-                return
-            }
-            let dis = calcuPointDis(trans1: result.worldTransform, trans2: (arView.session.currentFrame?.camera.transform)!)
-            print(dis)
-            let nowMatrix = PicMatrix()
-            let rotationTrans = makeRotationMatrix(x: -.pi/2)
-            nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
-            nowMatrix.itemDis = Double(dis)
-            picMatrix.append(nowMatrix)
-            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
-            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
-            if(mode==1){
-                setResult(cot: picMatrix.count, receive: DebugString.coffeeDebug, isDebug: true)
-            }else if mode == 2{
-                setResult(cot: picMatrix.count, receive: DebugString.coffeeDebug, isDebug: true)
-            }else{
-                setResult(cot: picMatrix.count, receive: DebugString.bookDebug, isDebug: true)
-            }
-        }
-    }
+//    @objc func buttonTapUploadDebug(){
+//        if let capturedImage = arView.session.currentFrame?.capturedImage{
+//            guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
+//                setMessage("no plane detected")
+//                return
+//            }
+//            let dis = calcuPointDis(trans1: result.worldTransform, trans2: (arView.session.currentFrame?.camera.transform)!)
+//            print(dis)
+//            let nowMatrix = PicMatrix()
+//            let rotationTrans = makeRotationMatrix(x: -.pi/2)
+//            nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
+//            nowMatrix.itemDis = Double(dis)
+//            picMatrix.append(nowMatrix)
+//            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
+//            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
+//            var subfix = " scan result"
+//            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
+//            setMessage("waiting for \(picMatrix.count-receiveAnsCot)"+subfix)
+//            if(mode==1){
+//                setResult(cot: picMatrix.count, receive: DebugString.coffeeDebug, isDebug: true)
+//            }else if mode == 2{
+//                setResult(cot: picMatrix.count, receive: DebugString.coffeeDebug, isDebug: true)
+//            }else{
+//                setResult(cot: picMatrix.count, receive: DebugString.bookDebug, isDebug: true)
+//            }
+//        }
+//    }
 
     
     @objc func buttonTapDecRad(){
@@ -216,6 +330,12 @@ extension ViewController{
             setMessage("Cannot scan more than 1 coffee menu at the same time.")
             return
         }
+        if picMatrix.count%2 == 0{
+            setMessage("Scanning"+getSubfix()+".")
+        }else{
+            setMessage("Recognize \(increaseCot())"+getSubfix()+".")
+        }
+
         if let capturedImage = arView.session.currentFrame?.capturedImage{
             guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
                 setMessage("no plane detected")
@@ -230,20 +350,33 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?en=0")!
+            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
             if mode==1{
                 url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=coffee")!
             }else if mode == 2{
                 url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color")!
             }
-            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
+//            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
 
             utiQueue.async {
                 Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
             }
            
         }
+//        setMessage("Recognize \(increaseCot())"+getSubfix())
+
     }
+    
+    public func getSubfix()->String{
+        if mode == 0{
+            return " books"
+        }else if mode == 1{
+            return " coffees"
+        }else{
+            return " eyeshadows"
+        }
+    }
+     
     @objc func buttonTapUploadLarge(){
         if let capturedImage = arView.session.currentFrame?.capturedImage{
             guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
@@ -259,15 +392,22 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?en=1")!
+            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?id=\(picMatrix.count+1)")!
             if mode==1{
                 url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=coffee_large")!
             }else if mode == 2{
-                url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color_square")!
-                isSquare = true
+                if first{
+                    url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color")!
+                    first = false
+                }else{
+                    url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color_square")!
+                    isSquare = true
+                }
                 print("isSquare:\(isSquare)")
             }
-            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
+            var subfix = " scan result"
+            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
+            setMessage("waiting for \(picMatrix.count-receiveAnsCot)"+subfix)
 
             utiQueue.async {
                 Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);

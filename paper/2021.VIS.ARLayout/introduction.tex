@@ -1,0 +1,168 @@
+\firstsection{Introduction}
+\label{sec:introduction}
+
+\maketitle
+
+
+%沉浸式设备的普遍、技术背景、及其优点
+
+The development and the popularity of augmented reality (AR) devices
+and the techniques have led to an increasing number of studies
+designing new authoring tools or personal visualizations (PV).
+PV is designed to help the public get better insight into the data
+in a personal context.
+Unlike the traditional visualizations that are oriented to domain experts,
+PV is less domain-specific and highly focus on
+daily life~\cite{Huang2014,Reipschlager2021}.
+Chen et al.~\cite{Chen2020} have summarized that
+mobile AR techniques have great potential to facilitate PV.
+
+In our everyday life, it is probable that it would take us
+a large amount time to find or choose a target object,
+e.g., a book, a coffee, a kind of drinking, a cup, a kind of fruit or even an eyeshadow
+from massive candidates according to some fuzzy information.
+Similarly, it also would take us too much time to filter, group or sort them
+by one or multiple additional attributes for better comparison.
+The used additional attributes can be summarized into the nominal, the ordinal or the quantitative.
+
+For example, finding a book according to the book name with fuzzy keywords or fuzzy author names
+in a library/bookstore (searching/filtering),
+and then highlight the search results.
+Besides, they would browse all the books and filter them
+to get a smaller number of candidate books (e.g., ``Algorithms'', nominal) for further comparisons.
+There are two subsequent actions the users would probably take:
+(1) Re-grouping. Re-group them according to the publishers (``IEEE'' or ``Springer'', nominal),
+book series, topics (e.g., ``dynamic programming'', nominal), or even more additional attributes
+instead of the unified classification numbers frequently-used in libraries.
+(2) Re-ranking. sort them according to their ratings (ordinal), prices (quantitative)
+or even more additional attributes.
+The illustrations of the library usage scenarios are shown in~\autoref{fig:intro_relayout_task}.
+
+\begin{figure*}[htb]
+%\setlength{\abovecaptionskip}{0.05cm}
+%\setlength{\belowcaptionskip}{-0.4cm}
+    \centering
+    \includegraphics[width=\linewidth]{images/intro_relayout_task.eps}
+    \caption{
+      The task illustrations on searching (a), re-grouping (b), and re-ranking (c) in AR environment.
+      We take the library/bookstore scenario as an example.
+    }
+    \label{fig:intro_relayout_task}
+\end{figure*}
+
+Except for the example of finding/comparing targets from massive candidates, such as the above-mentioned
+finding/re-grouping/re-ranking books in a library or a bookstore,
+we also note that many people either are hard to distinguish the names of some massive goods like foods or drinking,
+or are ambiguous to choose a specific goods from the massive candidates because they
+could not tell or remember the major differences of them.
+For example, we find that many people are hard to identify different coffees
+according to a pre-study investigation of the user study in Section~\ref{sec:evaluation},
+such as Caffe Misto, Blonde Roast, Caffe Mocha, Cappuccino, Caffee Americano, Flat White, Pistachio Latte,
+Caramel Macchiato, Nitro Cold Brew, Iced Coffee, Irish Cream Cold Brew, White Chocolate Mocha, Iced Pistachio Latte,
+or even the combinations of coffees with tea and coffees with milk, etc.
+We also find it difficult for them to choose a coffee in a coffee shop
+because they cannot remember the major differences of their ingredients (quantitative)
+e.g., the total caffeine, calorie, protein, fat, milk, etc,
+the price (quantitative) and rating (ordinal)
+Is it sweet or sugarless and what the total sugar content (quantitative) or
+the place of origin (nominal) is.
+For the users who can identify the coffee names but often are ambiguous to
+choose a coffee in a coffee shop,
+he would further filter the coffee to get a small number of target candidates,
+e.g., ``espresso'' or ``white americano'' (searching/filtering),
+and then re-group them according to the above-mentioned
+nominal, ordinal or quantitative attributes (re-grouping),
+or sort them according to the ordinal or quantitative attributes (re-ranking).
+
+We summarize many of such usage scenarios (book, coffee, drinking, fruit, eyeshadow, etc.)
+towards \textbf{massive target objects}
+in our daily life into three categories according to the tasks and data attributes as follows.
+We call them \textbf{visual re-layout for massive targets} in this paper because almost all of them
+need to break the original physical layouts in the reality.
+
+\begin{itemize}
+\item \textbf{Searching or filtering}: highlight the searched results to provide visual cues
+about their physical positions (used attributes: \textbf{nominal (including hue), ordinal}).
+\item \textbf{Re-grouping}: re-group the target objects according to one/multiple attributes via breaking the original physical
+layouts in AR environment (used attributes: \textbf{nominal (including hue), ordinal, quantitative}).
+\item \textbf{Re-ranking}: sort the target objects according to one/multiple attributes via changing the original physical
+layouts in AR environment (used attributes: \textbf{ordinal, quantitative}).
+\end{itemize}
+
+
+The above-mentioned visual re-layout for massive targets can be achieved by AR-based authoring PVs.
+However, enabling the public especially for the users
+with little knowledge about programming
+to create AR-based authoring tools is challenging
+due to the steep learning curve of programming on AR devices
+and the inconvenient offline workflow where users should
+work back-and-forth between AR devices and desktop PCs~\cite{Chen2020}.
+
+
+In this paper, we propose \textit{ARLayout}, an authoring PV tool designed
+for non-experts to build AR-based visual re-layouts based on real-time videos
+towards massive physical targets,
+which are captured from the camera of personal mobile devices such as mobile phones or tablets.
+All the candidate targets can be segmented and labeled by
+a convolutional neural network named PaddleSeg~\cite{Liu2019,Liu2021a},
+which just requires a small scale of labeled training samples (less than 100 in our three cases).
+The textual information about the targets is recognized by an OCR algorithm.
+The visual re-layouts can be achieved by above-mentioned
+searching (or filtering), re-grouping and re-ranking, etc.
+First, searching is used to narrow down the number of candidate targets
+where the search keywords are input by voice.
+The search results will be highlighted in the AR environment to guide them where to find
+the target in the reality world.
+%, e.g., searching books with fuzzy keywords from massive books in a library.
+Secondly, candidate targets can be re-grouped in the AR environment according to one or even multiple of their
+nominal, ordinal or quantitative attributes.
+Thirdly, candidate targets can be re-ranked in the AR environment according to one of
+their ordinal or quantitative attributes.
+In the experiments, we evaluate the proposed \textit{ARLayout} by
+user study and three usage scenarios,
+which demonstrate the usability, effectiveness and expressiveness of the tool.
+
+
+
+%底下这一段直接放在discussion而不是放到
+%Therefore, the PV tasks of this paper are also different from them due to the larger data scale.
+%We focus on searching/filtering, re-grouping and re-ranking according to
+%the additional attributes of massive physical targets
+%through the visual re-layouts of them,
+%instead of augmenting the existing static visualizations in PapARVis~\cite{Chen2020a}.
+%Besides, the visual presentation is different.
+%We focus on AR-based fisheye highlighting, virtual word cloud and virtual small multiples for better comparisons
+%for massive targets instead of virtual glyphs in MARVisT~\cite{Chen2020}.
+
+
+
+%三个CASE的例子可以在这里分别讨论一下场景，尤其是前面两个例子，
+%找书，但是图书馆或书店是分别按照分类号或者畅销程度进行排列，况且，有些书并没有正确按照分类号排列，
+%所以我们做了pre study，发现几乎所有测试者都表示曾经在图书馆或者书店里找一本书要找很久，
+%此时，用户在借阅或购买之前可能要对目标书籍进行多个维度的分组对比等等，
+%或者对价格，评价进行排序
+%
+%咖啡也是，几乎被测试者不知道各种咖啡的成份含量，也不知道不同各类成分的最大不同之处，不知道
+%能量，含糖量，是否包括牛奶等。
+%
+%眼影的也可以说下。
+
+
+
+
+%与这个工作MARVisT一定要详细讨论不同点，我们针对的是大量杂乱无章的对象，
+%所以给图像识别，重布局会带来很大的挑战
+%做的方面不一样这个是其次，最重要的是就是我刚说的这个，我们针对的是大量杂乱无章的对象，
+%所以给图像识别，重布局会带来很大的挑战
+%数据量更大，数据空间更大，带来了新的问题，带来了新的挑战，所以也带来了新的方法
+
+
+
+
+
+
+
+
+
+
+

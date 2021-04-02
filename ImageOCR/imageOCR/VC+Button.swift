@@ -12,7 +12,6 @@ extension ViewController{
         let button = UIButton(frame: CGRect(x: arView.bounds.size.width/2-50+negX, y: arView.bounds.size.height-negY, width: 150, height: 50))
         button.backgroundColor = UIColor.init(red: 0.2, green: 0.2, blue: 0.2, alpha: alpha)
         button.layer.cornerRadius = 10
-//        button
         button.setTitle(title, for: .normal)
         if action != nil{
             button.addTarget(self, action: action!, for: UIControl.Event.touchUpInside)

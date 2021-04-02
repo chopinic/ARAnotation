@@ -1,0 +1,239 @@
+%\documentclass[journal]{vgtc}                % final (journal style)
+\documentclass[review,journal]{vgtc}         % review (journal style)
+%\documentclass[widereview]{vgtc}             % wide-spaced review
+%\documentclass[preprint,journal]{vgtc}       % preprint (journal style)
+
+%% Uncomment one of the lines above depending on where your paper is
+%% in the conference process. ``review'' and ``widereview'' are for review
+%% submission, ``preprint'' is for pre-publication, and the final version
+%% doesn't use a specific qualifier.
+
+%% Please use one of the ``review'' options in combination with the
+%% assigned online id (see below) ONLY if your paper uses a double blind
+%% review process. Some conferences, like IEEE Vis and InfoVis, have NOT
+%% in the past.
+
+%% Please use the ``preprint''  option when producing a preprint version
+%% for sharing your article on an open access repository
+
+%% Please note that the use of figures other than the optional teaser is not permitted on the first page
+%% of the journal version.  Figures should begin on the second page and be
+%% in CMYK or Grey scale format, otherwise, colour shifting may occur
+%% during the printing process.  Papers submitted with figures other than the optional teaser on the
+%% first page will be refused. Also, the teaser figure should only have the
+%% width of the abstract as the template enforces it.
+
+%% These few lines make a distinction between latex and pdflatex calls and they
+%% bring in essential packages for graphics and font handling.
+%% Note that due to the \DeclareGraphicsExtensions{} call it is no longer necessary
+%% to provide the the path and extension of a graphics file:
+%% \includegraphics{diamondrule} is completely sufficient.
+%%
+\ifpdf%                                % if we use pdflatex
+  \pdfoutput=1\relax                   % create PDFs from pdfLaTeX
+  \pdfcompresslevel=9                  % PDF Compression
+  \pdfoptionpdfminorversion=7          % create PDF 1.7
+  \ExecuteOptions{pdftex}
+  \usepackage{graphicx}                % allow us to embed graphics files
+  \DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg} % for pdflatex we expect .pdf, .png, or .jpg files
+\else%                                 % else we use pure latex
+  \ExecuteOptions{dvips}
+  \usepackage{graphicx}                % allow us to embed graphics files
+  \DeclareGraphicsExtensions{.eps}     % for pure latex we expect eps files
+\fi%
+
+%% it is recommended to use ``\autoref{sec:bla}'' instead of ``Fig.~\ref{sec:bla}''
+\graphicspath{{figures/}{pictures/}{images/}{./}} % where to search for the images
+
+
+\usepackage{microtype}                 % use micro-typography (slightly more compact, better to read)
+\PassOptionsToPackage{warn}{textcomp}  % to address font issues with \textrightarrow
+\usepackage{textcomp}                  % use better special symbols
+\usepackage{listings}
+\usepackage{listingsutf8}
+\usepackage{mathptmx}                  % use matching math font
+\usepackage{times}                     % we use Times as the main font
+\renewcommand*\ttdefault{txtt}         % a nicer typewriter font
+\usepackage{cite}                      % needed to automatically sort the references
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{tabu}                      % only used for the table example
+\usepackage{booktabs}                  % only used for the table example
+
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{stfloats}
+%\usepackage{ulem}
+%\usepackage{fontspec}
+%\usepackage{geometry}
+
+\def\degree{${}^{\circ}$}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% First revision
+\newcommand{\mm}[1]{\textcolor{red}{#1}}
+%\newcommand\reduline{\bgroup\markoverwith{\textcolor{red}{\rule[0.5ex]{2pt}{0.4pt}}}\ULon}
+%\newcommand{\removed}[1]{\reduline{#1}}
+\newcommand{\rmrm}[1]{\sout{#1}}
+
+\def \firstclean{} % remove this comment to generate a clean version
+\ifx\firstclean\undefined
+\usepackage{ulem}
+\else
+ % \renewcommand{\remark}[1]{\iffalse #1 \fi}
+ \renewcommand{\rmrm}[1]{\iffalse #1 \fi}
+ \renewcommand{\mm}{}
+\fi
+
+
+\onlineid{1021}
+
+%% declare the category of your paper, only shown in review mode
+\vgtccategory{Research}
+%% please declare the paper type of your paper to help reviewers, only shown in review mode
+%% choices:
+%% * algorithm/technique
+%% * application/design study
+%% * evaluation
+%% * system
+%% * theory/model
+\vgtcpapertype{Technique}
+
+%% Paper title.
+\title{ARLayout: Massive Physical Targets Visual Re-Layout in Mobile Augmented Reality}
+% MomentRecapturer: Target Visual Re-grouping, Reranking and Relayout by Augmented Reality
+
+% Re-grouping, Re-ranking and Re-layout
+ 
+%% This is how authors are specified in the journal style
+
+%% indicate IEEE Member or Student Member in form indicated below
+\author{Roy G. Biv, Ed Grimley, \textit{Member, IEEE}, and Martha Stewart}
+\authorfooter{
+%% insert punctuation at end of each item
+\item
+ Roy G. Biv is with Starbucks Research. E-mail: roy.g.biv@aol.com.
+\item
+ Ed Grimley is with Grimley Widgets, Inc.. E-mail: ed.grimley@aol.com.
+\item
+ Martha Stewart is with Martha Stewart Enterprises at Microsoft
+ Research. E-mail: martha.stewart@marthastewart.com.
+}
+
+%other entries to be set up for journal
+\shortauthortitle{Biv \MakeLowercase{\textit{et al.}}: Global Illumination for Fun and Profit}
+%\shortauthortitle{Firstauthor \MakeLowercase{\textit{et al.}}: Paper Title}
+
+%% Abstract section.
+\abstract{
+The increasing popularity of VR/AR/MR devices has
+attracted a great deal of attention from researchers in the communities of
+virtual reality, visualization and human-computer interaction.
+However, enabling the public to create AR-based visualizations
+is challenging due to the steep learning curve of programming on AR devices.
+In this paper, we propose \textit{ARLayout}, an authoring tool designed
+for non-experts to build AR-based visual re-layouts towards massive physical targets,
+such as books, coffees, drinking, foods, eyeshadows or even some toys,
+which are captured from the reality world in real-time by the camera of
+mobile devices such as mobile phones or tablets.
+All the candidate targets can be segmented and labeled by
+a convolutional neural network named BOWDA-Net~\cite{Zhu2020},
+which just requires a small scale of labeled training 
+samples (less than 100 for each case in our experiments).
+The textual information is recognized by an OCR algorithm.
+The visual re-layouts of the physical targets include highlighting
+the search results by fisheye deformation, re-grouping and re-ranking.
+Specifically, (1) the fuzzy keywords are input by voice to 
+narrow down the number of candidate targets by searching,
+while the search results will be highlighted in the AR environment 
+to guide them where to find the targets in the reality world.
+%, e.g., searching books with fuzzy keywords from massive books in a library.
+(2) candidate targets can be re-grouped in the AR environment according to one/multiple of 
+their nominal, ordinal or quantitative attributes.
+(3) candidate targets can be re-ranked in the AR environment according to one of
+their ordinal or quantitative attributes.
+We demonstrate the usability, expressiveness and effectiveness 
+of \textit{ARLayout} by user study and case study with three usage scenarios in the evaluation.
+} % end of abstract
+
+%% Keywords that describe your work. Will show as 'Index Terms' in journal
+%% please capitalize first letter and insert punctuation after last keyword
+\keywords{Augmented reality, authoring tool, visual layout, physical visualization}
+
+%% ACM Computing Classification System (CCS).
+%% See <http://www.acm.org/class/1998/> for details.
+%% The ``\CCScat'' command takes four arguments.
+
+\CCScatlist{ % not used in journal version
+ \CCScat{K.6.1}{Management of Computing and Information Systems}%
+{Project and People Management}{Life Cycle};
+ \CCScat{K.7.m}{The Computing Profession}{Miscellaneous}{Ethics}
+}
+
+%% A teaser figure can be included as follows
+%\teaser{
+%  \centering
+%  \includegraphics[width=\linewidth]{CypressView}
+%  \caption{In the Clouds: Vancouver from Cypress Mountain. Note that the teaser may not be wider than the abstract block.}
+%  \label{fig:teaser}
+%}
+
+%% Uncomment below to disable the manuscript note
+%\renewcommand{\manuscriptnotetxt}{}
+
+%% Copyright space is enabled by default as required by guidelines.
+%% It is disabled by the 'review' option or via the following command:
+% \nocopyrightspace
+
+
+\vgtcinsertpkg
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% START OF THE PAPER %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%% The ``\maketitle'' command must be the first command after the
+%% ``\begin{document}'' command. It prepares and prints the title block.
+
+%% the only exception to this rule is the \firstsection command
+%\firstsection{Introduction}
+
+%\maketitle
+
+
+
+%%%--------------------------------------------------------------------------------%%%
+\input{introduction.tex}
+\input{relatedwork.tex}
+\input{design.tex}
+\input{evaluation.tex}
+\input{implementation.tex}
+\input{casestudy.tex}
+\input{discussion.tex}
+\input{conclusion.tex}
+%%%--------------------------------------------------------------------------------%%%
+
+
+
+%% if specified like this the section will be committed in review mode
+\acknowledgments{
+The authors wish to thank A, B, and C. This work was supported in part by
+a grant from XYZ (\# 12345-67890).}
+
+%\bibliographystyle{abbrv}
+\bibliographystyle{abbrv-doi}
+%\bibliographystyle{abbrv-doi-narrow}
+%\bibliographystyle{abbrv-doi-hyperref}
+%\bibliographystyle{abbrv-doi-hyperref-narrow}
+
+\bibliography{arlayout}
+\end{document}
+

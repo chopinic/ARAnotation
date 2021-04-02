@@ -12,6 +12,35 @@ import CoreML
 import UIKit
 import VideoToolbox
 
+public func transToSmallCase(_ str: String)->String{
+    var  str1 = String()
+    var j = 0
+    while j != str.count {
+        let s = str[str.index(str.startIndex, offsetBy: j)]
+        
+        let s1 = String(s)
+        var num:UInt32 = 0
+        for code in s1.unicodeScalars {
+            num = code.value
+        }
+        
+        if num >= 65 && num <= 90  {
+            num += 32
+        }
+//        else if num >= 97 && num <= 122{
+//            num -= 32
+//        }
+        let ch:Character = Character(UnicodeScalar(num)!)
+//        print(ch)
+        let s2 = String(ch)
+        
+        str1 += s2
+        
+        j += 1
+    }
+    return str1
+
+}
 
 public func highlightColorAnimate(_ entity: Entity) {
     if let modelEntity = entity as? ModelEntity{
@@ -23,8 +52,35 @@ public func highlightColorAnimate(_ entity: Entity) {
 
 }
 
-public func highlightMaterial(_ modelEntity: ModelEntity){
+func toggleFlash(_ mode: Int = 1) {
+    if mode != 2{return}
+    guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+    guard device.hasTorch else { return }
+
+    do {
+        try device.lockForConfiguration()
+
+        if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+            return
+//            device.torchMode = AVCaptureDevice.TorchMode.off
+        } else {
+            do {
+                try device.setTorchModeOn(level: 1.0)
+            } catch {
+                print(error)
+            }
+        }
+
+        device.unlockForConfiguration()
+    } catch {
+        print(error)
+    }
+}
+
+
+public func highlightMaterial(_ modelEntity: ModelEntity, _ incot: Int = 8){
     var fade = false
+    var cot = incot
     var alpha: CGFloat = 0.5
     guard let oriMaterial = modelEntity.model?.materials[0] as? UnlitMaterial else{
         return
@@ -37,15 +93,16 @@ public func highlightMaterial(_ modelEntity: ModelEntity){
 
         
         var material = UnlitMaterial()
-        material.baseColor = MaterialColorParameter.color(UIColor.red.withAlphaComponent(alpha))
-        if(alpha>=1.2){
-            fade = true
+        material.baseColor = MaterialColorParameter.color(UIColor(red: 1, green: alpha, blue: alpha, alpha: 1))
+        if(alpha>=1.2||alpha<=0.2){
+            cot -= 1
+            fade = !fade
         }
         if fade
         {alpha -= 0.1}
         else{alpha += 0.1}
         modelEntity.model!.materials = [material]
-        if alpha <= 0.2 {
+        if cot<=0 {
             timer.invalidate()
             modelEntity.model!.materials = [oriMaterial]
             return

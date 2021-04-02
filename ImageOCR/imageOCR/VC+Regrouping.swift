@@ -16,15 +16,16 @@ extension ViewController{
             if(kind == 1){return ""}
             if(kind == 2){return "Rating"}
             if(kind == 3){return "Milk"}
-            if(kind == 4){return "Caffine"}
+            if(kind == 4){return "Caffeine"}
             if(kind == 5){return "Sugar"}
             if(kind == 6){return "Calories"}
             if(kind == 7){return "Protein"}
             if(kind == 8){return "Fat"}
             else{return ""}
         } else if mode == 2 {
-            if(kind == 1){return "Shadowtype"}
-            if(kind == 2){return "Eyetype"}
+            if(kind == 0){return "Shadowtype"}
+            if(kind == 1){return "Eyetype"}
+            if(kind == 2){return "Scheme"}
             else{return ""}
         }else{
             if(kind == 1){return "Publisher"}
@@ -42,7 +43,7 @@ extension ViewController{
         }else if let coffee = ele as? CoffeeSt{
             if(kind == 2){return coffee.score}
             if(kind == 3){return coffee.milk}
-            if(kind == 4){return coffee.caffine}
+            if(kind == 4){return coffee.caffeine}
             if(kind == 5){return coffee.sugar}
             if(kind == 6){return coffee.calories}
             if(kind == 7){return coffee.protein}
@@ -64,7 +65,7 @@ extension ViewController{
             if(kind == 1){return coffee.belong}
             if(kind == 2){return String(coffee.score)}
             if(kind == 3){return String(coffee.milk)}
-            if(kind == 4){return String(coffee.caffine)}
+            if(kind == 4){return String(coffee.caffeine)}
             if(kind == 5){return String(coffee.sugar)}
             if(kind == 6){return String(coffee.calories)}
             if(kind == 7){return String(coffee.protein)}
@@ -74,6 +75,7 @@ extension ViewController{
             let color = ele as! ColorSt
             if(kind == 0){return color.shadowtype}
             if(kind == 1){return color.eyetype}
+            if(kind == 2){return String(color.scheme)}
             else{return ""}
         }
     }
@@ -81,6 +83,12 @@ extension ViewController{
     func evenValue(_ kind: Int, _ value: String) -> String{
         let a = Double(value) ?? 0
         if mode == 0{
+            if kind == 3{
+                if a <= 2{return "<= 2"}
+                else if a<=3{return "2 ~ 3"}
+                else if a<=4{return "3 ~ 4"}
+                else {return "4 ~ 5"}
+            }
             if kind == 4{
                 if a <= 10{return "<= 10¥"}
                 else if a <= 30{return "10¥ ~ 30¥"}
@@ -92,11 +100,16 @@ extension ViewController{
             if kind == 2{
                 return String(Int(a))
             }
-            if kind == 3 || kind == 4 || kind == 5{
+            if kind == 3 || kind == 4{
                 if a <= 0.05{return "< 5%"}
-                else if a <= 15{return "5% ~ 15%"}
-                else if a <= 25{return "15% ~ 25%"}
+                else if a <= 0.15{return "5% ~ 15%"}
+                else if a <= 0.25{return "15% ~ 25%"}
                 else{return "> 25%"}
+            }else if kind == 5{
+                if a <= 0.05{return "Sugar Free"}
+                else if a <= 0.15{return "Slightly Sweet"}
+                else if a <= 0.25{return "Medium Sweet"}
+                else{return "Sweet"}
             }else if kind == 6{
                 if a <= 10{return "<= 10cal"}
                 else if a <= 40{return "10cal ~ 40cal"}
@@ -108,6 +121,11 @@ extension ViewController{
                 else if a <= 30{return "10g ~ 30g"}
                 else{return "> 30g"}
             }
+        }
+        if mode == 2{
+//            if kind == 2{
+//                return "Scheme"
+//            }
         }
         return value
     }
@@ -124,9 +142,36 @@ extension ViewController{
         return evenValue(kind,getAttri(kind: kind, ele: ele1))==evenValue(kind,getAttri(kind: kind, ele: ele2))
     }
     
+    func transferOrderToId(result: [[Int]] )->[[Int]]{
+        guard mode == 1 else {
+            setMessage("Not in coffee mode!")
+            return [[Int]]()
+        }
+        let group = ["Hot Coffees","Cold Coffees","Hot Teas","Iced Teas","Drinks"]
+        var ans = [[Int]]()
+        for i in stride(from: 0, to: result.count, by: 1){
+            ans.append([Int]())
+            for j in stride(from: 0, to: result[i].count, by: 1){
+                for k in stride(from: 0, to: coffees.count, by: 1){
+                    if coffees[k].order == result[i][j] && coffees[k].belong == group[i]{
+                        ans[i].append(k)
+                        break
+                    }
+                }
+            }
+        }
+        return ans
+    }
+    
     func generateGroups(kind: Int) -> [[Int]] {
         var result = [[Int]]()
         if mode==1{
+            if kind == 1 {
+                result = [[1,2,3,4,5,6,7,8,9,10],[1,2,3,4,5,6,7,8,9,10],[1,2,3,4,5,6,7,8],[1,2,3,4,5,6,7,8],[1,2,3,4]]
+                
+                nowGroups = transferOrderToId(result: result)
+                return nowGroups
+            }
             for s in stride(from: 0, to: coffees.count, by: 1){
                 var isfind = false
                 generateGroupValue(id: s, kind: kind, element: coffees[s])
@@ -162,6 +207,7 @@ extension ViewController{
 
         }else{
             for s in stride(from: 0, to: books.count, by: 1){
+//                if books[s].entityId == -1{continue}
                 var isfind = false
                 generateGroupValue(id: s, kind: kind, element: books[s])
                 for i in stride(from: 0, to: result.count, by: 1){
@@ -182,9 +228,6 @@ extension ViewController{
         return result
     }
     
-//    func formHeadString(ori: String) -> String {
-//    }
-    
     func getPrefixHead(_ kind: Int)->String{
         if mode == 0{
             return getAttrName(kind: kind)+": "
@@ -192,13 +235,14 @@ extension ViewController{
 
         if mode == 1{
             if(kind == 1){return ""}
+            else if (kind == 5){return ""}
             else{
                 return getAttrName(kind: kind)+": "
             }
         }
         else{
-            if(kind == 1){return "Shadowtype"}
-            if(kind == 2){return "Eyetype"}
+            if(kind == 1){return "Eyetype"}
+            if(kind == 2){return "Scheme"}
         }
         return ""
     }
@@ -246,6 +290,7 @@ extension ViewController{
 //        shouldBeInPlace = false
         removeHeadAnchor()
         cmpGroup = [Int]()
+        isInRegroupView = true
 
         let nowTrans = arView.session.currentFrame!.camera.transform
 
@@ -284,7 +329,7 @@ extension ViewController{
             var absy = Float(0)
             var x = Float(-0.4)
             let z = Float(-1*PicMatrix.showDis)
-            var maxx = Float(-0.08)
+            var maxx = x
             var groupStartx = x
             
             var translation = matrix_identity_float4x4
@@ -292,11 +337,13 @@ extension ViewController{
             translation.columns.3.y = -1.8
             translation.columns.3.x = 0
             loadBookShelf(nowTrans*translation)
-            
             for i in stride(from: 0, to: result.count, by: 1) {
+                var jj = -1
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
-                    let nowNode = arView.scene.findEntity(named: "book@\(id)")!
+                    let nowNode = scanEntitys[id]
+                    if getIdFromName(nowNode.name) == -1{continue}
+                    jj+=1
                     let nowElement = books[id]
                     // set z
                     translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
@@ -307,7 +354,7 @@ extension ViewController{
                     translation.columns.3.x = x
                     x += 0.05
                     maxx = max(maxx, x)
-                    if j==0{
+                    if jj==0{
                         let headString = getPrefixHead(kind)+"\n"+addTitleReturn(getAttri(kind: kind, ele: nowElement)) + getSubfixHead(kind)
                         print(headString)
                         let lineHeight: CGFloat = 0.05
@@ -328,7 +375,8 @@ extension ViewController{
                     books[id].tempTrans = nowTrans*translation
                 }
                 if i % 3 == 2{
-                    groupStartx = maxx+0.23
+                    groupStartx = maxx+0.16
+                    if i/3 == 1{groupStartx-=0.06}
                     absy = 0
                 }
                 else if i % 3 == 0{
@@ -339,15 +387,16 @@ extension ViewController{
 
             }
         }else if mode == 2 {
-            var y = Float(0.1)
+            var y = Float(0.15)
             var absx = Float(0)
             var z = Float(-0.3)
             var translation = matrix_identity_float4x4
 
+            var cot = 0
             for i in stride(from: 0, to: result.count, by: 1) {
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
-                    let nowNode = arView.scene.findEntity(named: "color@\(id)")!
+                    let nowNode = scanEntitys[id]
                     let nowElement = colors[id]
                     // set z
                     translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
@@ -357,7 +406,9 @@ extension ViewController{
                     // set y
                     translation.columns.3.y = y
                     if j==0{
-                        let headString = getPrefixHead(kind) + "\n" + getAttri(kind: kind, ele: nowElement) + getSubfixHead(kind)
+                        var headString = getPrefixHead(kind) + "\n" + evenValue(kind, getAttri(kind: kind, ele: nowElement) ) + getSubfixHead(kind) + "\n"
+                        if kind == 2
+                        {headString = headString + eyeshadowscheme[i]}
                         print(headString)
                         let lineHeight: CGFloat = 0.05
                         let font = MeshResource.Font.boldSystemFont(ofSize: lineHeight)
@@ -373,12 +424,19 @@ extension ViewController{
                         y -= 0.024
                         translation.columns.3.y = y
                     }
-                    nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
+                    if j > 5 && kind == 2{
+                        translation.columns.3.z += 10
+                    }
+                    var trans = Transform(matrix: nowTrans*translation)
+                    let radio = Float(0.015/colors[id].size.width)
+                    trans.scale = SIMD3<Float>(x: radio, y: radio, z: radio)
+                    nowNode.move(to: trans, relativeTo: rootnode, duration: 0.4)
+        //            let picContents = elementPics[currentBook.picid]
                     colors[id].tempTrans = nowTrans*translation
-                    y -= 0.05
+                    y -= 0.025
                 }
-                y = 0.1
-                if(i%2==0){absx += 0.05; z -= 0.06}
+                y = 0.15-0.01*Float(cot)
+                if(i%2==0){absx += 0.08; z -= 0.06; cot+=1}
             }
         }else if coffeeAdhoc{
             if(picMatrix.count<=0){return}
@@ -386,10 +444,9 @@ extension ViewController{
             groupPosCha = [Double]()
             groupPosChaLimit = [Double]()
             for i in stride(from: 0, to: result.count, by: 1) {
+                let ystep = Float(coffeeOffset.step/coffeeOffset.rad)
                 let x = Float(coffeeOffset.xx[i]/coffeeOffset.rad)-0.015
                 var y = Float(coffeeOffset.yy[i]/coffeeOffset.rad)
-                let ystep = Float(coffeeOffset.step/coffeeOffset.rad)
-                let z = Float(0.01)
                 groupPosCha.append(Double(result[i].count-1)*Double(ystep))
                 groupPosChaLimit.append(Double(result[i].count-1)*Double(ystep))
                 for j in stride(from: 0, to: result[i].count, by: 1){
@@ -418,14 +475,15 @@ extension ViewController{
                             textModel.scale = SIMD3<Float>(x: 0.84, y: 0.84, z: 0.84)
                         }
                         menu.addChild(textModel)
+                        y -= ystep
                         translation.columns.3.y = y
                         y -= ystep
                         translation.columns.3.x = x
                     }
                     if checkIfVisible(i,translation.columns.3.y)==false{
-                        translation.columns.3.z = -1.5
+                        translation.columns.3.z = -10.50
                     }else{
-                        translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
+                        translation.columns.3.z = 0.010
                     }
                     nowNode.move(to: translation, relativeTo: nowNode.parent, duration: 0.4)
                 }
@@ -482,5 +540,6 @@ extension ViewController{
                 y = Float(0.05)
             }
         }
+        checkIfHidden()
     }
 }

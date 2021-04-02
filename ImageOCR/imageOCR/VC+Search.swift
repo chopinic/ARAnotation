@@ -32,9 +32,15 @@ extension ViewController: UITextFieldDelegate{
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool{
+        if mode == 0 && isFiltered == false{
+            let remainedCot = filterBooks(textField.text ?? "")
+            setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
+            print("After filtering: \(remainedCot) books remain.")
+            return true
+        }
 //        if(textField.na == message) {return false}
         let text = textField.text ?? ""
-        if(nowSelection == 0&&mode != 2)
+        if(nowSelection == 0 && mode != 2)
         {
             if(text != "")
             {
@@ -42,13 +48,54 @@ extension ViewController: UITextFieldDelegate{
             }
         }
         else{
-            prevSearch = text
-            previousKind = nowSelection
-            displayGroups(nowSelection, text)
+            if(text != ""&&mode == 2&&nowSelection == 2){
+                findEyeshadows(text)
+            }else{
+                prevSearch = text
+                previousKind = nowSelection
+                displayGroups(nowSelection, text)
+            }
         }
         textField.resignFirstResponder()
         return true
     }
+    
+    
+    public func findEyeshadows(_ str: String){
+        guard let g = Int(str)else{
+            setMessage("please input a valid scheme")
+            return
+        }
+        var isfind = false
+        for i in stride(from: 0, to: colors.count, by: 1){
+            if colors[i].scheme == g{
+                highlightColorAnimate(scanEntitys[i])
+                isfind = true
+            }
+        }
+        if isfind{
+            setMessage("Highlighting scheme \(g).")
+        }else{
+            setMessage("Scheme \(g) not found.")
+        }
+    }
+    
+    public func filterBooks(_ str:String)->Int{
+        if str == "" {return books.count}
+        var cot = 0
+        for i in stride(from: 0, to: books.count, by: 1){
+            let nowbook = books[i]
+            let endBIndex = nowbook.isbn.index(before: nowbook.isbn.endIndex)
+            if (Int(nowbook.isbn[..<endBIndex])!)%10 > 3{
+                books[i].isDisplay = true
+            }
+            if books[i].isDisplay == false{
+                cot+=1
+            }
+        }
+        return cot
+    }
+    
     
     public func highlightNodes(_ ids: [Int]){
         for id in stride(from: 0, to: scanEntitys.count, by: 1){
@@ -58,7 +105,9 @@ extension ViewController: UITextFieldDelegate{
             }
             if ids.firstIndex(of: id) != nil{
                 var trans = Transform(matrix: scanEntitys[id].transformMatrix(relativeTo: scanEntitys[id].parent))
-                trans.scale = SIMD3<Float>(x: 1.4, y: 1.4, z: 1.4)
+                var ratio = Float(1.4)
+                if mode == 2{ratio = 1.2}
+                trans.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
                 scanEntitys[id].move(to: trans, relativeTo: scanEntitys[id].parent, duration: 1)
                 highlightColorAnimate(scanEntitys[id])
             }
@@ -95,7 +144,7 @@ extension ViewController: UITextFieldDelegate{
             for i in stride(from: 0, to: coffees.count ,by: 1){
                 let element = coffees[i]
                 elementWeights[i].id = i;
-                if element.name.contains(lookFor)
+                if transToSmallCase(element.name).contains(lookFor)
                 {
                     elementWeights[i].weight = (Double(lookFor.count)/Double(element.name.count))
                     findResult.append(i)
@@ -108,7 +157,7 @@ extension ViewController: UITextFieldDelegate{
             for i in stride(from: 0, to: colors.count ,by: 1){
                 let element = colors[i]
                 elementWeights[i].id = i;
-                if element.shadowtype.contains(lookFor)
+                if transToSmallCase(element.shadowtype).contains(lookFor)
                 {
                     elementWeights[i].weight = (Double(lookFor.count)/Double(element.shadowtype.count))
                     findResult.append(i)
@@ -123,15 +172,29 @@ extension ViewController: UITextFieldDelegate{
                 elementWeights[i].id = i;
                 elementWeights[i].weight = 0;
 
-                for j in stride(from: 0, to: singlebook.words.count ,by: 1){
-                    if singlebook.words[j].contains(lookFor){
-                        findResult.append(i)
-                        elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
-                        break
-                    }else{
-                        elementWeights[i].update(w: 0);
+                if transToSmallCase(singlebook.title).contains(lookFor){
+                    findResult.append(i)
+                    elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.title.count))
+                }
+                else{
+                    if mode == 0 && arView.scene.findEntity(named: "trans@1") == nil{
+                        var translation = matrix_identity_float4x4
+                        translation.columns.3.z = 100
+                        translation.columns.3.y = 0
+                        translation.columns.3.x = 0
+                        let nowtrans = arView.session.currentFrame!.camera.transform
+                        scanEntitys[i].setTransformMatrix(nowtrans*translation, relativeTo: rootnode)
+//                        scanEntitys[i].setPosition(, relativeTo: )
                     }
                 }
+//                for j in stride(from: 0, to: singlebook.words.count ,by: 1){
+//                    if singlebook.words[j].contains(lookFor){
+//                        findResult.append(i)
+//                        elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.words[j].count));
+//                        break
+//                    }else{
+//                        elementWeights[i].update(w: 0);
+//                    }
             }
         }
         if(findResult.count == 0){
@@ -142,11 +205,11 @@ extension ViewController: UITextFieldDelegate{
         }
         print("find \(findResult.count) results")
         setMessage("Find \(findResult.count) related results")
-        if mode == 2{
-            scaleNodes(ids: findResult)
-        }else{
-            highlightNodes(findResult)
-        }
+//        if mode == 2{
+//            scaleNodes(ids: findResult)
+//        }else{
+        highlightNodes(findResult)
+//        }
     }
     
     public func scaleNodes(ids: [Int], time: Double = 0.4){
@@ -156,6 +219,7 @@ extension ViewController: UITextFieldDelegate{
             let name = node.name
             var elementId = -1
             elementId = getIdFromName(name)
+            if elementId == -1{continue}
 
             if ids.firstIndex(of: elementId) != nil{
 //                var enhance =
@@ -185,6 +249,7 @@ extension ViewController: UITextFieldDelegate{
 //    func
     
     func openBook(_ id: Int){
+        return
         if mode==1{return}
         for i in stride(from: 0, to: books.count, by: 1){
             let book = findById(id: i) as! AnchorEntity
@@ -276,6 +341,7 @@ extension ViewController: UITextFieldDelegate{
 //        shouldBeInPlace = false
         removeHeadAnchor()
         elementWeights.sort(by: {$0.weight > $1.weight})
+        isInRegroupView = true
         if(mode==0){
 
             let z = -1*PicMatrix.showDis
@@ -302,10 +368,10 @@ extension ViewController: UITextFieldDelegate{
             textAnchor.name = "head@"
             textAnchor.addChild(textModel)
             self.arView.scene.addAnchor(textAnchor)
-
             for i in stride(from: 0, to: elementWeights.count ,by: 1){
                 let elementWeight = elementWeights[i]
-                var nowNode = scanEntitys[elementWeight.id]
+                let nowNode = scanEntitys[elementWeight.id]
+                if getIdFromName(nowNode.name) == -1{continue}
                 translation.columns.3.z = Float(z)-(0.0001*Float(i%5))
 
                 translation.columns.3.y = Float(y)
@@ -322,9 +388,11 @@ extension ViewController: UITextFieldDelegate{
             var result = [[Int]]()
             result.append([Int]())
             var i = 0
+            var cot = 0
             for ele in elementWeights{
                 if result[i].count >= 10 && i <= 3 {i+=1;result.append([Int]())}
                 result[i].append(ele.id)
+                cot+=1
             }
             nowGroups = result
             for i in stride(from: 0, to: result.count, by: 1) {
@@ -336,22 +404,42 @@ extension ViewController: UITextFieldDelegate{
                 groupPosCha.append(Double(result[i].count-1)*Double(ystep))
                 groupPosChaLimit.append(Double(result[i].count-1)*Double(ystep))
                 for j in stride(from: 0, to: result[i].count, by: 1){
+                    print("now moving: \(j)")
+                    if coffees[result[i][j]].name.contains("oast") {
+                        print("now trans")
+                    }
+
                     let id = result[i][j]
                     let nowNode = arView.scene.findEntity(named: "coffee@\(id)")!
                     var translation = matrix_identity_float4x4
-//                    // set z
-//                    translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
                     // set y
                     translation.columns.3.y = y
                     // set x
                     translation.columns.3.x = x
                     y -= ystep
+                    if j == 0 && i == 1{
+                        let filenamearrar = getDocumentsDirectory().appendingPathComponent("arror.png")
+                        translation.columns.3.x += 0.055
+                        translation.columns.3.z = 0.06
+                        translation.columns.3.y -= 0.035
+                        let cellSize = CGSize(width: 0.18, height: 0.02)
+                        let arror = createImagePlane(url: filenamearrar, size: cellSize)!
+                        arror.transform = Transform(matrix: translation)
+                        arror.name = "head@"
+                        menu.addChild(arror)
+                        translation.columns.3.y = y
+                        // set x
+                        translation.columns.3.x = x
+                        y -= ystep
+                    }
                     if j==0 && (i==0||i==result.count-1){
-                        print("i:\(i)")
                         translation.columns.3.x -= 0.01
-                        var headString = "Sort by " + getAttrName(kind: nowSelection)
-                        if i==0 {headString+="(the most)"}
-                        else{headString="The least"}
+                        if i == 0{
+                            translation.columns.3.x -= 0.02
+                        }
+                        var headString = getAttrName(kind: nowSelection)
+                        if i==0 {headString+="(most)"}
+                        else{headString+="(least)"}
                         let lineHeight: CGFloat = 0.05
                         let font = MeshResource.Font.boldSystemFont(ofSize: lineHeight)
                         let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)
@@ -369,15 +457,15 @@ extension ViewController: UITextFieldDelegate{
                         translation.columns.3.x = x
                     }
                     if checkIfVisible(i,translation.columns.3.y)==false{
-                        translation.columns.3.z = -1.5
+                        translation.columns.3.z = -10
                     }else{
-                        translation.columns.3.z = z-(0.0001*Float(j%5+i%3))
+                        translation.columns.3.z = z
                     }
                     nowNode.move(to: translation, relativeTo: nowNode.parent, duration: 0.4)
                 }
             }
         }
-
+        checkIfHidden()
     }
     
     func calculateXDistance(_ pos1: CGPoint,_ pos2: CGPoint)->Double{
@@ -412,6 +500,8 @@ extension ViewController: UITextFieldDelegate{
         removeBookShelf()
         openBook(-1)
         cmpGroup = [Int]()
+        isInRegroupView = false
+        
         if arView.scene.findEntity(named: "trans@1") != nil{
             buttonTapCreateBigPlane()
         }
@@ -424,8 +514,13 @@ extension ViewController: UITextFieldDelegate{
         for node in scanEntitys {
             let name = node.name
             let id = getIdFromName(name)
+            if id == -1{continue}
             if mode == 2 {
-                node.move(to: self.colors[id].oriTrans, relativeTo: node.parent, duration: 0.4)
+                var trans = Transform(matrix: self.colors[id].oriTrans)
+                trans.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
+//                nowNode.setScale(SIMD3<Float>(x: radio, y: radio, z: radio), relativeTo: rootnode)
+
+                node.move(to: trans, relativeTo: node.parent, duration: 0.4)
                 colors[id].tempTrans = colors[id].oriTrans
             }else{
                 node.move(to: self.books[id].oriTrans, relativeTo: node.parent, duration: 0.4)
@@ -434,7 +529,7 @@ extension ViewController: UITextFieldDelegate{
 
         }
 
-
+        checkIfHidden()
     }
 
     func checkBookShelf()->Bool{
@@ -450,16 +545,22 @@ extension ViewController: UITextFieldDelegate{
         }
         removeBookShelf()
         let bookShelf = try! Entity.loadModel(named: "bookShelf")
-        let bookShelf1 = bookShelf.clone(recursive: true)
-        bookShelf1.position = SIMD3<Float>(x: -1.22, y: 0, z: 0)
+//        let bookShelf1 = bookShelf.clone(recursive: true)
+//        bookShelf1.position = SIMD3<Float>(x: -1.22, y: 0, z: 0)
         let bookShelf2 = bookShelf.clone(recursive: true)
         bookShelf2.position = SIMD3<Float>(x: 1.22, y: 0, z: 0)
+        let bookShelf3 = bookShelf.clone(recursive: true)
+        bookShelf3.position = SIMD3<Float>(x: 2.44, y: 0, z: 0)
+        let bookShelf4 = bookShelf.clone(recursive: true)
+        bookShelf4.position = SIMD3<Float>(x: 3.66, y: 0, z: 0)
 
         print("loading entity")
         let anchor = AnchorEntity(world: trans )
         anchor.addChild(bookShelf)
-        anchor.addChild(bookShelf1)
+//        anchor.addChild(bookShelf1)
         anchor.addChild(bookShelf2)
+        anchor.addChild(bookShelf3)
+        anchor.addChild(bookShelf4)
 //        bookShelf.scale = SIMD3<Float>(x: 0.1, y: 0.1, z: 0.1)
         anchor.name = "bookShelf"
         arView.scene.anchors.append(anchor)

@@ -1,0 +1,27 @@
+\BOOKMARK [1][]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][]{section.4}{Related Work}{}% 2
+\BOOKMARK [2][]{subsection.5}{AR Visualizations}{section.4}% 3
+\BOOKMARK [2][]{subsection.6}{Personal Visualization}{section.4}% 4
+\BOOKMARK [2][]{subsection.7}{Visualization Authoring Tools}{section.4}% 5
+\BOOKMARK [2][]{subsection.9}{Relationship with The Most Related Work}{section.4}% 6
+\BOOKMARK [1][]{section.10}{Design Rationale}{}% 7
+\BOOKMARK [2][]{subsection.11}{Design Goals}{section.10}% 8
+\BOOKMARK [2][]{subsection.12}{Design Considerations and Design Details}{section.10}% 9
+\BOOKMARK [2][]{subsection.14}{Design Details: System Workflow Design}{section.10}% 10
+\BOOKMARK [1][]{section.15}{Evaluations}{}% 11
+\BOOKMARK [2][]{subsection.16}{Case Scenarios}{section.15}% 12
+\BOOKMARK [2][]{subsection.19}{Tasks}{section.15}% 13
+\BOOKMARK [2][]{subsection.21}{User Study}{section.15}% 14
+\BOOKMARK [2][]{subsection.22}{User Study Results}{section.15}% 15
+\BOOKMARK [1][]{section.25}{Implementation and Performance}{}% 16
+\BOOKMARK [2][]{subsection.27}{Database}{section.25}% 17
+\BOOKMARK [2][]{subsection.28}{Optical Character Recognition}{section.25}% 18
+\BOOKMARK [2][]{subsection.29}{Image Segmentation and Labelling}{section.25}% 19
+\BOOKMARK [2][]{subsection.30}{Coordinates Consistency between Virtuality and Reality}{section.25}% 20
+\BOOKMARK [2][]{subsection.31}{Small Multiples and Virtual Models}{section.25}% 21
+\BOOKMARK [1][]{section.36}{Usage Scenarios}{}% 22
+\BOOKMARK [2][]{subsection.37}{Library/Bookstore Scenario}{section.36}% 23
+\BOOKMARK [2][]{subsection.38}{Coffee Shop Scenario}{section.36}% 24
+\BOOKMARK [2][]{subsection.39}{Eyeshadow Scenario}{section.36}% 25
+\BOOKMARK [1][]{section.40}{Discussion and Future Work}{}% 26
+\BOOKMARK [1][]{section.41}{Conclusion}{}% 27

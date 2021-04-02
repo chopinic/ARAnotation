@@ -93,7 +93,9 @@ extension ViewController{
             }
 
         }
+        checkIfHidden()
     }
+    
     func createComparePanel()->AnchorEntity{
         hideAbstract()
         if let cmpPlane = arView.scene.findEntity(named: "cmp@1"){
@@ -122,8 +124,11 @@ extension ViewController{
         return transTip
     }
 
+//    func chechIfTooLong(_ str:String)->String{
+//
+//    }
     
-    func addTitleReturn(_ title: String)->String{
+    func addTitleReturn(_ title: String, _ length: Int = 15,_ hasLimit:Int = 100)->String{
         var name = ""
 //        for i in stride(from: 0, to: title.count, by: 1){
 //            if(lineori.index(after: String.Index(encodedOffset: i)) != " "){continue}
@@ -132,6 +137,9 @@ extension ViewController{
 //        }
         var tail = title
         var head = ""
+//        var cot = 0
+        var nowLineLength = 0
+        var linecot = 0
         while(true){
             var firstSpace = tail.firstIndex(of: " ") ?? tail.endIndex
             if firstSpace == tail.endIndex{
@@ -139,16 +147,26 @@ extension ViewController{
                 break
             }
             head = String(tail[..<firstSpace])
-            if head.count>3{
-                name = name + "\n" + head
+            nowLineLength += head.count
+//            if head.count>3{
+            if nowLineLength>length{
+                if linecot >= hasLimit{
+                    return name+" ..."
+                }
+                if(head.count>length){
+                    name = name + head.prefix(head.count - nowLineLength + length) + "-"
+                    name = name + "\n" + head.suffix(nowLineLength-length)
+                }else{
+                    name = name + "\n" + head
+                    nowLineLength = head.count
+                    linecot+=1
+                }
+                
             }else{
                 name = name + " " + head
             }
             firstSpace = tail.index(after: firstSpace)
             tail = String(tail[firstSpace...])
-//            print("tail:\(tail), head:\(head)")
-//            print(name)
-//            print()
         }
         return name
     }
@@ -172,67 +190,91 @@ extension ViewController{
                 dic["title"] = "Rating and Prices"
                 for id in cmpGroup {
                     let bookInfo = NSMutableDictionary()
-                    bookInfo["title"] = addTitleReturn(books[id].title)
+                    bookInfo["title"] = addTitleReturn(books[id].title, 60/cmpGroup.count)
                     bookInfo["price"] = books[id].price
                     bookInfo["score"] = books[id].score
                     info.append(bookInfo)
                 }
                 dic["data"] = info
-            }else{return}
-            let jsonData = Internet.convertDictionaryToJSONString(dict: dic).data(using: .utf8)!
-            var request = URLRequest(url: URL(string: "http://106.12.176.27:8888/score")!)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                let jsonData = Internet.convertDictionaryToJSONString(dict: dic).data(using: .utf8)!
+                var request = URLRequest(url: URL(string: "http://106.12.176.27:8888/score")!)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            var receive = Internet.uploadBookIsbns(request: request, data: jsonData)
-            var picDic = Internet.getDictionaryFromJSONString(jsonString: receive)
-            var pibBase64 = picDic["base64"] as! String
-            var dataDecoded : Data = Data(base64Encoded: pibBase64, options: .ignoreUnknownCharacters)!
-            let filename = getDocumentsDirectory().appendingPathComponent("cmpScoreChart.png")
-            try! dataDecoded.write(to: filename)
-            
-            request = URLRequest(url: URL(string: "http://106.12.176.27:8888/price")!)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            receive = Internet.uploadBookIsbns(request: request, data: jsonData)
-            picDic = Internet.getDictionaryFromJSONString(jsonString: receive)
-            pibBase64 = picDic["base64"] as! String
-            dataDecoded = Data(base64Encoded: pibBase64, options: .ignoreUnknownCharacters)!
-            let filenamePrice = getDocumentsDirectory().appendingPathComponent("cmpPriceChart.png")
-            try! dataDecoded.write(to: filenamePrice)
+                var receive = Internet.uploadBookIsbns(request: request, data: jsonData)
+                var picDic = Internet.getDictionaryFromJSONString(jsonString: receive)
+                var pibBase64 = picDic["base64"] as! String
+                var dataDecoded : Data = Data(base64Encoded: pibBase64, options: .ignoreUnknownCharacters)!
+                let filename = getDocumentsDirectory().appendingPathComponent("cmpScoreChart.png")
+                try! dataDecoded.write(to: filename)
+                
+                request = URLRequest(url: URL(string: "http://106.12.176.27:8888/price")!)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                receive = Internet.uploadBookIsbns(request: request, data: jsonData)
+                picDic = Internet.getDictionaryFromJSONString(jsonString: receive)
+                pibBase64 = picDic["base64"] as! String
+                dataDecoded = Data(base64Encoded: pibBase64, options: .ignoreUnknownCharacters)!
+                let filenamePrice = getDocumentsDirectory().appendingPathComponent("cmpPriceChart.png")
+                try! dataDecoded.write(to: filenamePrice)
 
-            Thread.sleep(forTimeInterval: 0.5)
-            
-            let cellSize = CGSize(width: 0.10, height: 0.10)
-            let priceCell = createImagePlane(url: filename, size: cellSize)!
-            priceCell.position = SIMD3<Float>(x: -0.06, y: -0.008, z: 0.016)
-            let lineHeight: CGFloat = 0.05
-            let font = MeshResource.Font.systemFont(ofSize: lineHeight)
-            var textMesh = MeshResource.generateText("Rating", extrusionDepth: Float(lineHeight * 0.1), font: font)
-            var bound = textMesh.bounds
-            let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
-            let ratio = Float(0.2)
-            var titleText = ModelEntity(mesh: textMesh, materials: [textMaterial])
-            titleText.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
-            titleText.position = SIMD3<Float>(x: -ratio*bound.boundingRadius, y: 0.065, z: 0)
-            priceCell.addChild(titleText)
-            
-            
-            
-            let scoreCell = createImagePlane(url: filenamePrice, size: cellSize)!
-            scoreCell.position = SIMD3<Float>(x: 0.06, y: -0.008, z: 0.0155)
-            textMesh = MeshResource.generateText("Price", extrusionDepth: Float(lineHeight * 0.1), font: font)
-            bound = textMesh.bounds
-            titleText = ModelEntity(mesh: textMesh, materials: [textMaterial])
-            titleText.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
-            titleText.position = SIMD3<Float>(x: -ratio*bound.boundingRadius, y: 0.065, z: 0)
-            scoreCell.addChild(titleText)
-            
-            transTip.addChild(priceCell)
-            transTip.addChild(scoreCell)
+                Thread.sleep(forTimeInterval: 0.5)
+                
+                let cellSize = CGSize(width: 0.10, height: 0.10)
+                let priceCell = createImagePlane(url: filename, size: cellSize)!
+                priceCell.position = SIMD3<Float>(x: -0.06, y: -0.008, z: 0.016)
+                let lineHeight: CGFloat = 0.05
+                let font = MeshResource.Font.systemFont(ofSize: lineHeight)
+                var textMesh = MeshResource.generateText("Rating", extrusionDepth: Float(lineHeight * 0.1), font: font)
+                var bound = textMesh.bounds
+                let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
+                let ratio = Float(0.2)
+                var titleText = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                titleText.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
+                titleText.position = SIMD3<Float>(x: -ratio*bound.boundingRadius, y: 0.065, z: 0)
+                priceCell.addChild(titleText)
+                
+                
+                
+                let scoreCell = createImagePlane(url: filenamePrice, size: cellSize)!
+                scoreCell.position = SIMD3<Float>(x: 0.06, y: -0.008, z: 0.0155)
+                textMesh = MeshResource.generateText("Price", extrusionDepth: Float(lineHeight * 0.1), font: font)
+                bound = textMesh.bounds
+                titleText = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                titleText.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
+                titleText.position = SIMD3<Float>(x: -ratio*bound.boundingRadius, y: 0.065, z: 0)
+                scoreCell.addChild(titleText)
+                
+                transTip.addChild(priceCell)
+                transTip.addChild(scoreCell)
 
+            }else if mode == 1{
+                generateTitleText("Ingredients",transTip)
+                for i in stride(from: 0, to: cmpGroup.count, by: 1){
+                    let cellSize = CGSize(width: 0.05, height: 0.05)
+                    let filename = getDocumentsDirectory().appendingPathComponent("coffeedespercent@\(cmpGroup[i]).png")
+                    let cell = createImagePlane(url: filename, size: cellSize)!
+                    cell.position = SIMD3<Float>(x: -0.09+0.06*Float(i), y: 0.020, z: 0.006)
+                    transTip.addChild(cell)
+                    
+                    let lineHeight: CGFloat = 0.05
+                    let font = MeshResource.Font.systemFont(ofSize: lineHeight)
+                    let textMesh = MeshResource.generateText(coffees[cmpGroup[i]].name, extrusionDepth: Float(lineHeight * 0.1), font: font)
+                    let boundBox = textMesh.bounds
+                    let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
+                    let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
+                    var translation = matrix_identity_float4x4
+                    translation.columns.3.z = Float(-0.25)
+                    textModel.transform = Transform(matrix: translation)
+                    let ratio = Float(0.07)
+                    textModel.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
+                    textModel.position = SIMD3<Float>(x: -1*ratio*boundBox.boundingRadius, y: -0.032, z: 0)
+                    cell.addChild(textModel)
+                }
+            }
             arView.scene.addAnchor(transTip)
         }
+
     }
 
     @objc func buttonTapPicCmp(){
@@ -278,7 +320,7 @@ extension ViewController{
                     
                     let lineHeight: CGFloat = 0.05
                     let font = MeshResource.Font.systemFont(ofSize: lineHeight)
-                    let textMesh = MeshResource.generateText(books[cmpGroup[i]].title, extrusionDepth: Float(lineHeight * 0.1), font: font)
+                    let textMesh = MeshResource.generateText(addTitleReturn(books[cmpGroup[i]].title,15,3), extrusionDepth: Float(lineHeight * 0.1), font: font)
                     let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
                     let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
                     var translation = matrix_identity_float4x4
@@ -287,17 +329,25 @@ extension ViewController{
                     let boundBox = textMesh.bounds
                     let ratio = Float(0.07)
                     textModel.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
-                    textModel.position = SIMD3<Float>(x: -1*ratio*boundBox.boundingRadius, y: -0.027, z: 0)
+                    textModel.position = SIMD3<Float>(x: -1*ratio*boundBox.boundingRadius, y: -0.027-0.4*ratio*boundBox.boundingRadius, z: 0)
                     cell.addChild(textModel)
                 }
             }
             else{
-                generateTitleText("Coffee Ingredient",transTip)
+                generateTitleText("Word Cloud",transTip)
                 for i in stride(from: 0, to: cmpGroup.count, by: 1){
-                    let cellSize = CGSize(width: 0.04, height: 0.04)
-                    let filename = getDocumentsDirectory().appendingPathComponent("coffeedes@\(cmpGroup[i]).png")
-                    let cell = createImagePlane(url: filename, size: cellSize)!
-                    cell.position = SIMD3<Float>(x: -0.07+0.05*Float(i), y: 0.02, z: 0.006)
+                    let cellSize = CGSize(width: 0.07, height: 0.07)
+                    let filename = getDocumentsDirectory().appendingPathComponent("coffeeRemark@\(cmpGroup[i]).png")
+                    guard let cell = createImagePlane(url: filename, size: cellSize) else{
+                        setMessage("Please select coffee. There's drinks or tea in the selected list.")
+                        return
+                    }
+//                    for j in stride(from: 0, to: cmpGroup.count, by: 1){
+//                        for h in stride(from: 0, to: 2, by: 1){
+                    cell.position = SIMD3<Float>(x: -0.04+0.08*Float(i%2), y: 0.04-0.070*Float(i/2), z: 0.006)
+//                        }
+//                    }
+
                     transTip.addChild(cell)
                     
                     let lineHeight: CGFloat = 0.05
@@ -309,10 +359,12 @@ extension ViewController{
                     var translation = matrix_identity_float4x4
                     translation.columns.3.z = Float(-0.25)
                     textModel.transform = Transform(matrix: translation)
-                    let ratio = Float(0.07)
+                    let ratio = Float(0.08)
                     textModel.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
-                    textModel.position = SIMD3<Float>(x: -1*ratio*boundBox.boundingRadius, y: -0.027, z: 0)
+                    textModel.position = SIMD3<Float>(x: -1*ratio*boundBox.boundingRadius, y: -0.035, z: 0)
                     cell.addChild(textModel)
+                    
+                
                 }
             }
             arView.scene.addAnchor(transTip)

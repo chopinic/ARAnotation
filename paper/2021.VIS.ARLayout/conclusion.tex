@@ -1,0 +1,37 @@
+\section{Conclusion}
+
+%In this work, we present \textit{ARLayout},
+%an authoring tool designed for non-experts
+%to build AR-based visual re-layouts over massive physical targets.
+%The design and implementation of \textit{ARLayout} is based on the C/S architecture.
+%OCR and image segmentation are used to process the text and image data in the scenario,
+%and AR + VR (mainly AR) are used to display the data.
+%We demonstrate the expressiveness, usability and usefulness of \textit{ARLayout}
+%through three usage scenario examples and a user study.
+
+
+In this paper, we present \textit{ARLayout}, a personal visualization tool designed
+for non-experts to build AR-based visual re-layouts towards massive physical targets,
+such as books in a library/bookstore, coffees in a coffee shop, eyeshadows in a shop, etc.
+The real-time video are captured from the reality world by the camera of
+mobile devices.
+All the candidate targets can be segmented and labeled by
+a convolutional neural network PaddleSeg~\cite{Liu2019,Liu2021a}.
+The network just requires a small scale of labeled training
+samples, i.e., less than 100 for each case in our experiments,
+while the textual information is recognized by an OCR algorithm.
+
+The visual re-layouts of the physical targets include (1) highlighting
+the search results by AR-based fisheye deformation,
+(2) re-grouping them according to their additional nominal,
+ordinal or quantitative attributes,
+and (3) re-ranking them according to their additional ordinal or quantitative attributes.
+In the searching scenario, the fuzzy keywords are input by voice to narrow down the number of candidate targets,
+and then the search results will be highlighted by flashing, transparency or AR-based fisheye deformation
+in the AR environment to guide them where to find the targets in the reality world.
+In the re-grouping task, candidate targets can be re-grouped in the AR environment
+according to one or multiple of their nominal, ordinal or quantitative attributes.
+In the re-ranking task, candidate targets can be sorted in the AR environment according to one of
+their ordinal or quantitative attributes.
+In the experiments, we demonstrate the usability, expressiveness and effectiveness
+of \textit{ARLayout} by a user study and three case studies.
