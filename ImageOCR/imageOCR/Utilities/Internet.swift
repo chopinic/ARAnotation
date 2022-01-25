@@ -195,6 +195,7 @@ public struct Internet {
 
         if let data = tempUiImage.jpegData(compressionQuality: 0.3 ){
             let imageData = data.base64EncodedString()
+            print(imageData)
             var request = URLRequest(url: url)
             imgData = imageData
             request.httpMethod = "POST"

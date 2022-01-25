@@ -358,9 +358,11 @@ extension ViewController{
             }
 //            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
 
-            utiQueue.async {
-                Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
-            }
+            
+            setResult(cot: 1, receive: DebugString.coffeeStr)
+//            utiQueue.async {
+//                Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
+//            }
            
         }
 //        setMessage("Recognize \(increaseCot())"+getSubfix())

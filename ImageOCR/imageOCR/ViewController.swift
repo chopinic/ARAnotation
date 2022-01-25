@@ -495,22 +495,6 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     public func resetPicTracking() -> Bool{
         if(mode != 1){return false}
-//        let fileName = "MenuOri@.png"
-//        let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/" + fileName
-//        guard var oriMenu = UIImage(contentsOfFile: path)else{
-//            setMessage("no original menu file")
-//            return false
-//        }
-//        PicMatrix.imageW = Double(oriMenu.size.width * oriMenu.scale)
-//        PicMatrix.imageH = Double(oriMenu.size.height * oriMenu.scale)
-//        print("pic width: \(PicMatrix.imageW), pic height: \(PicMatrix.imageH)")
-////        if PicMatrix.imageW < PicMatrix.imageH{
-////            oriMenu = UIImage(named: "big.jpg")!
-////        }else{
-////        }
-//
-//        let physicalWidth = picMatrix[0].getActualLen(oriLen: PicMatrix.imageW, isW: true)
-//        print(physicalWidth)
 
         let oriMenuBig = UIImage(named: "bigPic.jpeg")!.cgImage!
 //        let oriMenuCIImageBig = CIImage(image: oriMenuBig)!
@@ -555,6 +539,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     node.removeFromParent()
                 }
             }
+            
             else{
                 let childNodes = getEntityList()
                 for node in childNodes {

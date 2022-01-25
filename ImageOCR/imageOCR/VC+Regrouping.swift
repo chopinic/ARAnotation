@@ -1,7 +1,7 @@
 //
 //  Viewcontroller+Regrouping.swift
 //  imageOCR
-//
+//   
 //  Created by 杨光 on 2020/12/5.
 //  Copyright © 2020 Ivan Nesterenko. All rights reserved.
 //
