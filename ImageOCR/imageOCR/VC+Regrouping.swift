@@ -1,7 +1,7 @@
 //
 //  Viewcontroller+Regrouping.swift
 //  imageOCR
-//   
+//
 //  Created by 杨光 on 2020/12/5.
 //  Copyright © 2020 Ivan Nesterenko. All rights reserved.
 //
@@ -116,10 +116,10 @@ extension ViewController{
                 else if a <= 120{return "40cal ~ 120cal"}
                 else{return "> 120cal"}
             }else if kind == 7 || kind == 8{
-                if a <= 5{return "<= 5g"}
-                else if a <= 10{return "5g ~ 10g"}
-                else if a <= 30{return "10g ~ 30g"}
-                else{return "> 30g"}
+                if a > 30 {return "> 30g"}
+                else if (a > 10 && a <= 30){return "10g ~ 30g"}
+                else if (a > 5 && a <= 10){return "5g ~ 10g"}
+                else{return "<= 5g"}
             }
         }
         if mode == 2{

@@ -16,14 +16,8 @@ extension ViewController{
     
     func checkIfHidden(){
         (uiButton["scan"] as! UIButton).isHidden = false
-
-
-
         (uiButton["switch"] as! UIButton).isHidden = true
         (uiButton["background"] as! UIButton).isHidden = true
-//        (uiButton["switch"] as! UIButton).isHidden = false
-//        (uiButton["switch"] as! UIButton).isHidden = false
-//        (uiButton["switch"] as! UIButton).isHidden = false
 
         if scanEntitys.count > 0 || isInRegroupView{
             (uiButton["reranking"] as! UIButton).isHidden = false
@@ -36,6 +30,8 @@ extension ViewController{
         }
         
         if mode == 0{
+            (uiButton["clearStore"] as! UIButton).isHidden = false
+            (uiButton["store"] as! UIButton).isHidden = false
             (uiButton["background"] as! UIButton).isHidden = false
             if isFiltered{
                 (uiButton["model"] as! UIButton).isHidden = true
@@ -90,7 +86,8 @@ extension ViewController{
 
     
     func setInitHidden(){
-        for i in stride(from: 0, to: uiButton.count-1, by: 1){
+        for i in stride(from: 0, to: uiButton.count, by: 1){
+            if(uiKeys[i] == "hide"){continue}
             (uiButton[uiKeys[i]] as! UIButton).isHidden = true
         }
         (uiButton["scan"] as! UIButton).isHidden = true
@@ -111,11 +108,12 @@ extension ViewController{
                 hideButton.setTitle("Hide Buttons",for: .normal)
             }
         }
-        for i in stride(from: 0, to: uiButton.count-1, by: 1){
+        for i in stride(from: 0, to: uiButton.count, by: 1){
 //            if uiBotton[i].
             if (uiButton[uiKeys[i]] as! UIButton).title(for: .normal) == ""{
                 (uiButton[uiKeys[i]] as! UIButton).isHidden = true
             }else{
+                if(uiKeys[i] == "hide"){continue}
                 (uiButton[uiKeys[i]] as! UIButton).isHidden = toHide
                 if(toHide==false){
                     checkIfHidden()
@@ -124,32 +122,7 @@ extension ViewController{
         }
         toggleFlash(mode)
     }
-    
-    @objc func adHoc(){
-        if let capturedImage = arView.session.currentFrame?.capturedImage{
-            guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
-                setMessage("no plane detected")
-                return
-            }
-            let dis = calcuPointDis(trans1: result.worldTransform, trans2: (arView.session.currentFrame?.camera.transform)!)
-            print(dis)
-            let nowMatrix = PicMatrix()
-            let rotationTrans = makeRotationMatrix(x: -.pi/2)
-            nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
-            nowMatrix.itemDis = Double(dis)
-            picMatrix.append(nowMatrix)
-            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
-            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            let url = URL(string: "http://106.12.176.27/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
-            setMessage("waiting for \(picMatrix.count-receiveAnsCot) scan results")
-
-            utiQueue.async {
-                Internet.uploadImageTemp(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
-            }
-           
-        }
-    }
-    
+        
     func setButtonText(){
         for i in stride(from: 0, to: uiButton.count, by: 1){
             (uiButton[uiKeys[i]] as! UIButton).setTitle(bottonText[mode][i], for: .normal)
@@ -184,7 +157,8 @@ extension ViewController{
     
     @objc func buttonTapTimer(){
         if mode != 0{
-            //            buttonTapUploadLarge()
+        // 大菜单、小菜单。硬编码
+//            buttonTapUploadLarge()
             buttonTapUpload()
             return
         }
@@ -203,14 +177,6 @@ extension ViewController{
     @objc func buttonTapLoadModel(){
         if mode == 0{
             isFiltered = true
-//            var cot = 0
-//            for i in stride(from: 0, to: books.count, by: 1){
-//                if books[i].isDisplay == false{
-//                    books[i].entityId = cot
-//                    cot+=1
-//                }
-//            }
-            
             resetAndAddAnchor()
             return
         }
@@ -263,36 +229,6 @@ extension ViewController{
         print(coffees[2].name)
         print(coffees[3].name)
     }
-
-    
-//    @objc func buttonTapUploadDebug(){
-//        if let capturedImage = arView.session.currentFrame?.capturedImage{
-//            guard let result = arView.raycast(from: arView.center, allowing: .estimatedPlane, alignment: .any).first else{
-//                setMessage("no plane detected")
-//                return
-//            }
-//            let dis = calcuPointDis(trans1: result.worldTransform, trans2: (arView.session.currentFrame?.camera.transform)!)
-//            print(dis)
-//            let nowMatrix = PicMatrix()
-//            let rotationTrans = makeRotationMatrix(x: -.pi/2)
-//            nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
-//            nowMatrix.itemDis = Double(dis)
-//            picMatrix.append(nowMatrix)
-//            imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
-//            imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-//            var subfix = " scan result"
-//            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
-//            setMessage("waiting for \(picMatrix.count-receiveAnsCot)"+subfix)
-//            if(mode==1){
-//                setResult(cot: picMatrix.count, receive: DebugString.coffeeDebug, isDebug: true)
-//            }else if mode == 2{
-//                setResult(cot: picMatrix.count, receive: DebugString.coffeeDebug, isDebug: true)
-//            }else{
-//                setResult(cot: picMatrix.count, receive: DebugString.bookDebug, isDebug: true)
-//            }
-//        }
-//    }
-
     
     @objc func buttonTapDecRad(){
         coffeeOffset.rad = coffeeOffset.rad + 120
@@ -325,6 +261,32 @@ extension ViewController{
         print(Internet.imgData)
     }
     
+    @objc func buttonTabClearPrev(){
+        FileHandler.clearAllSavedData()
+    }
+    
+    @objc func buttonTabLoadPrev(){
+        let resultCot = FileHandler.readResultCot();
+        NSLog("find \(resultCot) previous result");
+        staticRefCoodPrev = FileHandler.readCoodRef() ?? matrix_identity_float4x4
+        for i in stride(from: 0, to: resultCot ,by: 1){
+            if let nowMatrix = FileHandler.decodeMatrixToFile(cot: i){
+                while(picMatrix.count <= i){
+                    picMatrix.append(PicMatrix())
+                }
+                picMatrix[i] = nowMatrix
+                if let nowResult = FileHandler.readResultFromFile(cot: i){
+                    setResult(cot: i+1, receive: nowResult, false);
+                }
+                else{
+                    NSLog("error reading nowResult: \(i)");
+                }
+            }else{
+                NSLog("error reading nowmatrix: \(i)");
+            }
+        }
+    }
+    
     @objc func buttonTapUpload(){
         if mode==1&&picMatrix.count>=1{
             setMessage("Cannot scan more than 1 coffee menu at the same time.")
@@ -350,22 +312,21 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
-            if mode==1{
-                url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=coffee")!
-            }else if mode == 2{
-                url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color")!
+            var url = URL(string: "http://180.76.103.228/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
+            if mode == 0{
+                FileHandler.encodeMatrixToFile(matrix: nowMatrix);
             }
-//            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
-
-            
-            setResult(cot: 1, receive: DebugString.coffeeStr)
-//            utiQueue.async {
-//                Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
-//            }
-           
+            else if mode==1{
+                url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=coffee")!
+            }else if mode == 2{
+                url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=color")!
+            }
+            utiQueue.async {
+                Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
+            }
+                       
         }
-//        setMessage("Recognize \(increaseCot())"+getSubfix())
+            //        setMessage("Recognize \(increaseCot())"+getSubfix())
 
     }
     
@@ -394,15 +355,15 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://106.12.176.27/AR/ARInterface.php?id=\(picMatrix.count+1)")!
+            var url = URL(string: "http://180.76.103.228/AR/ARInterface.php?id=\(picMatrix.count+1)")!
             if mode==1{
-                url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=coffee_large")!
+                url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=coffee")!
             }else if mode == 2{
-                if first{
-                    url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color")!
-                    first = false
+                if isFirstPic{
+                    url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=color")!
+                    isFirstPic = false
                 }else{
-                    url = URL(string: "http://106.12.176.27/AR/ARInterface.php?recognizeType=color_square")!
+                    url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=color_square")!
                     isSquare = true
                 }
                 print("isSquare:\(isSquare)")

@@ -420,7 +420,7 @@ extension ViewController: UITextFieldDelegate{
                     if j == 0 && i == 1{
                         let filenamearrar = getDocumentsDirectory().appendingPathComponent("arror.png")
                         translation.columns.3.x += 0.055
-                        translation.columns.3.z = 0.06
+                        translation.columns.3.z = 0.15
                         translation.columns.3.y -= 0.035
                         let cellSize = CGSize(width: 0.18, height: 0.02)
                         let arror = createImagePlane(url: filenamearrar, size: cellSize)!
@@ -438,8 +438,8 @@ extension ViewController: UITextFieldDelegate{
                             translation.columns.3.x -= 0.02
                         }
                         var headString = getAttrName(kind: nowSelection)
-                        if i==0 {headString+="(most)"}
-                        else{headString+="(least)"}
+                        if i==0 {headString+=" (most)"}
+                        else{headString+=" (least)"}
                         let lineHeight: CGFloat = 0.05
                         let font = MeshResource.Font.boldSystemFont(ofSize: lineHeight)
                         let textMesh = MeshResource.generateText(headString, extrusionDepth: Float(lineHeight * 0.1), font: font)

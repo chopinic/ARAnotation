@@ -10,7 +10,6 @@ import UIKit
 import SceneKit
 import ARKit
 import RealityKit
-
 //import Base
 
 
@@ -77,11 +76,13 @@ class ViewController: UIViewController, ARSessionDelegate {
     var scanEntitys = [Entity]()
     var isFiltered = false
     
-    var first = true
+    var isFirstPic = true  // in mode 1 / 2, only one pic is allowed
     var eyeshadowscheme = ["Brown and Gold Soft","The Simple Day-Look","Soft Smokey","Defined-Crease Smokey","Rose Gold","Deep Blue","The Simple Day-Look","Soft Smokey","Defined-Crease Smokey", "Brown and Gold Soft","Defined-Crease Smokey","Rose Gold","Rose Gold","Deep Blue","The Simple Day-Look"]
 
-    
-    
+    var coordinateTransFromPrev = matrix_identity_float4x4
+    var staticRefCood = matrix_identity_float4x4
+    var staticRefCoodPrev = matrix_identity_float4x4
+
     override func viewDidLoad() {
         super.viewDidLoad()
         let wholewidth = wholeView.bounds.size.width
@@ -117,11 +118,11 @@ class ViewController: UIViewController, ARSessionDelegate {
         colorAttr = ["Color", "Eyetype", "Scheme"]
         
         bottonText = [
-            ["Switch Mode", "Reranking", "Pan to Scale", "Restore",  "Scan","", "Load Books", "Background", "Select Target","Compare Chart","Word Cloud","Hide Buttons"],
-        ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan Menu", "Scan Menu", "", "", "Select Target","Components","Word Cloud","Hide Buttons"],
-        ["Switch Mode", "", "Pan to Scale", "Restore", "Scan (Circle)", "Scan", "Virtual Preview", "Background","","","","Hide Buttons"]]
-//        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.findString), name: NSNotification.Name.UITextFieldTextDidChange, object:nil)
-        uiKeys = ["switch","reranking","fisheye","restore","scan","sscan","model","background","select","chart","compare","hide"]
+            ["Switch Mode", "Reranking", "Pan to Scale", "Restore",  "Scan","", "Load Books", "Background", "Select Target","Compare Chart","Word Cloud","Hide Buttons","GetStored","ClearStored"],
+        ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan Menu", "Scan Menu", "", "", "Select Target","Components","Word Cloud","Hide Buttons","",""],
+        ["Switch Mode", "", "Pan to Scale", "Restore", "Scan (Circle)", "Scan", "Virtual Preview", "Background","","","","Hide Buttons","",""]]
+
+        uiKeys = ["switch","reranking","fisheye","restore","scan","sscan","model","background","select","chart","compare","hide","store","clearStore"]
         self.arView.addSubview(bookAbstractUI.ui)
 
         coffeeAbstractUI.setIsHidden(true)
@@ -166,19 +167,18 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         coffeeNormalMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.99)
         coffeeVagueMaterial.tintColor = UIColor(red: 130.0/255, green: 90.0/255, blue: 55.0/255, alpha: 0.6)
+        
 
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        let configuration = ARWorldTrackingConfiguration()
-        arView.session.run(configuration)
-        // height 100
-//        uiBotton.append(createButton( title: "DScan", negY: 100, action: #selector(ViewController.buttonTapUploadDebug),0.1))
-////        createButton(title: "sort",negX: 100,  negY: 100, action: #selector(ViewController.changeToSortDisplay))
-//        // height 150
-//        uiBotton.append((createButton(title: "debug", negY: 150, action: #selector(ViewController.buttonTapDecRad),0.1)))
-//        createButton(title: "data",negY: 200, action: #selector(ViewController.buttonTapData),0.1)
+        if (mode == 0){
+            resetRefImageTracking()
+        }else{
+            let configuration = ARWorldTrackingConfiguration()
+            arView.session.run(configuration)
+        }
 
         uiButton["switch"] = createButton(title: "Switch",negX: -500, negY: 450, action: #selector(ViewController.switchMode))
         uiButton["reranking"] = createButton(title: "Reranking",negX: -500,negY: 380, action: #selector(ViewController.changeToSortDisplay))
@@ -188,41 +188,21 @@ class ViewController: UIViewController, ARSessionDelegate {
         antButton.addTarget(self, action: #selector(ViewController.stopAntEyeDisplay), for: [.touchUpInside, .touchUpOutside])
 
         uiButton["fisheye"] = antButton
-//        uiBotton.append(createButton(title: "Background",negX: -500,negY: 300, action: #selector(ViewController.buttonTapCreateBigPlane)))
-//        uiButton.append(createButton(title: "Switch",negX: -500, negY: 450, action: #selector(ViewController.switchMode)))
-//        uiButton.append(createButton(title: "Reranking",negX: -500,negY: 380, action: #selector(ViewController.changeToSortDisplay)))
         uiButton["restore"] = createButton(title: "Restore",negX: -500, negY: 240, action: #selector(ViewController.restoreDisplay))
-        uiButton["scan"] = createButton( title: "Scan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapTimer))
+        uiButton["scan"] = createButton( title: "Scan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapUpload))
         uiButton["sscan"] = createButton( title: "Sscan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapUploadLarge))
-//        uiButton.append(createButton( title: "Sscan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapUploadLarge)))
-
-        
-
         uiButton["model"] = createButton(title: "Model",negX: 450,negY: 450, action: #selector(ViewController.buttonTapLoadModel))
         uiButton["background"] = createButton(title: "BackGround",negX: 450,negY: 370, action: #selector(ViewController.buttonTapCreateBigPlane))
-//        uiButton.append(createButton(title: "Model",negX: 450,negY: 450, action: #selector(ViewController.buttonTapFaceDebug)))
-//        uiButton.append(createButton(title: "BackGround",negX: 450,negY: 370, action: #selector(ViewController.buttonTapCreateBigPlane)))
         let selectButton = createButton(title: "Select",negX: 450,negY: 310, action: #selector(ViewController.buttonTapSelect))
         selectButton.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.5)
         uiButton["select"] = selectButton
         uiButton["chart"] = createButton(title: "Chart",negX: 450,  negY: 240, action: #selector(ViewController.buttonTapCmp))
         uiButton["compare"] = createButton(title: "Compare",negX: 450,negY: 170, action: #selector(ViewController.buttonTapPicCmp))
         uiButton["hide"] = createButton(title: "Hide",negX: 450, negY: 100, action: #selector(ViewController.setHiddenAfterSwitch))
-
-//        uiButton.append(createButton(title: "Compare",negX: 450,negY: 170, action: #selector(ViewController.buttonTapPicCmp)))
-//        uiButton.append(createButton(title: "Hide",negX: 450, negY: 100, action: #selector(ViewController.setHidden)))
-//        uiBotton.append(createButton(title: "Pic",negX: 500, negY: 50, action: #selector(ViewController.adHoc)))
-
-//        createDirectionButton()
-//        ButtonCreate.createButton(title: "Timer", negY: 200, action: #selector(ViewController.buttonTapTimer))
-        
-        // height 300
-//        createButton(title: "coffeedebug",negX: 100, negY: 300, action: #selector(ViewController.buttonShowCoffeeAbs))
+        uiButton["store"] = createButton(title: "GetStored",negX: -500, negY: 170, action: #selector(ViewController.buttonTabLoadPrev))
+        uiButton["clearStore"] = createButton(title: "ClearStored",negX: -500, negY: 520, action: #selector(ViewController.buttonTabClearPrev))
 
 
-//        DispatchQueue.main.async{
-//            self.nowOrientation = UIApplication.shared.statusBarOrientation.rawValue
-//        }
         setButtonText()
         setHiddenAfterSwitch(true)
         setInitHidden()
@@ -231,8 +211,9 @@ class ViewController: UIViewController, ARSessionDelegate {
         rootNode.name = "rootnode@"
         arView.scene.addAnchor(rootNode)
         rootnode = rootNode
-//        switchMode()
-//        switchMode()
+        // 修改场景，硬编码
+        //switchMode()
+        //switchMode()
 
     }
     
@@ -253,24 +234,40 @@ class ViewController: UIViewController, ARSessionDelegate {
         return loc;
     }
     
-    func setResult(cot:Int, receive: String, isDebug: Bool = false, _ temp: Bool = false){
+    func setResult(cot:Int, receive: String, isDebug: Bool = false, _ isNew:Bool = true){
         result = Internet.getDictionaryFromJSONString(jsonString: receive)
-//        print("visit returns")
-//        print("setResult function is on \(Thread.current)" )
         receiveAnsCot+=1
         if let hasResult = result {
-            if(temp==false){
-                if mode == 0{
-                    setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
-                }else if mode == 2{
-                    setForColor(cot:cot, hasResult: hasResult,isDebug: isDebug)
-                }else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
-            }
+            if mode == 0{
+                setMessage("Set for Books")
+                
+                if (isNew){
+                    FileHandler.addResultToFile(text: receive)
+                } else{
+                    // load from file, previous result
+                    staticRefCoodPrev = FileHandler.readCoodRef() ?? matrix_identity_float4x4;
+                    coordinateTransFromPrev = matrix_identity_float4x4
+                    if (staticRefCoodPrev != matrix_identity_float4x4) {
+                        if (staticRefCood != matrix_identity_float4x4) {
+                            coordinateTransFromPrev = staticRefCood * simd_inverse(staticRefCoodPrev)
+                            NSLog("trans from prev to current success")
+                        }else{
+                            NSLog("fail to load coordinate referrence, locations may be inaccurate")
+                        }
+                    }else{
+                        NSLog("fail to load previous coordinate referrence, locations may be inaccurate")
+                    }
+                }
+
+                setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
+                setMessage("Set for Books OK")
+            }else if mode == 2{
+                setForColor(cot:cot, hasResult: hasResult,isDebug: isDebug)
+            }else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
         }
         if(receiveAnsCot != picMatrix.count){
             var subfix = " scan result"
             if picMatrix.count-receiveAnsCot>1{subfix+="s"}
-//            setMessage("waiting for scanning results")
             setMessage("Recognize \(increaseCot())"+getSubfix())
 
         }else{
@@ -419,7 +416,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         var ready = false
         while(ready==false){
             Thread.sleep(forTimeInterval: 0.5)
-            ready = resetPicTracking()
+            ready = resetCoffeePicTracking()
             print(ready)
         }
     }
@@ -459,12 +456,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     }
                 }
                 nowbook.picid = elementPics.count-1
-                let parts = nowtempbook["part"] as! NSArray
-                for wordforlocs in parts {
-                    let wordlocs = wordforlocs as! NSDictionary
-//                    nowbook.kinds.append(wordlocs["type"] as! String)
-                    nowbook.words.append(wordlocs["words"] as! String)
-                }
+                nowbook.words.append("wors");
                 if isDebug{nowbook.words.append("\(books.count)")}
                 nowbook.matrixId = cot;
                 books.append(nowbook);
@@ -474,6 +466,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         setMessage("Recognize \(increaseCot())" + getSubfix())
     }
     
+    // 虚报图书数量
     public func increaseCot() -> Int{
         let cot = books.count
         if mode == 1{
@@ -486,33 +479,49 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
 
     public func removeHeadAnchor(){
-//        let childNodes = arView.scene.anchors
         while(true){
             guard let headNode = arView.scene.findEntity(named: "head@")else{break}
             headNode.removeFromParent()
         }
     }
     
-    public func resetPicTracking() -> Bool{
-        if(mode != 1){return false}
+    public func resetRefImageTracking() -> Bool{
+        if(mode == 0) {
+            let refImg = UIImage(named: "refImg.jpeg")!
+            let refImgCIImage = CIImage(image: refImg)!
+            let refImgCgImage = convertCIImageToCGImage(inputImage: refImgCIImage)!
+            let arImage = ARReferenceImage(refImgCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(0.1))
+            arImage.name = "ref_img"
+            let configuration = ARWorldTrackingConfiguration()
+            configuration.detectionImages = [arImage]
+            arView.session.run(configuration)
+            return true;
+        }
+        return false
+    }
+    
+    public func resetCoffeePicTracking() -> Bool{
+        if(mode == 1) {
 
-        let oriMenuBig = UIImage(named: "bigPic.jpeg")!.cgImage!
-//        let oriMenuCIImageBig = CIImage(image: oriMenuBig)!
-//        let oriMenuCgImageBig = convertCIImageToCGImage(inputImage: oriMenuCIImageBig)!
-        let arImageBig = ARReferenceImage(oriMenuBig, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(1.2))
-        arImageBig.name = "big"
-        
-        let oriMenu = UIImage(named: "small.jpg")!
-        let oriMenuCIImage = CIImage(image: oriMenu)!
-        let oriMenuCgImage = convertCIImageToCGImage(inputImage: oriMenuCIImage)!
-        let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(0.5))
-        arImage.name = "small"
+            let oriMenuBig = UIImage(named: "bigPic.jpeg")!.cgImage!
+    //        let oriMenuCIImageBig = CIImage(image: oriMenuBig)!
+    //        let oriMenuCgImageBig = convertCIImageToCGImage(inputImage: oriMenuCIImageBig)!
+            let arImageBig = ARReferenceImage(oriMenuBig, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(1.2))
+            arImageBig.name = "big"
+            
+            let oriMenu = UIImage(named: "small.jpg")!
+            let oriMenuCIImage = CIImage(image: oriMenu)!
+            let oriMenuCgImage = convertCIImageToCGImage(inputImage: oriMenuCIImage)!
+            let arImage = ARReferenceImage(oriMenuCgImage, orientation: CGImagePropertyOrientation.up, physicalWidth: CGFloat(0.5))
+            arImage.name = "small"
 
-        
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.detectionImages = [arImage,arImageBig]
-        arView.session.run(configuration)
-        return true
+            
+            let configuration = ARWorldTrackingConfiguration()
+            configuration.detectionImages = [arImage,arImageBig]
+            arView.session.run(configuration)
+            return true
+        }
+        return false;
     }
     
     public func resetAndAddAnchor(isReset: Bool = false) -> Bool{
@@ -584,11 +593,9 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let textMesh = MeshResource.generateText(coffees[i].name, extrusionDepth: Float(lineHeight * 0.1), font: font)
                 let bound = textMesh.bounds
                 var textMaterial = UnlitMaterial()
-    //            material.baseColor = MaterialColorParameter.texture(resource!)
                 textMaterial.tintColor = UIColor(red: 108.0/255, green: 71.0/255, blue: 45.0/255, alpha: 0.99)
                 let coffeeFont = ModelEntity(mesh: textMesh, materials: [textMaterial])
                 coffeeFont.name = "font"
-//                coffeeFont.model?.materials.first =
                 var radius = Float(0.15)
                 if menu.findEntity(named: "big") != nil{
                     radius = Float(0.7)
@@ -607,7 +614,6 @@ class ViewController: UIViewController, ARSessionDelegate {
             if isReset{displayGroups(previousKind, prevSearch, false)}
             else{displayGroups()}
 
-//            if menu.findEntity(named: "small") != nil{
             for i in stride(from: 0, to: coffeeOffset.blockStartx.count, by: 1){
                 let size = CGSize(width: coffeeOffset.blockWidth[i]/coffeeOffset.boxrad, height: coffeeOffset.blockHeight[i]/coffeeOffset.boxrad)
                 var material = UnlitMaterial()
@@ -619,21 +625,6 @@ class ViewController: UIViewController, ARSessionDelegate {
                 plane.generateCollisionShapes(recursive: true)
                 menu.addChild(plane)
             }
-//            }else{
-//                for i in stride(from: 0, to: BigOffset.blockStartx.count, by: 1){
-//                    let size = CGSize(width: BigOffset.blockWidth[i]/boxrad, height: BigOffset.blockHeight[i]/boxrad)
-//                    var material = UnlitMaterial()
-//
-//                    material.tintColor = UIColor.init(red: 1, green: 0, blue: 0, alpha: 0.5)
-//                    let plane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height)), materials: [material])
-//                    plane.name =  "group@\(i)"
-//                    plane.position = SIMD3<Float>(x: Float((BigOffset.blockStartx[i]+BigOffset.blockWidth[i]/2)/boxrad), y: Float((BigOffset.blockStarty[i]-BigOffset.blockHeight[i]/2)/boxrad), z: 0.005)
-//                    plane.generateCollisionShapes(recursive: true)
-//                    print("add plane\(i)")
-//                    menu.addChild(plane)
-//                }
-//                print()
-//            }
         } else if mode == 2 {
             for i in stride(from: 0, to: colors.count ,by: 1){
                 if colors[i].isDisplay{
@@ -641,7 +632,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }
                 let nowMatrix = colors[i].matrixId!-1
                 colors[i].isDisplay = true;
-                let trans = picMatrix[nowMatrix].addBookAnchor(id:i,element:colors[i])
+                let trans = picMatrix[nowMatrix].getBookTrans(id:i,element:colors[i])
                 colors[i].oriTrans = trans
                 colors[i].tempTrans = trans
                 let currentColor = colors[i]
@@ -656,7 +647,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 color.addChild(plane)
                 color.name = "color@\(i)"
                 color.generateCollisionShapes(recursive: true)
-                
+
                 arView.scene.addAnchor(color)
                 scanEntitys.append(color)
             }
@@ -670,19 +661,15 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }
                 let nowMatrix = books[i].matrixId!-1
                 books[i].isDisplay = true;
-                let trans = picMatrix[nowMatrix].addBookAnchor(id:i,element:books[i])
+                var trans = picMatrix[nowMatrix].getBookTrans(id:i,element:books[i])
+                trans = coordinateTransFromPrev * trans
                 books[i].oriTrans = trans
                 books[i].tempTrans = trans
                 let currentBook = books[i]
                 let rootLoc = currentBook.loc
-    //            let picContents = elementPics[currentBook.picid]
                 let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
                 books[i].size = size
                 print("bookid: \(i),size \(size)")
-                var words = ""
-                for str in currentBook.words {
-                    words+=str+" "
-                }
                 let book = AnchorEntity(world: trans)
                 guard let plane = createPlane(id: i, size: size, mode: mode) else{
                     return false
@@ -708,8 +695,13 @@ class ViewController: UIViewController, ARSessionDelegate {
             return
         }
         print(imageAnchor.referenceImage.name)
-        var nowW = 0.5//Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageW, isW: true))
-        var nowH = 0.35//Float(picMatrix.last!.getActualLen(oriLen: PicMatrix.imageH, isW: false))
+        if (imageAnchor.referenceImage.name == "ref_img"){
+            staticRefCood = imageAnchor.transform
+            NSLog("find refrence image")
+            return
+        }
+        var nowW = 0.5
+        var nowH = 0.35
 
         var resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("small_empty.jpg"))
         if imageAnchor.referenceImage.name == "big"{
@@ -718,10 +710,9 @@ class ViewController: UIViewController, ARSessionDelegate {
             nowH = 2
             coffeeOffset = BigOffset()
         }
-        //        let resource = try? TextureResource.load(contentsOf: getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png"))
         print("menu width: \(nowW), height:\(nowH)")
         let rotationTrans = imageAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
-        let trans = getForwardTrans(ori: rotationTrans, dis: 0.1) //开始时是悬浮在上方10cm， update时向下移动到原位
+        let trans = getForwardTrans(ori: rotationTrans, dis: 0.1) //开始时设置悬浮在上方10cm， update时向下移动到原位，造成动画效果
         let anchor = AnchorEntity(world:trans)
         picMatrix[0].prevTrans = trans
         var material = UnlitMaterial()
@@ -915,7 +906,5 @@ class ViewController: UIViewController, ARSessionDelegate {
         result = nil
     }
     
-    
+  
 }
-
-

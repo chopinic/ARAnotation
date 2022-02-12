@@ -51,6 +51,8 @@ public class BookSt: Element{
     var publisher = ""
     var isOpen = false
     var price = 160.0
+    
+    
     public override func uiPos(_ trans: simd_float4x4 = matrix_identity_float4x4)->SIMD3<Float>{
         var translation = matrix_identity_float4x4
         translation.columns.3.y = Float(size.height)/2

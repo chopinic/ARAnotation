@@ -65,7 +65,9 @@ extension ViewController{
             moveGroup(id,dis)
         }
         else {
+            // On cancellation, return the piece to its original location.
             print("canceled")
+            //          piece.center = initialCenter
         }
     }
     
@@ -160,7 +162,11 @@ extension ViewController{
         }
         return list
     }
-        
+    
+    //    func getEntityPosList()->[CGPoint]{
+    //
+    //    }
+    
 }
 
 

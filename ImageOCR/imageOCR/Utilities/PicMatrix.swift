@@ -14,8 +14,7 @@ import RealityKit
 class PicMatrix{
     
     
-//    static
-////  iphone X:
+//  iphone X:
 //    static var camWAngle: Double = 48.71/2
 //    static var camHAngle: Double = 61.15/2
 //    static var imageW: Double = 4320
@@ -156,7 +155,7 @@ class PicMatrix{
         
     }
     
-    public func addBookAnchor(id:Int,element:Element)->simd_float4x4{
+    public func getBookTrans(id:Int,element:Element)->simd_float4x4{
 //        print("addBookAnchor function is on \(Thread.current)" )
         guard let trans = prevTrans
         else { return matrix_identity_float4x4}

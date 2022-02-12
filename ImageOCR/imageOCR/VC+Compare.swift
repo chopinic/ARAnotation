@@ -49,7 +49,7 @@ extension ViewController{
             if cmpGroup.count==1{
                 let lineHeight: CGFloat = 0.05
                 let font = MeshResource.Font.boldSystemFont(ofSize: lineHeight)
-                let textMesh = MeshResource.generateText("Select", extrusionDepth: Float(lineHeight * 0.1), font: font)
+                let textMesh = MeshResource.generateText("Selected:", extrusionDepth: Float(lineHeight * 0.1), font: font)
                 let textMaterial = SimpleMaterial(color: .black, isMetallic: false)
                 let textModel = ModelEntity(mesh: textMesh, materials: [textMaterial])
                 textModel.name = "head"
@@ -197,7 +197,7 @@ extension ViewController{
                 }
                 dic["data"] = info
                 let jsonData = Internet.convertDictionaryToJSONString(dict: dic).data(using: .utf8)!
-                var request = URLRequest(url: URL(string: "http://106.12.176.27:8888/score")!)
+                var request = URLRequest(url: URL(string: "http://180.76.103.228:8888/score")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -208,7 +208,7 @@ extension ViewController{
                 let filename = getDocumentsDirectory().appendingPathComponent("cmpScoreChart.png")
                 try! dataDecoded.write(to: filename)
                 
-                request = URLRequest(url: URL(string: "http://106.12.176.27:8888/price")!)
+                request = URLRequest(url: URL(string: "http://180.76.103.228:8888/price")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 receive = Internet.uploadBookIsbns(request: request, data: jsonData)
@@ -295,7 +295,7 @@ extension ViewController{
                 }
                 dic["isbns"] = isbns
                 let jsonData = Internet.convertDictionaryToJSONString(dict: dic).data(using: .utf8)!
-                var request = URLRequest(url: URL(string: "http://106.12.176.27/AR/BookDataInterface.php")!)
+                var request = URLRequest(url: URL(string: "http://180.76.103.228/AR/BookDataInterface.php")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
