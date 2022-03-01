@@ -17,7 +17,6 @@
 		0976B01E2564CE3000315782 /* VC+Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B01D2564CE3000315782 /* VC+Button.swift */; };
 		0976B0212564D03B00315782 /* VC+BtAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976B0202564D03B00315782 /* VC+BtAction.swift */; };
 		097E0CF325C7E3AA00F8FA36 /* bookBox.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 097E0CF225C7E3AA00F8FA36 /* bookBox.usdz */; };
-		097E0CF725C7E3B900F8FA36 /* slide_stylized.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 097E0CF625C7E3B900F8FA36 /* slide_stylized.usdz */; };
 		097E0CFA25C7EAE800F8FA36 /* bookShelf.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 097E0CF925C7EAE800F8FA36 /* bookShelf.usdz */; };
 		097E0D0125C7F45900F8FA36 /* bookBox1.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 097E0D0025C7F45900F8FA36 /* bookBox1.usdz */; };
 		09A33C8A252091CB001F97A4 /* ARUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A33C87252091CB001F97A4 /* ARUtilities.swift */; };
@@ -44,7 +43,6 @@
 		D5C92BDF25EE19DE003A7905 /* Angelica.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D5C92BDE25EE19DE003A7905 /* Angelica.usdz */; };
 		D5C92BE625EE297C003A7905 /* face1.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D5C92BE525EE297C003A7905 /* face1.usdz */; };
 		D5C92BF125EE5825003A7905 /* VC+Compare.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C92BF025EE5825003A7905 /* VC+Compare.swift */; };
-		D5C92BF625EE9AE6003A7905 /* bookDebug.png in Resources */ = {isa = PBXBuildFile; fileRef = D5C92BF525EE9AE6003A7905 /* bookDebug.png */; };
 		D5C92BFC25EFFD8E003A7905 /* component.png in Resources */ = {isa = PBXBuildFile; fileRef = D5C92BF925EFFD8E003A7905 /* component.png */; };
 		D5C92BFD25EFFD8E003A7905 /* menuDebug.jpg in Resources */ = {isa = PBXBuildFile; fileRef = D5C92BFA25EFFD8E003A7905 /* menuDebug.jpg */; };
 		D5C92BFE25EFFD8E003A7905 /* menu_nowords.jpg in Resources */ = {isa = PBXBuildFile; fileRef = D5C92BFB25EFFD8E003A7905 /* menu_nowords.jpg */; };
@@ -74,7 +72,6 @@
 		0976B01D2564CE3000315782 /* VC+Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+Button.swift"; sourceTree = "<group>"; };
 		0976B0202564D03B00315782 /* VC+BtAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+BtAction.swift"; sourceTree = "<group>"; };
 		097E0CF225C7E3AA00F8FA36 /* bookBox.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = bookBox.usdz; sourceTree = "<group>"; };
-		097E0CF625C7E3B900F8FA36 /* slide_stylized.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = slide_stylized.usdz; sourceTree = "<group>"; };
 		097E0CF925C7EAE800F8FA36 /* bookShelf.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = bookShelf.usdz; sourceTree = "<group>"; };
 		097E0D0025C7F45900F8FA36 /* bookBox1.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = bookBox1.usdz; sourceTree = "<group>"; };
 		09A33C87252091CB001F97A4 /* ARUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ARUtilities.swift; sourceTree = "<group>"; };
@@ -101,7 +98,6 @@
 		D5C92BDE25EE19DE003A7905 /* Angelica.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Angelica.usdz; sourceTree = "<group>"; };
 		D5C92BE525EE297C003A7905 /* face1.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = face1.usdz; sourceTree = "<group>"; };
 		D5C92BF025EE5825003A7905 /* VC+Compare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+Compare.swift"; sourceTree = "<group>"; };
-		D5C92BF525EE9AE6003A7905 /* bookDebug.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bookDebug.png; sourceTree = "<group>"; };
 		D5C92BF925EFFD8E003A7905 /* component.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = component.png; path = imageOCR/imgs/coffee/component.png; sourceTree = SOURCE_ROOT; };
 		D5C92BFA25EFFD8E003A7905 /* menuDebug.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = menuDebug.jpg; path = imageOCR/imgs/coffee/menuDebug.jpg; sourceTree = SOURCE_ROOT; };
 		D5C92BFB25EFFD8E003A7905 /* menu_nowords.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = menu_nowords.jpg; path = imageOCR/imgs/coffee/menu_nowords.jpg; sourceTree = SOURCE_ROOT; };
@@ -152,21 +148,19 @@
 		09B4D3D32582FAF400AC2A57 /* imgs */ = {
 			isa = PBXGroup;
 			children = (
-				D56EBF2627B510C400405501 /* book */,
 				D56EA8232609E15800AB34E4 /* arror.png */,
-				D5C92BF525EE9AE6003A7905 /* bookDebug.png */,
-				D564455B25EE14A3001D8472 /* face */,
 				D5F152A125DE6BC200ABB8F6 /* L_In.usdz */,
 				D5F1529825DE6A4100ABB8F6 /* L_Out.usdz */,
 				D5F1529A25DE6A4100ABB8F6 /* R_In.usdz */,
 				D5F1529925DE6A4100ABB8F6 /* R_Out.usdz */,
-				D5F152A525DEA25700ABB8F6 /* coffee */,
 				09E74DDA25D150E000885D85 /* page.usdz */,
 				09E74DD925D150E000885D85 /* sur.usdz */,
 				097E0D0025C7F45900F8FA36 /* bookBox1.usdz */,
 				097E0CF925C7EAE800F8FA36 /* bookShelf.usdz */,
-				097E0CF625C7E3B900F8FA36 /* slide_stylized.usdz */,
 				097E0CF225C7E3AA00F8FA36 /* bookBox.usdz */,
+				D56EBF2627B510C400405501 /* book */,
+				D564455B25EE14A3001D8472 /* face */,
+				D5F152A525DEA25700ABB8F6 /* coffee */,
 			);
 			path = imgs;
 			sourceTree = "<group>";
@@ -326,7 +320,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D5C92BF625EE9AE6003A7905 /* bookDebug.png in Resources */,
 				E49C2E0120BC53F700D6C6F3 /* art.scnassets in Resources */,
 				D5C92BDF25EE19DE003A7905 /* Angelica.usdz in Resources */,
 				D564455D25EE14B1001D8472 /* face.usdz in Resources */,
@@ -349,7 +342,6 @@
 				097E0CFA25C7EAE800F8FA36 /* bookShelf.usdz in Resources */,
 				D5C92BFD25EFFD8E003A7905 /* menuDebug.jpg in Resources */,
 				D5F152AB25DEE66E00ABB8F6 /* small_empty.png in Resources */,
-				097E0CF725C7E3B900F8FA36 /* slide_stylized.usdz in Resources */,
 				D514CD3925F153DB009BCE9A /* face_part.usdz in Resources */,
 				D56EBF2827B5117200405501 /* refImg.jpeg in Resources */,
 				097E0D0125C7F45900F8FA36 /* bookBox1.usdz in Resources */,

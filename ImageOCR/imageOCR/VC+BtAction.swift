@@ -268,22 +268,31 @@ extension ViewController{
     @objc func buttonTabLoadPrev(){
         let resultCot = FileHandler.readResultCot();
         NSLog("find \(resultCot) previous result");
-        staticRefCoodPrev = FileHandler.readCoodRef() ?? matrix_identity_float4x4
         for i in stride(from: 0, to: resultCot ,by: 1){
-            if let nowMatrix = FileHandler.decodeMatrixToFile(cot: i){
-                while(picMatrix.count <= i){
-                    picMatrix.append(PicMatrix())
-                }
-                picMatrix[i] = nowMatrix
-                if let nowResult = FileHandler.readResultFromFile(cot: i){
-                    setResult(cot: i+1, receive: nowResult, false);
-                }
-                else{
-                    NSLog("error reading nowResult: \(i)");
-                }
-            }else{
+            let nowMatrix = FileHandler.readMatrixFromFile(cot: i)
+            if (nowMatrix == nil){
                 NSLog("error reading nowmatrix: \(i)");
+                continue
             }
+            while(picMatrix.count <= i){
+                picMatrix.append(PicMatrix())
+            }
+            picMatrix[i] = nowMatrix!
+            let nowResult = FileHandler.readResultFromFile(cot: i)
+            if (nowResult == nil){
+                NSLog("error reading nowResult: \(i)");
+                return;
+            }
+            let staticRefCoodPrev = FileHandler.readCoodRef(cot: i) ?? matrix_identity_float4x4;
+            if (staticRefCoodPrev == matrix_identity_float4x4) {
+                NSLog("fail to load previous coordinate referrence, locations may be inaccurate")
+            }
+            if (staticRefCood == matrix_identity_float4x4) {
+                NSLog("fail to load coordinate referrence, locations may be inaccurate")
+            }
+            picMatrix[i].refImgOffset = staticRefCood * simd_inverse(staticRefCoodPrev)
+            NSLog("trans \(i) from prev to current success")
+            setResult(cot: i+1, receive: nowResult!, false);
         }
     }
     
@@ -310,16 +319,18 @@ extension ViewController{
             nowMatrix.saveCurrentTrans(trans: result.worldTransform*rotationTrans)
             nowMatrix.itemDis = Double(dis)
             picMatrix.append(nowMatrix)
+            
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://180.76.103.228/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
+            var url = URL(string: "http://180.76.187.112/AR/ARInterface.php?id=\(picMatrix.count+1)&en=1")!
             if mode == 0{
-                FileHandler.encodeMatrixToFile(matrix: nowMatrix);
+                FileHandler.writeMatrixToFile(matrix: nowMatrix, cot: picMatrix.count-1);
+                FileHandler.writeCoodRef(matrix: staticRefCood, cot: picMatrix.count-1)
             }
             else if mode==1{
-                url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=coffee")!
+                url = URL(string: "http://180.76.187.112/AR/ARInterface.php?recognizeType=coffee")!
             }else if mode == 2{
-                url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=color")!
+                url = URL(string: "http://180.76.187.112/AR/ARInterface.php?recognizeType=color")!
             }
             utiQueue.async {
                 Internet.uploadImage(cot: self.picMatrix.count, url: url, capturedImage: capturedImage, controller:self);
@@ -355,15 +366,15 @@ extension ViewController{
             picMatrix.append(nowMatrix)
             imageW = CGFloat(CVPixelBufferGetWidth(capturedImage))
             imageH = CGFloat(CVPixelBufferGetHeight(capturedImage))
-            var url = URL(string: "http://180.76.103.228/AR/ARInterface.php?id=\(picMatrix.count+1)")!
+            var url = URL(string: "http://180.76.187.112/AR/ARInterface.php?id=\(picMatrix.count+1)")!
             if mode==1{
-                url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=coffee")!
+                url = URL(string: "http://180.76.187.112/AR/ARInterface.php?recognizeType=coffee")!
             }else if mode == 2{
                 if isFirstPic{
-                    url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=color")!
+                    url = URL(string: "http://180.76.187.112/AR/ARInterface.php?recognizeType=color")!
                     isFirstPic = false
                 }else{
-                    url = URL(string: "http://180.76.103.228/AR/ARInterface.php?recognizeType=color_square")!
+                    url = URL(string: "http://180.76.187.112/AR/ARInterface.php?recognizeType=color_square")!
                     isSquare = true
                 }
                 print("isSquare:\(isSquare)")

@@ -32,11 +32,25 @@ extension ViewController: UITextFieldDelegate{
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool{
-        if mode == 0 && isFiltered == false{
-            let remainedCot = filterBooks(textField.text ?? "")
-            setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
-            print("After filtering: \(remainedCot) books remain.")
-            return true
+        if mode == 0{
+            let text = textField.text ?? ""
+            let command = text.components(separatedBy: " ")
+            if(command.count == 2 && command[0] == "d"){
+                FileHandler.removeResult(Int(command[1])!)
+                return true
+            }
+            if(command.count == 2 && command[0] == "setres"){
+                FileHandler.savedResultCot = Int(command[1])!
+                FileHandler.writeResultCot()
+                return true
+            }
+
+            if(isFiltered == false){
+                let remainedCot = filterBooks(textField.text ?? "")
+                setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
+                print("After filtering: \(remainedCot) books remain.")
+                return true
+            }
         }
 //        if(textField.na == message) {return false}
         let text = textField.text ?? ""

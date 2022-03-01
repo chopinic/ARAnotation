@@ -41,8 +41,8 @@ public struct Internet {
         
     static func uploadAndSetResult(request :URLRequest, data: Data, cot:Int, controller: ViewController?) -> String? {
         let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 180.0
-        sessionConfig.timeoutIntervalForResource = 180.0
+        sessionConfig.timeoutIntervalForRequest = 2500.0
+        sessionConfig.timeoutIntervalForResource = 2500.0
         let session = URLSession(configuration: sessionConfig)
         let task = session.uploadTask(with: request, from: data) { data, response, error in
             print("received")

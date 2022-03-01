@@ -43,34 +43,38 @@ class FileHandler{
         return savedResultCot;
     }
     
-    static public func readCoodRef()->simd_float4x4?{
+    static public func readCoodRef(cot:Int = -1)->simd_float4x4?{
         var matrix = matrix_identity_float4x4
-        let matrixStr = readFile(url: "\(coodRef)\(fileSubFix)");
+        var matrixStr = readFile(url: "\(coodRef)\(cot)\(fileSubFix)");
+        if (matrixStr == nil) {
+            matrixStr = readFile(url: "\(coodRef)\(fileSubFix)")
+        }
+
         if let allNumbers = matrixStr?.components(separatedBy: " "){
-            if(allNumbers.count == 17){
-                matrix.columns.0.x = Float(allNumbers[1])!;
-                matrix.columns.0.y = Float(allNumbers[2])!;
-                matrix.columns.0.z = Float(allNumbers[3])!;
-                matrix.columns.0.w = Float(allNumbers[4])!;
-                matrix.columns.1.x = Float(allNumbers[5])!;
-                matrix.columns.1.y = Float(allNumbers[6])!;
-                matrix.columns.1.z = Float(allNumbers[7])!;
-                matrix.columns.1.w = Float(allNumbers[8])!;
-                matrix.columns.2.x = Float(allNumbers[9])!;
-                matrix.columns.2.y = Float(allNumbers[10])!;
-                matrix.columns.2.z = Float(allNumbers[11])!;
-                matrix.columns.2.w = Float(allNumbers[12])!;
-                matrix.columns.3.x = Float(allNumbers[13])!;
-                matrix.columns.3.y = Float(allNumbers[14])!;
-                matrix.columns.3.z = Float(allNumbers[15])!;
-                matrix.columns.3.w = Float(allNumbers[16])!;
+            if(allNumbers.count == 16){
+                matrix.columns.0.x = Float(allNumbers[0])!;
+                matrix.columns.0.y = Float(allNumbers[1])!;
+                matrix.columns.0.z = Float(allNumbers[2])!;
+                matrix.columns.0.w = Float(allNumbers[3])!;
+                matrix.columns.1.x = Float(allNumbers[4])!;
+                matrix.columns.1.y = Float(allNumbers[5])!;
+                matrix.columns.1.z = Float(allNumbers[6])!;
+                matrix.columns.1.w = Float(allNumbers[7])!;
+                matrix.columns.2.x = Float(allNumbers[8])!;
+                matrix.columns.2.y = Float(allNumbers[9])!;
+                matrix.columns.2.z = Float(allNumbers[10])!;
+                matrix.columns.2.w = Float(allNumbers[11])!;
+                matrix.columns.3.x = Float(allNumbers[12])!;
+                matrix.columns.3.y = Float(allNumbers[13])!;
+                matrix.columns.3.z = Float(allNumbers[14])!;
+                matrix.columns.3.w = Float(allNumbers[15])!;
                 return matrix;
             }
         }
         return nil;
     }
     
-    static public func writeCoodRef(matrix: simd_float4x4){
+    static public func writeCoodRef(matrix: simd_float4x4, cot: Int){
         let matrixStr = NSMutableString("");
         matrixStr.append(String(matrix.columns.0.x))
         matrixStr.append(" ");
@@ -104,36 +108,46 @@ class FileHandler{
         matrixStr.append(" ");
         matrixStr.append(String(matrix.columns.3.w))
         
-        writeFile(text: matrixStr as String, url: "\(coodRef)\(fileSubFix)");
+        writeFile(text: matrixStr as String, url: "\(coodRef)\(cot)\(fileSubFix)");
+    }
+    
+    static public func deleteFile(_ url:String){
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first;
+        let fullFileURL = dir!.appendingPathComponent(url)
+        do{
+            if( FileManager().fileExists(atPath: fullFileURL.path) ){
+                try FileManager().removeItem(atPath: fullFileURL.path)
+                NSLog("removed \(url)");
+            }else{
+                NSLog("\(url) not exist, can't remove");
+            }
+        }catch {
+            NSLog("error clear data:  \(error)");
+        }
+
+
+    }
+    
+    static public func removeResult(_ i:Int){
+        let nowFileURL = "\(bookResultFile)\(i)\(fileSubFix)"
+        deleteFile(nowFileURL)
+        let nowMatrixURL = "\(picMatrixFile)\(i)\(fileSubFix)"
+        deleteFile(nowMatrixURL)
+        let nowRefImgURL = "\(coodRef)\(i)\(fileSubFix)"
+        deleteFile(nowRefImgURL)
     }
     
     static public func clearAllSavedData() {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first;
         readResultCot();
-        do{
-            for i in stride(from: 0, to: savedResultCot ,by: 1){
-                let nowFileURL = "\(bookResultFile)\(i)\(fileSubFix)"
-                let fullFileURL = dir!.appendingPathComponent(nowFileURL)
-                if( FileManager().fileExists(atPath: fullFileURL.absoluteString) ){
-                    try FileManager().removeItem(atPath: fullFileURL.absoluteString)
-                    NSLog("removed \(nowFileURL)");
-                }
-                let nowMatrixURL = "\(picMatrixFile)\(i)\(fileSubFix)"
-                let fullMatrixURL = dir!.appendingPathComponent(nowMatrixURL)
-                if( FileManager().fileExists(atPath: fullMatrixURL.absoluteString) ){
-                    try FileManager().removeItem(atPath: fullMatrixURL.absoluteString)
-                    NSLog("removed \(nowMatrixURL)");
-                }
-            }
-            writeResultCot();
-        }catch {
-            NSLog("error clear data:  \(error)");
+        for i in stride(from: 0, to: savedResultCot ,by: 1){
+            removeResult(i)
         }
         savedResultCot = 0;
         writeResultCot();
     }
     
-    static public func decodeMatrixToFile(cot:Int) ->PicMatrix?{
+    static public func readMatrixFromFile(cot:Int) ->PicMatrix?{
         var matrix = PicMatrix();
         let matrixStr = readFile(url: "\(picMatrixFile)\(cot)\(fileSubFix)");
         if let allNumbers = matrixStr?.components(separatedBy: " "){
@@ -162,8 +176,7 @@ class FileHandler{
         return nil;
     }
     
-    static public func encodeMatrixToFile(matrix: PicMatrix){
-        readResultCot()
+    static public func writeMatrixToFile(matrix: PicMatrix, cot:Int){
         let matrixStr = NSMutableString("");
         matrixStr.append(String(matrix.itemDis))
         matrixStr.append(" ");
@@ -199,7 +212,7 @@ class FileHandler{
         matrixStr.append(" ");
         matrixStr.append(String(matrix.prevTrans!.columns.3.w))
         
-        writeFile(text: matrixStr as String, url: "\(picMatrixFile)\(savedResultCot)\(fileSubFix)");
+        writeFile(text: matrixStr as String, url: "\(picMatrixFile)\(cot)\(fileSubFix)");
     }
     
     static public func readResultFromFile(cot:Int) -> String?{
@@ -212,19 +225,10 @@ class FileHandler{
     
     static public func addResultToFile(text:String) -> Int?{
         readResultCot();
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = dir.appendingPathComponent("\(bookResultFile)\(savedResultCot)\(fileSubFix)");
-            do {
-                try text.write(to: fileURL, atomically: false, encoding: .utf8)
-            }
-            catch {
-                NSLog("error writing file");
-                return nil;
-            }
-        }
+        writeFile(text: text, url: "\(bookResultFile)\(savedResultCot)\(fileSubFix)");
+
         savedResultCot+=1
         writeResultCot()
-        readResultCot(); // double check
         return savedResultCot;
     }
     
@@ -236,6 +240,7 @@ class FileHandler{
             //writing
             do {
                 try text.write(to: fileURL, atomically: false, encoding: .utf8)
+                NSLog("successful write file: \(url)")
             }
             catch {
                 NSLog("error writing file: \(url)");
@@ -253,10 +258,11 @@ class FileHandler{
             //reading
             do {
                 text = try String(contentsOf: fileURL, encoding: .utf8)
+                NSLog("successful read file: \(url)")
                 return text;
             }
             catch {
-                NSLog("error reading file: \(url), reason: \(error)");
+                NSLog("error read file: \(url), reason: \(error)");
                 return nil;
             }
         }

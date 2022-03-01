@@ -38,6 +38,8 @@ class PicMatrix{
     
     public var itemDis: Double = 0.4
     
+    public var refImgOffset = matrix_identity_float4x4
+
     static var actualPicW: Double = 0.29
     
     static var actualPicH: Double = 0.26

@@ -79,9 +79,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     var isFirstPic = true  // in mode 1 / 2, only one pic is allowed
     var eyeshadowscheme = ["Brown and Gold Soft","The Simple Day-Look","Soft Smokey","Defined-Crease Smokey","Rose Gold","Deep Blue","The Simple Day-Look","Soft Smokey","Defined-Crease Smokey", "Brown and Gold Soft","Defined-Crease Smokey","Rose Gold","Rose Gold","Deep Blue","The Simple Day-Look"]
 
-    var coordinateTransFromPrev = matrix_identity_float4x4
     var staticRefCood = matrix_identity_float4x4
-    var staticRefCoodPrev = matrix_identity_float4x4
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -234,7 +232,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         return loc;
     }
     
-    func setResult(cot:Int, receive: String, isDebug: Bool = false, _ isNew:Bool = true){
+    func setResult(cot:Int, receive: String, isDebug: Bool = false, _ isNew:Bool = true, _ refImgOffset: simd_float4x4 = matrix_identity_float4x4){
         result = Internet.getDictionaryFromJSONString(jsonString: receive)
         receiveAnsCot+=1
         if let hasResult = result {
@@ -243,31 +241,14 @@ class ViewController: UIViewController, ARSessionDelegate {
                 
                 if (isNew){
                     FileHandler.addResultToFile(text: receive)
-                } else{
-                    // load from file, previous result
-                    staticRefCoodPrev = FileHandler.readCoodRef() ?? matrix_identity_float4x4;
-                    coordinateTransFromPrev = matrix_identity_float4x4
-                    if (staticRefCoodPrev != matrix_identity_float4x4) {
-                        if (staticRefCood != matrix_identity_float4x4) {
-                            coordinateTransFromPrev = staticRefCood * simd_inverse(staticRefCoodPrev)
-                            NSLog("trans from prev to current success")
-                        }else{
-                            NSLog("fail to load coordinate referrence, locations may be inaccurate")
-                        }
-                    }else{
-                        NSLog("fail to load previous coordinate referrence, locations may be inaccurate")
-                    }
                 }
-
-                setForBooks(cot:cot, hasResult: hasResult,isDebug: isDebug)
+                setForBooks(cot:cot, hasResult: hasResult)
                 setMessage("Set for Books OK")
             }else if mode == 2{
                 setForColor(cot:cot, hasResult: hasResult,isDebug: isDebug)
             }else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
         }
         if(receiveAnsCot != picMatrix.count){
-            var subfix = " scan result"
-            if picMatrix.count-receiveAnsCot>1{subfix+="s"}
             setMessage("Recognize \(increaseCot())"+getSubfix())
 
         }else{
@@ -336,9 +317,6 @@ class ViewController: UIViewController, ARSessionDelegate {
             let menuPic : Data = Data(base64Encoded: hasResult["menubase64"] as! String, options: .ignoreUnknownCharacters)!
             let oriFilename = getDocumentsDirectory().appendingPathComponent("MenuOri@.png")
             try! menuPic.write(to: oriFilename)
-//            let emptyMenu : Data = Data(base64Encoded: hasResult["menubase64_nowords"] as! String, options: .ignoreUnknownCharacters)!
-//            let emptyFileName = getDocumentsDirectory().appendingPathComponent("MenuEmpty@.png")
-//            try! emptyMenu.write(to: emptyFileName)
         }
             
         if let resultbooks = hasResult["words_result"] {
@@ -421,7 +399,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         }
     }
 
-    public func setForBooks(cot:Int, hasResult: NSDictionary, isDebug: Bool){
+    public func setForBooks(cot:Int, hasResult: NSDictionary){
         if let resultbooks = hasResult["words_result"] {
             let bookarray = resultbooks as! NSArray
             print("Found \(bookarray.count) books")
@@ -439,31 +417,27 @@ class ViewController: UIViewController, ARSessionDelegate {
                 nowbook.author = nowtempbook["author"] as! String
                 nowbook.publisher = nowtempbook["publisher"] as! String
                 nowbook.price = (nowtempbook["pages"] as? Double ?? Double(books.count) )/5
-                nowbook.score = Double(nowtempbook["average"] as! Int)
+                nowbook.score = Double(nowtempbook["average"] as? Int ?? 5)
                 nowbook.remark = nowtempbook["summary"] as! String
-                if(isDebug){
-                    let data = UIImage(named: "bookDebug.png")!.pngData()
+                let strBase64 = nowtempbook["base64"] as! String
+                let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
+                if let pic = UIImage(data: dataDecoded){
+                    let temppic = pic.rotate(radians: .pi/2)
+                    let data = temppic.pngData()
                     let filename = getDocumentsDirectory().appendingPathComponent("book@\(books.count).png")
                     try! data!.write(to: filename)
-                }else{
-                    let strBase64 = nowtempbook["base64"] as! String
-                    let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
-                    if let pic = UIImage(data: dataDecoded){
-                        let temppic = pic.rotate(radians: .pi/2)
-                        let data = temppic.pngData()
-                        let filename = getDocumentsDirectory().appendingPathComponent("book@\(books.count).png")
-                        try! data!.write(to: filename)
-                    }
                 }
                 nowbook.picid = elementPics.count-1
                 nowbook.words.append("wors");
-                if isDebug{nowbook.words.append("\(books.count)")}
                 nowbook.matrixId = cot;
                 books.append(nowbook);
                 elementWeights.append(ElementWeight())
             }
         }
         setMessage("Recognize \(increaseCot())" + getSubfix())
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.resetAndAddAnchor()
+        }
     }
     
     // 虚报图书数量
@@ -654,6 +628,9 @@ class ViewController: UIViewController, ARSessionDelegate {
         }else{
             for i in stride(from: 0, to: books.count ,by: 1){
                 if books[i].isDisplay{
+                    continue;
+                }
+                if i%2 == 0 {
                     let a = AnchorEntity()
                     a.name = "book@-1"
                     scanEntitys.append(a)
@@ -662,15 +639,21 @@ class ViewController: UIViewController, ARSessionDelegate {
                 let nowMatrix = books[i].matrixId!-1
                 books[i].isDisplay = true;
                 var trans = picMatrix[nowMatrix].getBookTrans(id:i,element:books[i])
-                trans = coordinateTransFromPrev * trans
+                trans = picMatrix[nowMatrix].refImgOffset * trans
+                
+                trans = getForwardTrans(ori: trans, dis: 0.01 * Float(i%2)) // avoid collide
+                if(i == 0){
+                    print("book 0 trans: \(trans)")
+                }
                 books[i].oriTrans = trans
                 books[i].tempTrans = trans
                 let currentBook = books[i]
                 let rootLoc = currentBook.loc
-                let size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+                var size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
                 books[i].size = size
                 print("bookid: \(i),size \(size)")
                 let book = AnchorEntity(world: trans)
+                size.width *= 0.9 // avoid collide
                 guard let plane = createPlane(id: i, size: size, mode: mode) else{
                     return false
                 }
@@ -683,7 +666,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 arView.scene.addAnchor(book)
                 scanEntitys.append(book)
             }
-            setMessage("Showing filtered" + getSubfix() + " after fuzzy search.")
+//            setMessage("Showing filtered" + getSubfix() + " after fuzzy search.")
         }
         checkIfHidden()
         return true
@@ -733,6 +716,11 @@ class ViewController: UIViewController, ARSessionDelegate {
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]){
         for anchor in anchors{
             if let imgAnchor = anchor as? ARImageAnchor{
+                if (imgAnchor.referenceImage.name == "ref_img"){
+                    staticRefCood = anchor.transform
+                    continue;
+                }
+
                 if let childNode = arView.scene.findEntity(named: "menu@"){
                     let rotationTrans = imgAnchor.transform*makeRotationMatrix(x: -.pi/2, y: 0, z: 0)
                     childNode.move(to: rotationTrans, relativeTo: rootnode, duration: 0.4)
