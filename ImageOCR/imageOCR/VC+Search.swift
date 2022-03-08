@@ -44,13 +44,21 @@ extension ViewController: UITextFieldDelegate{
                 FileHandler.writeResultCot()
                 return true
             }
-
-            if(isFiltered == false){
-                let remainedCot = filterBooks(textField.text ?? "")
-                setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
-                print("After filtering: \(remainedCot) books remain.")
+            if(command.count == 3 && command[0] == "change"){
+                FileHandler.swapResult(from: Int(command[1])!, to: Int(command[2])!)
                 return true
             }
+            if(command.count == 2 && command[0] == "clear" && command[1] == "_all"){
+                FileHandler.clearAllSavedData()
+                return true
+            }
+
+//            if(isFiltered == false){
+//                let remainedCot = filterBooks(textField.text ?? "")
+//                setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
+//                print("After filtering: \(remainedCot) books remain.")
+//                return true
+//            }
         }
 //        if(textField.na == message) {return false}
         let text = textField.text ?? ""
@@ -83,7 +91,7 @@ extension ViewController: UITextFieldDelegate{
         var isfind = false
         for i in stride(from: 0, to: colors.count, by: 1){
             if colors[i].scheme == g{
-                highlightColorAnimate(scanEntitys[i])
+                highlightColorAnimate(arEntitys[i])
                 isfind = true
             }
         }
@@ -112,26 +120,26 @@ extension ViewController: UITextFieldDelegate{
     
     
     public func highlightNodes(_ ids: [Int]){
-        for id in stride(from: 0, to: scanEntitys.count, by: 1){
+        for id in stride(from: 0, to: arEntitys.count, by: 1){
             setCoffeeColor(id, true)
             if ids.count == 0 {
                 continue
             }
             if ids.firstIndex(of: id) != nil{
-                var trans = Transform(matrix: scanEntitys[id].transformMatrix(relativeTo: scanEntitys[id].parent))
+                var trans = Transform(matrix: arEntitys[id].transformMatrix(relativeTo: arEntitys[id].parent))
                 var ratio = Float(1.4)
                 if mode == 2{ratio = 1.2}
                 trans.scale = SIMD3<Float>(x: ratio, y: ratio, z: ratio)
-                scanEntitys[id].move(to: trans, relativeTo: scanEntitys[id].parent, duration: 1)
-                highlightColorAnimate(scanEntitys[id])
+                arEntitys[id].move(to: trans, relativeTo: arEntitys[id].parent, duration: 1)
+                highlightColorAnimate(arEntitys[id])
             }
             else{
-                var trans = Transform(matrix: scanEntitys[id].transformMatrix(relativeTo: scanEntitys[id].parent))
+                var trans = Transform(matrix: arEntitys[id].transformMatrix(relativeTo: arEntitys[id].parent))
 //                if(trans.scale.x != 1){
 //                    print("set coffee vague:\(id)")
 //                }
                 trans.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
-                scanEntitys[id].move(to: trans, relativeTo: scanEntitys[id].parent, duration: 0.4)
+                arEntitys[id].move(to: trans, relativeTo: arEntitys[id].parent, duration: 0.4)
                 setCoffeeColor(id, false)
             }
         }
@@ -141,7 +149,7 @@ extension ViewController: UITextFieldDelegate{
         guard mode==1 else {
             return
         }
-        let font = scanEntitys[id].findEntity(named: "font")! as! ModelEntity
+        let font = arEntitys[id].findEntity(named: "font")! as! ModelEntity
         if isHighlighted{
             font.model!.materials = [coffeeNormalMaterial]
         }else{
@@ -181,12 +189,15 @@ extension ViewController: UITextFieldDelegate{
                 }
             }
         }else{
+            if checkBookShelf() == false{
+                restoreDisplay()
+            }
             for i in stride(from: 0, to: books.count ,by: 1){
                 let singlebook = books[i]
                 elementWeights[i].id = i;
                 elementWeights[i].weight = 0;
 
-                if transToSmallCase(singlebook.title).contains(lookFor){
+                if transToSmallCase(singlebook.title).contains(transToSmallCase(lookFor)){
                     findResult.append(i)
                     elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.title.count))
                 }
@@ -197,8 +208,7 @@ extension ViewController: UITextFieldDelegate{
                         translation.columns.3.y = 0
                         translation.columns.3.x = 0
                         let nowtrans = arView.session.currentFrame!.camera.transform
-                        scanEntitys[i].setTransformMatrix(nowtrans*translation, relativeTo: rootnode)
-//                        scanEntitys[i].setPosition(, relativeTo: )
+                        arEntitys[i].setTransformMatrix(nowtrans*translation, relativeTo: rootnode)
                     }
                 }
 //                for j in stride(from: 0, to: singlebook.words.count ,by: 1){
@@ -219,17 +229,13 @@ extension ViewController: UITextFieldDelegate{
         }
         print("find \(findResult.count) results")
         setMessage("Find \(findResult.count) related results")
-//        if mode == 2{
-//            scaleNodes(ids: findResult)
-//        }else{
         highlightNodes(findResult)
-//        }
     }
     
     public func scaleNodes(ids: [Int], time: Double = 0.4){
         isAntUpdate = false
 //        let closer = SCNAction.moveBy(x: 0, y: 0, z: 0.01, duration: 0.4)
-        for node in scanEntitys{
+        for node in arEntitys{
             let name = node.name
             var elementId = -1
             elementId = getIdFromName(name)
@@ -314,7 +320,7 @@ extension ViewController: UITextFieldDelegate{
             hideAbstract()
         }
         if mode==1{
-            guard scanEntitys[id].position.z >= 0 else{return}
+            guard arEntitys[id].position.z >= 0 else{return}
             coffeeAbstractUI.id = id
             coffeeAbstractUI.setImage(elementPics[coffees[id].desPicid])
             coffeeAbstractUI.setText(coffees[id].generateAbstract())
@@ -384,7 +390,7 @@ extension ViewController: UITextFieldDelegate{
             self.arView.scene.addAnchor(textAnchor)
             for i in stride(from: 0, to: elementWeights.count ,by: 1){
                 let elementWeight = elementWeights[i]
-                let nowNode = scanEntitys[elementWeight.id]
+                let nowNode = arEntitys[elementWeight.id]
                 if getIdFromName(nowNode.name) == -1{continue}
                 translation.columns.3.z = Float(z)-(0.0001*Float(i%5))
 
@@ -508,6 +514,7 @@ extension ViewController: UITextFieldDelegate{
     
     @objc func restoreDisplay(){
 //        shouldBeInPlace = true
+        
         scaleNodes(ids: [])
         hideAbstract()
         removeHeadAnchor()
@@ -516,16 +523,16 @@ extension ViewController: UITextFieldDelegate{
         cmpGroup = [Int]()
         isInRegroupView = false
         
-        if arView.scene.findEntity(named: "trans@1") != nil{
-            buttonTapCreateBigPlane()
-        }
+//        if arView.scene.findEntity(named: "trans@1") != nil{
+//            buttonTapCreateBigPlane()
+//        }
 
         if self.mode==1{
             displayGroups()
             //resetAndAddAnchor(isReset: true)
             return
         }
-        for node in scanEntitys {
+        for node in arEntitys {
             let name = node.name
             let id = getIdFromName(name)
             if id == -1{continue}

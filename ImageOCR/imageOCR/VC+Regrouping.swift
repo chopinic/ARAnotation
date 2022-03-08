@@ -341,7 +341,7 @@ extension ViewController{
                 var jj = -1
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
-                    let nowNode = scanEntitys[id]
+                    let nowNode = arEntitys[id]
                     if getIdFromName(nowNode.name) == -1{continue}
                     jj+=1
                     let nowElement = books[id]
@@ -396,7 +396,7 @@ extension ViewController{
             for i in stride(from: 0, to: result.count, by: 1) {
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
-                    let nowNode = scanEntitys[id]
+                    let nowNode = arEntitys[id]
                     let nowElement = colors[id]
                     // set z
                     translation.columns.3.z = z-(0.0001*Float(j%5+i%3))

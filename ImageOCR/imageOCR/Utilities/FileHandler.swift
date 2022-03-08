@@ -128,6 +128,13 @@ class FileHandler{
 
     }
     
+    static public func swapResult(from:Int, to:Int){
+        let temp = readResultFromFile(cot: from)
+        writeResultToFile(text: readResultFromFile(cot: to)!, from)
+        writeResultToFile(text: temp!,to)
+        NSLog("swapped")
+    }
+    
     static public func removeResult(_ i:Int){
         let nowFileURL = "\(bookResultFile)\(i)\(fileSubFix)"
         deleteFile(nowFileURL)
@@ -223,12 +230,16 @@ class FileHandler{
         return readFile(url: "\(bookResultFile)\(cot)\(fileSubFix)")
     }
     
-    static public func addResultToFile(text:String) -> Int?{
-        readResultCot();
-        writeFile(text: text, url: "\(bookResultFile)\(savedResultCot)\(fileSubFix)");
+    static public func writeResultToFile(text:String, _ cot:Int = -1) -> Int?{
+        if cot == -1{
+            readResultCot();
+            writeFile(text: text, url: "\(bookResultFile)\(savedResultCot)\(fileSubFix)");
+            savedResultCot+=1
+            writeResultCot()
+        }else{
+            writeFile(text: text, url: "\(bookResultFile)\(cot)\(fileSubFix)");
+        }
 
-        savedResultCot+=1
-        writeResultCot()
         return savedResultCot;
     }
     
@@ -240,7 +251,7 @@ class FileHandler{
             //writing
             do {
                 try text.write(to: fileURL, atomically: false, encoding: .utf8)
-                NSLog("successful write file: \(url)")
+                NSLog("successfully write file: \(url)")
             }
             catch {
                 NSLog("error writing file: \(url)");

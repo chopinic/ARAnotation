@@ -78,7 +78,7 @@ func toggleFlash(_ mode: Int = 1) {
 }
 
 
-public func highlightMaterial(_ modelEntity: ModelEntity, _ incot: Int = 8){
+public func highlightMaterial(_ modelEntity: ModelEntity, _ incot: Int = 25){
     var fade = false
     var cot = incot
     var alpha: CGFloat = 0.5
@@ -90,8 +90,6 @@ public func highlightMaterial(_ modelEntity: ModelEntity, _ incot: Int = 8){
 //    oriMaterial.tintColor = (entity.model!.materials[0] as! UnlitMaterial).tintColor
 
     let timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { timer in
-
-        
         var material = UnlitMaterial()
         material.baseColor = MaterialColorParameter.color(UIColor(red: 1, green: alpha, blue: alpha, alpha: 1))
         if(alpha>=1.2||alpha<=0.2){
@@ -275,6 +273,7 @@ func createPlane(id:Int,size: CGSize, mode: Int, _ isSquare :Bool = false)->Mode
             imagePlane.name = "color@\(id)"
             return imagePlane
         }else{
+            NSLog("load pic book@\(id).png")
             guard let imagePlane = createImagePlane(url: getDocumentsDirectory().appendingPathComponent("book@\(id).png"), size: size)
             else{return nil}
             imagePlane.name = "book@\(id)"

@@ -13,7 +13,10 @@ import RealityKit
 //import Base
 
 
-
+var Ant_Eye_Update_Interval = 50
+var Nearby_Anchor_Update_Interval = 500
+var Show_Entity_Limit = 150
+var Simple_Show_Entity_Filter = 5
 
 
 class ViewController: UIViewController, ARSessionDelegate {
@@ -23,7 +26,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     @IBOutlet var inputText: UITextField!
     @IBOutlet var attrSelect: UIPickerView!
     @IBOutlet var message: UITextField!
-    var nowSelection: Int = 1
+    var nowSelection: Int = 0
     var bookAttr = [String]()
     var coffAttr = [String]()
     var colorAttr = [String]()
@@ -50,6 +53,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     var isRegrouped = false
     var isAntUpdate = false
     var isAntUpdateCot = 0
+    var updateShouldShowCot = 0
     var cmpGroup = [Int]()
     
     var mode = 0
@@ -71,9 +75,10 @@ class ViewController: UIViewController, ARSessionDelegate {
     var previousKind = 1
     
     var utiQueue = DispatchQueue(label:"uploadImage", qos: .utility)
+    var bookAnchorQueue = DispatchQueue(label:"addBookAnchors", qos: .utility)
 
     var nowScaleNodes = [Int]()
-    var scanEntitys = [Entity]()
+    var arEntitys = [Entity]()
     var isFiltered = false
     
     var isFirstPic = true  // in mode 1 / 2, only one pic is allowed
@@ -116,7 +121,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         colorAttr = ["Color", "Eyetype", "Scheme"]
         
         bottonText = [
-            ["Switch Mode", "Reranking", "Pan to Scale", "Restore",  "Scan","", "Load Books", "Background", "Select Target","Compare Chart","Word Cloud","Hide Buttons","GetStored","ClearStored"],
+            ["Switch Mode", "Reranking", "Pan to Scale", "Restore",  "Scan","", "Load Books", "Background", "Select Target","Compare Chart","Word Cloud","Hide Buttons","Stored","ClearStored"],
         ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan Menu", "Scan Menu", "", "", "Select Target","Components","Word Cloud","Hide Buttons","",""],
         ["Switch Mode", "", "Pan to Scale", "Restore", "Scan (Circle)", "Scan", "Virtual Preview", "Background","","","","Hide Buttons","",""]]
 
@@ -238,12 +243,16 @@ class ViewController: UIViewController, ARSessionDelegate {
         if let hasResult = result {
             if mode == 0{
                 setMessage("Set for Books")
-                
-                if (isNew){
-                    FileHandler.addResultToFile(text: receive)
-                }
                 setForBooks(cot:cot, hasResult: hasResult)
                 setMessage("Set for Books OK")
+                if (isNew || receiveAnsCot == picMatrix.count){
+                    if isNew {
+                        FileHandler.writeResultToFile(text: receive)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        self.resetAndAddAnchor()
+                    }
+                }
             }else if mode == 2{
                 setForColor(cot:cot, hasResult: hasResult,isDebug: isDebug)
             }else{setForCoffee(cot:cot, hasResult: hasResult,isDebug: isDebug)}
@@ -413,11 +422,16 @@ class ViewController: UIViewController, ARSessionDelegate {
                 if nowbook.title == ""{
                     nowbook.title = nowtempbook["title"] as! String
                 }
+                NSLog("book title: \(nowbook.title)")
                 nowbook.isbn = nowtempbook["isbn"] as! String
                 nowbook.author = nowtempbook["author"] as! String
                 nowbook.publisher = nowtempbook["publisher"] as! String
                 nowbook.price = (nowtempbook["pages"] as? Double ?? Double(books.count) )/5
-                nowbook.score = Double(nowtempbook["average"] as? Int ?? 5)
+                nowbook.score = Double(nowtempbook["average"] as? Int ?? books.count%6)
+                if (nowbook.score < 1)
+                {
+                    nowbook.score = 2.0
+                }
                 nowbook.remark = nowtempbook["summary"] as! String
                 let strBase64 = nowtempbook["base64"] as! String
                 let dataDecoded : Data = Data(base64Encoded: strBase64, options: .ignoreUnknownCharacters)!
@@ -435,9 +449,6 @@ class ViewController: UIViewController, ARSessionDelegate {
             }
         }
         setMessage("Recognize \(increaseCot())" + getSubfix())
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            self.resetAndAddAnchor()
-        }
     }
     
     // 虚报图书数量
@@ -500,7 +511,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     public func resetAndAddAnchor(isReset: Bool = false) -> Bool{
         if isReset{
-            scanEntitys = [Entity]()
+            arEntitys = [Entity]()
             for i in stride(from: 0, to: books.count ,by: 1){
                 books[i].isDisplay = false
             }
@@ -536,11 +547,16 @@ class ViewController: UIViewController, ARSessionDelegate {
                     }
                 }
             }
+            arEntitys = [Entity]()
         }
         
         
-        
-        if mode==1{
+        if mode == 0{
+//            bookAnchorQueue.async{
+            self.updateShouldShowEntities()
+//            }
+//            setMessage("Showing filtered" + getSubfix() + " after fuzzy search.")
+        }else if mode==1{
             guard let menu = arView.scene.findEntity(named: "menu@") else{
                 return false
             }
@@ -583,7 +599,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 coffeeFont.scale = SIMD3<Float>(x: radius, y: radius, z: radius)
                 coffee.generateCollisionShapes(recursive: true)
                 menu.addChild(coffee)
-                scanEntitys.append(coffee)
+                arEntitys.append(coffee)
             }
             if isReset{displayGroups(previousKind, prevSearch, false)}
             else{displayGroups()}
@@ -623,50 +639,8 @@ class ViewController: UIViewController, ARSessionDelegate {
                 color.generateCollisionShapes(recursive: true)
 
                 arView.scene.addAnchor(color)
-                scanEntitys.append(color)
+                arEntitys.append(color)
             }
-        }else{
-            for i in stride(from: 0, to: books.count ,by: 1){
-                if books[i].isDisplay{
-                    continue;
-                }
-                if i%2 == 0 {
-                    let a = AnchorEntity()
-                    a.name = "book@-1"
-                    scanEntitys.append(a)
-                    continue;
-                }
-                let nowMatrix = books[i].matrixId!-1
-                books[i].isDisplay = true;
-                var trans = picMatrix[nowMatrix].getBookTrans(id:i,element:books[i])
-                trans = picMatrix[nowMatrix].refImgOffset * trans
-                
-                trans = getForwardTrans(ori: trans, dis: 0.01 * Float(i%2)) // avoid collide
-                if(i == 0){
-                    print("book 0 trans: \(trans)")
-                }
-                books[i].oriTrans = trans
-                books[i].tempTrans = trans
-                let currentBook = books[i]
-                let rootLoc = currentBook.loc
-                var size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
-                books[i].size = size
-                print("bookid: \(i),size \(size)")
-                let book = AnchorEntity(world: trans)
-                size.width *= 0.9 // avoid collide
-                guard let plane = createPlane(id: i, size: size, mode: mode) else{
-                    return false
-                }
-                book.addChild(plane)
-                
-                let bookBox = loadBookModel(books[i].color,size)
-                book.addChild(bookBox)
-                book.name = "book@\(i)"
-                book.generateCollisionShapes(recursive: true)
-                arView.scene.addAnchor(book)
-                scanEntitys.append(book)
-            }
-//            setMessage("Showing filtered" + getSubfix() + " after fuzzy search.")
         }
         checkIfHidden()
         return true
@@ -784,7 +758,7 @@ class ViewController: UIViewController, ARSessionDelegate {
             var minid = -1
             if mode==1{
                 for i in stride(from: 0, to: coffees.count, by: 1) {
-                    let trans = scanEntitys[i].transformMatrix(relativeTo: rootnode)
+                    let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
                     guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
                     let point = CGPoint(x:pos.x,y:pos.y)
                     var screenCenter = arView.center
@@ -802,7 +776,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }
             } else if mode == 2 {
                 for i in stride(from: 0, to: colors.count, by: 1) {
-                    let trans = scanEntitys[i].transformMatrix(relativeTo: rootnode)
+                    let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
                     guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
                     let point = CGPoint(x:pos.x,y:pos.y)
                     var screenCenter = arView.center
@@ -810,7 +784,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     let dis = calculateScreenDistance(screenCenter,point)
                     if dis<400{
                         let ratio = Float(min(1.5,(dis+28.0)/(10+dis)))
-                        let node = scanEntitys[i]
+                        let node = arEntitys[i]
                         node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
                         mindis = min(mindis,dis)
                         if mindis == dis{
@@ -820,8 +794,9 @@ class ViewController: UIViewController, ARSessionDelegate {
                 }
 
             }else{
-                if isAntUpdateCot%(books.count/8+1) == 0{
-                    updateNearbyNodes()
+                if isAntUpdateCot > Ant_Eye_Update_Interval{
+                    isAntUpdateCot = 0
+                    updateAntEyeEffectNodes()
                 }
                 for i in stride(from: 0, to: nowScaleNodes.count, by: 1) {
                     let trans = books[nowScaleNodes[i]].tempTrans
@@ -832,7 +807,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     let ratio = Float(min(2,(dis+28.0)/dis))
 //                    print("now ratio:\(ratio), nowdis:\(dis)")
                     
-                    let node = scanEntitys[nowScaleNodes[i]]
+                    let node = arEntitys[nowScaleNodes[i]]
                     node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
                     mindis = min(mindis,dis)
                     if mindis == dis{
@@ -849,12 +824,19 @@ class ViewController: UIViewController, ARSessionDelegate {
                     if prevId != -1
                     {
                         translation.columns.3.z = Float(0.0005*Float(prevId%13))
-                        scanEntitys[prevId].setTransformMatrix(colors[prevId].tempTrans, relativeTo: rootnode)
+                        arEntitys[prevId].setTransformMatrix(colors[prevId].tempTrans, relativeTo: rootnode)
                     }
                     translation.columns.3.z = Float(0.01)
-                    scanEntitys[minid].setTransformMatrix(colors[minid].tempTrans*translation, relativeTo: rootnode)
+                    arEntitys[minid].setTransformMatrix(colors[minid].tempTrans*translation, relativeTo: rootnode)
                 }
                 showAbstract(id: minid)
+            }
+        }
+        if(true){
+            updateShouldShowCot += 1;
+            if updateShouldShowCot > Nearby_Anchor_Update_Interval {
+                updateShouldShowCot = 0
+                updateShouldShowEntities()
             }
         }
         if let backnode = arView.scene.findEntity(named: "trans@1"){
@@ -872,11 +854,15 @@ class ViewController: UIViewController, ARSessionDelegate {
         }
     }
     
-    
-    func updateNearbyNodes(){
+    // only for books
+    func updateAntEyeEffectNodes(){
+        if (mode != 0){return}
         nowScaleNodes = [Int]()
-        for i in stride(from: 0, to: scanEntitys.count, by: 1) {
-            let trans = scanEntitys[i].transformMatrix(relativeTo: rootnode)
+        for i in stride(from: 0, to: arEntitys.count, by: 1) {
+            if arEntitys[i].name == "book@-1"{
+                continue
+            }
+            let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
             guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
             let point = CGPoint(x:pos.x,y:pos.y-200)
             let screenCenter = arView.center
@@ -889,10 +875,146 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
 
     
+    struct BookDisCmp: Comparable{
+        var id = 0;
+        var dis = Float(0.0)
+        init(){}
+        init(_ _id:Int ,_ _dis:Float){id = _id; dis = _dis}
+        static func < (lhs: ViewController.BookDisCmp, rhs: ViewController.BookDisCmp) -> Bool {
+            return lhs.dis < rhs.dis
+        }
+        static func == (lhs: ViewController.BookDisCmp, rhs: ViewController.BookDisCmp) -> Bool {
+            return lhs.id == rhs.id
+        }
+    }
+    public var bookDisArray = [BookDisCmp]()
+
+    // only for books
+    func updateShouldShowEntities(){
+        if (mode != 0){return}
+        var book: AnchorEntity
+        updateNearbyEntities()
+//        NSLog("update book should show, all \(bookDisArray.count) books cmp")
+        for i in stride(from: 0, to: books.count ,by: 1){
+            if books[i].isDisplay{
+                if arEntitys.count>i {
+                    let entityId = getIdFromName(arEntitys[i].name)
+                    if entityId == i{
+                        // already displaying
+                        continue;
+                    }else{
+                        // replace the empty anchor with real one
+                        book = createBookAnchor(i)!
+                        arView.scene.addAnchor(book)
+                        arEntitys[i] = book
+                    }
+                }else{
+                    // add book anchor the first time
+                    book = createBookAnchor(i)!
+                    arView.scene.addAnchor(book)
+                    arEntitys.append(book)
+                }
+            } else {
+                // don't display this book, too far
+                if arEntitys.count>i {
+                    let entityId = getIdFromName(arEntitys[i].name)
+                    if entityId == i{
+                        // already displaying, replace it with empty one
+                        arView.scene.removeAnchor(arEntitys[i] as! HasAnchoring)
+                        let a = AnchorEntity()
+                        a.name = "book@-1"
+                        arEntitys[i] = a
+                        continue;
+                    }
+                    else{
+                        // already has empty one
+                        continue;
+                    }
+                }else{
+                    // add empty anchor the first time
+                    let a = AnchorEntity()
+                    a.name = "book@-1"
+                    arEntitys.append(a)
+                    continue
+                }
+            }
+        }
+    }
+
+    func createBookAnchor(_ i:Int) -> AnchorEntity?{
+        let nowMatrix = books[i].matrixId!-1
+        books[i].isDisplay = true;
+        var trans = picMatrix[nowMatrix].getBookTrans(id:i,element:books[i])
+        trans = picMatrix[nowMatrix].refImgOffset * trans
+        
+        trans = getForwardTrans(ori: trans, dis: 0.01 * Float(i%2)) // avoid collide
+        books[i].oriTrans = trans
+        books[i].tempTrans = trans
+        let currentBook = books[i]
+        let rootLoc = currentBook.loc
+        var size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
+        books[i].size = size
+        print("bookid: \(i),size \(size)")
+        let book = AnchorEntity(world: trans)
+        size.width *= 0.9 // avoid collide
+        guard let plane = createPlane(id: i, size: size, mode: mode) else{
+            NSLog("fail to create plane")
+            return nil
+        }
+        book.addChild(plane)
+        
+        let bookBox = loadBookModel(books[i].color,size)
+        book.addChild(bookBox)
+        book.name = "book@\(i)"
+        book.generateCollisionShapes(recursive: true)
+        return book
+    }
+    
+    // only for books
+    func updateNearbyEntities(){
+        if (mode != 0){return}
+        
+        // 过滤显示图书
+        for i in stride(from: 0, to: books.count ,by: 1){
+            if i%Simple_Show_Entity_Filter == 0 {
+                books[i].isDisplay = true;
+            }else {
+                books[i].isDisplay = false;
+            }
+            if books[i].title == "Operations Management:Concepts,Methods,and Strategies"
+            {
+                books[i].isDisplay = true;
+                NSLog("found \(books[i].title)")
+            }
+            if books[i].title == "ACCOUNTING PRINCIPLES"
+            {
+                books[i].isDisplay = true;
+                NSLog("found \(books[i].title)")
+            }
+
+        }
+        return
+        bookDisArray = [BookDisCmp]()
+        for i in stride(from: 0, to: books.count ,by: 1){
+            let dis = calcuPointDis(trans1: books[i].oriTrans, trans2: (arView.session.currentFrame?.camera.transform)!)
+            bookDisArray.append(BookDisCmp(i,dis))
+        }
+        bookDisArray.sort()
+        for i in stride(from: 0, to: bookDisArray.count ,by: 1){
+            var nowBookCmp = bookDisArray[i]
+            // find most nearby entity to show
+            if i >= Show_Entity_Limit {
+                books[nowBookCmp.id].isDisplay = false;
+            }else{
+                // lable to be shown
+                books[nowBookCmp.id].isDisplay = true;
+            }
+        }
+    }
+    
     override func didReceiveMemoryWarning(){
         super.didReceiveMemoryWarning()
         result = nil
     }
-    
   
 }

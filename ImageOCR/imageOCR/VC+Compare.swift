@@ -196,8 +196,9 @@ extension ViewController{
                     info.append(bookInfo)
                 }
                 dic["data"] = info
-                let jsonData = Internet.convertDictionaryToJSONString(dict: dic).data(using: .utf8)!
-                var request = URLRequest(url: URL(string: "http://180.76.103.228:8888/score")!)
+                let json = Internet.convertDictionaryToJSONString(dict: dic)
+                let jsonData = json.data(using: .utf8)!
+                var request = URLRequest(url: URL(string: "http://180.76.187.112/score")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -208,7 +209,7 @@ extension ViewController{
                 let filename = getDocumentsDirectory().appendingPathComponent("cmpScoreChart.png")
                 try! dataDecoded.write(to: filename)
                 
-                request = URLRequest(url: URL(string: "http://180.76.103.228:8888/price")!)
+                request = URLRequest(url: URL(string: "http://180.76.187.112/price")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 receive = Internet.uploadBookIsbns(request: request, data: jsonData)
@@ -295,7 +296,7 @@ extension ViewController{
                 }
                 dic["isbns"] = isbns
                 let jsonData = Internet.convertDictionaryToJSONString(dict: dic).data(using: .utf8)!
-                var request = URLRequest(url: URL(string: "http://180.76.103.228/AR/BookDataInterface.php")!)
+                var request = URLRequest(url: URL(string: "http://180.76.187.112/AR/BookDataInterface.php")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 

@@ -15,11 +15,11 @@ import VideoToolbox
 extension ViewController{
     
     func checkIfHidden(){
-        (uiButton["scan"] as! UIButton).isHidden = false
+        (uiButton["scan"] as! UIButton).isHidden = true
         (uiButton["switch"] as! UIButton).isHidden = true
         (uiButton["background"] as! UIButton).isHidden = true
 
-        if scanEntitys.count > 0 || isInRegroupView{
+        if arEntitys.count > 0 || isInRegroupView{
             (uiButton["reranking"] as! UIButton).isHidden = false
             (uiButton["fisheye"] as! UIButton).isHidden = false
             (uiButton["restore"] as! UIButton).isHidden = false
@@ -30,13 +30,13 @@ extension ViewController{
         }
         
         if mode == 0{
-            (uiButton["clearStore"] as! UIButton).isHidden = false
+            (uiButton["clearStore"] as! UIButton).isHidden = true
             (uiButton["store"] as! UIButton).isHidden = false
             (uiButton["background"] as! UIButton).isHidden = false
             if isFiltered{
-                (uiButton["model"] as! UIButton).isHidden = true
+                (uiButton["model"] as! UIButton).isHidden = true //
             }else{
-                (uiButton["model"] as! UIButton).isHidden = false
+                (uiButton["model"] as! UIButton).isHidden = true
             }
             if isInRegroupView{
                 (uiButton["select"] as! UIButton).isHidden = false
@@ -48,8 +48,8 @@ extension ViewController{
             }
                         
             if cmpGroup.count > 0{
-                (uiButton["chart"] as! UIButton).isHidden = false
-                (uiButton["compare"] as! UIButton).isHidden = false
+                (uiButton["chart"] as! UIButton).isHidden = true
+                (uiButton["compare"] as! UIButton).isHidden = true
             }else{
                 (uiButton["chart"] as! UIButton).isHidden = true
                 (uiButton["compare"] as! UIButton).isHidden = true
@@ -130,7 +130,7 @@ extension ViewController{
     }
     
     @objc func switchMode(){
-        if scanEntitys.count > 0{
+        if arEntitys.count > 0{
             setMessage("Cannot switch mode now, you can reopen and then switch mode.")
             return
         }
