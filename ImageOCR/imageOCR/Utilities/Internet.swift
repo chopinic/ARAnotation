@@ -72,7 +72,7 @@ public struct Internet {
         return nil;
     }
     
-    static func uploadBookIsbns(request :URLRequest, data: Data, _ type: Bool = false) -> String {
+    static func uploadBookIsbns(request :URLRequest, data: Data?, _ type: Bool = false) -> String {
         var receiveStr = ""
         let task = URLSession.shared.uploadTask(with: request, from: data) { data, response, error in
             print("received")

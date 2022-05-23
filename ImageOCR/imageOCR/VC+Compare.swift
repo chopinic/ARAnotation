@@ -123,10 +123,6 @@ extension ViewController{
         transTip.addChild(backPlane)
         return transTip
     }
-
-//    func chechIfTooLong(_ str:String)->String{
-//
-//    }
     
     func addTitleReturn(_ title: String, _ length: Int = 15,_ hasLimit:Int = 100)->String{
         var name = ""
@@ -198,7 +194,7 @@ extension ViewController{
                 dic["data"] = info
                 let json = Internet.convertDictionaryToJSONString(dict: dic)
                 let jsonData = json.data(using: .utf8)!
-                var request = URLRequest(url: URL(string: "http://180.76.187.112/score")!)
+                var request = URLRequest(url: URL(string: "http://180.76.187.112:8888/score")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -209,7 +205,7 @@ extension ViewController{
                 let filename = getDocumentsDirectory().appendingPathComponent("cmpScoreChart.png")
                 try! dataDecoded.write(to: filename)
                 
-                request = URLRequest(url: URL(string: "http://180.76.187.112/price")!)
+                request = URLRequest(url: URL(string: "http://180.76.187.112:8888/price")!)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 receive = Internet.uploadBookIsbns(request: request, data: jsonData)

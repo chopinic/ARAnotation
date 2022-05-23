@@ -15,7 +15,7 @@ import VideoToolbox
 extension ViewController{
     
     func checkIfHidden(){
-        (uiButton["scan"] as! UIButton).isHidden = true
+        (uiButton["scan"] as! UIButton).isHidden = false
         (uiButton["switch"] as! UIButton).isHidden = true
         (uiButton["background"] as! UIButton).isHidden = true
 
@@ -36,7 +36,7 @@ extension ViewController{
             if isFiltered{
                 (uiButton["model"] as! UIButton).isHidden = true //
             }else{
-                (uiButton["model"] as! UIButton).isHidden = true
+                (uiButton["model"] as! UIButton).isHidden = false
             }
             if isInRegroupView{
                 (uiButton["select"] as! UIButton).isHidden = false
@@ -48,8 +48,8 @@ extension ViewController{
             }
                         
             if cmpGroup.count > 0{
-                (uiButton["chart"] as! UIButton).isHidden = true
-                (uiButton["compare"] as! UIButton).isHidden = true
+                (uiButton["chart"] as! UIButton).isHidden = false
+                (uiButton["compare"] as! UIButton).isHidden = false
             }else{
                 (uiButton["chart"] as! UIButton).isHidden = true
                 (uiButton["compare"] as! UIButton).isHidden = true
@@ -152,7 +152,7 @@ extension ViewController{
 
     
     @objc func timerAction(){
-        buttonTapUpload()
+//        buttonTapUpload()
     }
     
     @objc func buttonTapTimer(){
@@ -171,7 +171,6 @@ extension ViewController{
         }
         timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
         (uiButton["scan"] as! UIButton).backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.5)
-
     }
     
     @objc func buttonTapLoadModel(){

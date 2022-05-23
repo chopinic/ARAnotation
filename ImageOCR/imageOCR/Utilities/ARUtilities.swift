@@ -11,6 +11,7 @@ import RealityKit
 import CoreML
 import UIKit
 import VideoToolbox
+import Combine
 
 public func transToSmallCase(_ str: String)->String{
     var  str1 = String()
@@ -78,7 +79,7 @@ func toggleFlash(_ mode: Int = 1) {
 }
 
 
-public func highlightMaterial(_ modelEntity: ModelEntity, _ incot: Int = 25){
+public func highlightMaterial(_ modelEntity: ModelEntity, _ incot: Int = 10){
     var fade = false
     var cot = incot
     var alpha: CGFloat = 0.5
@@ -273,11 +274,7 @@ func createPlane(id:Int,size: CGSize, mode: Int, _ isSquare :Bool = false)->Mode
             imagePlane.name = "color@\(id)"
             return imagePlane
         }else{
-            NSLog("load pic book@\(id).png")
-            guard let imagePlane = createImagePlane(url: getDocumentsDirectory().appendingPathComponent("book@\(id).png"), size: size)
-            else{return nil}
-            imagePlane.name = "book@\(id)"
-            return imagePlane
+            return nil
         }
     }
 }

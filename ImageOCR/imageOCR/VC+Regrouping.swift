@@ -325,7 +325,6 @@ extension ViewController{
             setMessage("Find \(result.count) groups")
         }
         if(mode == 0){
-            
             var absy = Float(0)
             var x = Float(-0.4)
             let z = Float(-1*PicMatrix.showDis)
@@ -342,7 +341,6 @@ extension ViewController{
                 for j in stride(from: 0, to: result[i].count, by: 1){
                     let id = result[i][j]
                     let nowNode = arEntitys[id]
-                    if getIdFromName(nowNode.name) == -1{continue}
                     jj+=1
                     let nowElement = books[id]
                     // set z
@@ -354,7 +352,7 @@ extension ViewController{
                     translation.columns.3.x = x
                     x += 0.05
                     maxx = max(maxx, x)
-                    if jj==0{
+                    if jj==0 && i<20{
                         let headString = getPrefixHead(kind)+"\n"+addTitleReturn(getAttri(kind: kind, ele: nowElement)) + getSubfixHead(kind)
                         print(headString)
                         let lineHeight: CGFloat = 0.05
@@ -372,6 +370,7 @@ extension ViewController{
                         x+=0.05
                     }
                     nowNode.move(to: nowTrans*translation, relativeTo: rootnode, duration: 0.4)
+                    NSLog("\(id) set temp trans")
                     books[id].tempTrans = nowTrans*translation
                 }
                 if i % 3 == 2{

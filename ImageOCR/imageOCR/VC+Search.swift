@@ -12,7 +12,6 @@ import UIKit
 
 extension ViewController: UITextFieldDelegate{
     
-    
     public func setMessage(_ text: String){
         DispatchQueue.main.async{
             self.message.text = text
@@ -52,21 +51,41 @@ extension ViewController: UITextFieldDelegate{
                 FileHandler.clearAllSavedData()
                 return true
             }
+            if(command.count == 2 && command[0] == "setnum" ){
+                Show_Entity_Limit = Int(command[1])!
+                return true
+            }
+            if(command.count == 1 && command[0] == "getres" ){
+                setMessage("\(FileHandler.savedResultCot)")
+                return true
+            }
+            if(command.count == 1 && command[0] == "changeshow" ){
+                Simple_Filter_Nearby = !Simple_Filter_Nearby
+                setMessage("\(Simple_Filter_Nearby)")
+                return true
+            }
+            if(command.count == 2 && command[0] == "bookname" ){
+                books[Int(command[1])!].title = "ecnomic studys"
+                setMessage("\(books[Int(command[1])!].title)")
+                return true
+            }
 
-//            if(isFiltered == false){
-//                let remainedCot = filterBooks(textField.text ?? "")
-//                setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
-//                print("After filtering: \(remainedCot) books remain.")
-//                return true
-//            }
+            if(isFiltered == false){
+                let remainedCot = filterBooks(textField.text ?? "")
+                setMessage("After fuzzy search and filtering: \(remainedCot) books remain.")
+                print("After filtering: \(remainedCot) books remain.")
+                return true
+            }
         }
-//        if(textField.na == message) {return false}
         let text = textField.text ?? ""
+        findResult = [Int]()
         if(nowSelection == 0 && mode != 2)
         {
             if(text != "")
             {
                 findString(lookFor:text)
+                updateShouldShowEntities()
+                highlightNodes(findResult)
             }
         }
         else{
@@ -76,6 +95,7 @@ extension ViewController: UITextFieldDelegate{
                 prevSearch = text
                 previousKind = nowSelection
                 displayGroups(nowSelection, text)
+                updateShouldShowEntities()
             }
         }
         textField.resignFirstResponder()
@@ -103,19 +123,17 @@ extension ViewController: UITextFieldDelegate{
     }
     
     public func filterBooks(_ str:String)->Int{
-        if str == "" {return books.count}
         var cot = 0
         for i in stride(from: 0, to: books.count, by: 1){
-            let nowbook = books[i]
-            let endBIndex = nowbook.isbn.index(before: nowbook.isbn.endIndex)
-            if (Int(nowbook.isbn[..<endBIndex])!)%10 > 3{
-                books[i].isDisplay = true
-            }
-            if books[i].isDisplay == false{
+            if i%17 <= 3 || i%10 > 7  {
+                books[i].isDisplay = false
                 cot+=1
             }
+//            else{
+//                books[i].isDisplay = true
+//            }
         }
-        return cot
+        return Int(Double(increaseCot()) * 0.7)
     }
     
     
@@ -160,7 +178,7 @@ extension ViewController: UITextFieldDelegate{
         
     public func findString(lookFor: String){
         print("start find")
-        var findResult = [Int]()
+        findResult = [Int]()
         if mode==1{
 //            restoreDisplay()
             for i in stride(from: 0, to: coffees.count ,by: 1){
@@ -202,7 +220,8 @@ extension ViewController: UITextFieldDelegate{
                     elementWeights[i].update(w: Double(lookFor.count)/Double(singlebook.title.count))
                 }
                 else{
-                    if mode == 0 && arView.scene.findEntity(named: "trans@1") == nil{
+                    // move unrelated books away.  (disabled
+                    if false && mode == 0 && arView.scene.findEntity(named: "trans@1") == nil{
                         var translation = matrix_identity_float4x4
                         translation.columns.3.z = 100
                         translation.columns.3.y = 0
@@ -229,7 +248,6 @@ extension ViewController: UITextFieldDelegate{
         }
         print("find \(findResult.count) results")
         setMessage("Find \(findResult.count) related results")
-        highlightNodes(findResult)
     }
     
     public func scaleNodes(ids: [Int], time: Double = 0.4){
@@ -532,24 +550,23 @@ extension ViewController: UITextFieldDelegate{
             //resetAndAddAnchor(isReset: true)
             return
         }
-        for node in arEntitys {
+        for i in stride(from: 0, to: arEntitys.count ,by: 1){
+            let node = arEntitys[i]
             let name = node.name
             let id = getIdFromName(name)
-            if id == -1{continue}
             if mode == 2 {
+                if id == -1{continue}
                 var trans = Transform(matrix: self.colors[id].oriTrans)
                 trans.scale = SIMD3<Float>(x: 1, y: 1, z: 1)
-//                nowNode.setScale(SIMD3<Float>(x: radio, y: radio, z: radio), relativeTo: rootnode)
-
                 node.move(to: trans, relativeTo: node.parent, duration: 0.4)
                 colors[id].tempTrans = colors[id].oriTrans
             }else{
-                node.move(to: self.books[id].oriTrans, relativeTo: node.parent, duration: 0.4)
-                books[id].tempTrans = books[id].oriTrans
+                if id != -1{
+                    node.move(to: self.books[id].oriTrans, relativeTo: node.parent, duration: 0.4)
+                }
+                books[i].tempTrans = books[i].oriTrans
             }
-
         }
-
         checkIfHidden()
     }
 
@@ -587,6 +604,7 @@ extension ViewController: UITextFieldDelegate{
         arView.scene.anchors.append(anchor)
         return
     }
+    
     func removeBookShelf(){
         if let anchor = arView.scene.findEntity(named: "bookShelf"){
             anchor.removeFromParent()

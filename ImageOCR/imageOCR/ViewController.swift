@@ -10,14 +10,15 @@ import UIKit
 import SceneKit
 import ARKit
 import RealityKit
+import Combine
 //import Base
 
 
 var Ant_Eye_Update_Interval = 50
-var Nearby_Anchor_Update_Interval = 500
-var Show_Entity_Limit = 150
-var Simple_Show_Entity_Filter = 5
-
+var Nearby_Anchor_Update_Interval = 300
+var Show_Entity_Limit = 100
+var Simple_Show_Entity_Filter = 1
+var Simple_Filter_Nearby = false
 
 class ViewController: UIViewController, ARSessionDelegate {
     
@@ -85,6 +86,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     var eyeshadowscheme = ["Brown and Gold Soft","The Simple Day-Look","Soft Smokey","Defined-Crease Smokey","Rose Gold","Deep Blue","The Simple Day-Look","Soft Smokey","Defined-Crease Smokey", "Brown and Gold Soft","Defined-Crease Smokey","Rose Gold","Rose Gold","Deep Blue","The Simple Day-Look"]
 
     var staticRefCood = matrix_identity_float4x4
+    var findResult = [Int]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -121,7 +123,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         colorAttr = ["Color", "Eyetype", "Scheme"]
         
         bottonText = [
-            ["Switch Mode", "Reranking", "Pan to Scale", "Restore",  "Scan","", "Load Books", "Background", "Select Target","Compare Chart","Word Cloud","Hide Buttons","Stored","ClearStored"],
+            ["Switch Mode", "Reranking", "Pan to Scale", "Restore",  "Scan","", "Filter Books", "Background", "Select Target","Compare Chart","Word Cloud","Hide Buttons","Load","ClearStored"],
         ["Switch Mode", "Reranking", "Pan to Scale", "Restore", "Scan Menu", "Scan Menu", "", "", "Select Target","Components","Word Cloud","Hide Buttons","",""],
         ["Switch Mode", "", "Pan to Scale", "Restore", "Scan (Circle)", "Scan", "Virtual Preview", "Background","","","","Hide Buttons","",""]]
 
@@ -192,6 +194,7 @@ class ViewController: UIViewController, ARSessionDelegate {
 
         uiButton["fisheye"] = antButton
         uiButton["restore"] = createButton(title: "Restore",negX: -500, negY: 240, action: #selector(ViewController.restoreDisplay))
+//        uiButton["scan"] = createButton( title: "Scan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapTimer))
         uiButton["scan"] = createButton( title: "Scan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapUpload))
         uiButton["sscan"] = createButton( title: "Sscan",negX: -500, negY: 100, action: #selector(ViewController.buttonTapUploadLarge))
         uiButton["model"] = createButton(title: "Model",negX: 450,negY: 450, action: #selector(ViewController.buttonTapLoadModel))
@@ -428,6 +431,14 @@ class ViewController: UIViewController, ARSessionDelegate {
                 nowbook.publisher = nowtempbook["publisher"] as! String
                 nowbook.price = (nowtempbook["pages"] as? Double ?? Double(books.count) )/5
                 nowbook.score = Double(nowtempbook["average"] as? Int ?? books.count%6)
+                if nowbook.title == "Truman" {
+                    nowbook.score = 5
+                }else{
+                    nowbook.score -= 1
+                }
+                if cot > 15{
+                    nowbook.score = 1
+                }
                 if (nowbook.score < 1)
                 {
                     nowbook.score = 2.0
@@ -552,9 +563,18 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         
         if mode == 0{
-//            bookAnchorQueue.async{
+            // init book position
+            for i in stride(from: 0, to: books.count ,by: 1){
+                let nowMatrix = books[i].matrixId!-1
+                var trans = picMatrix[nowMatrix].getBookTrans(id:i,element:books[i])
+                trans = picMatrix[nowMatrix].refImgOffset * trans
+                
+                trans = getForwardTrans(ori: trans, dis: 0.01 * Float(i%2)) // avoid collide
+                books[i].oriTrans = trans
+                books[i].tempTrans = trans
+                books[i].isDisplay = true
+            }
             self.updateShouldShowEntities()
-//            }
 //            setMessage("Showing filtered" + getSubfix() + " after fuzzy search.")
         }else if mode==1{
             guard let menu = arView.scene.findEntity(named: "menu@") else{
@@ -708,6 +728,38 @@ class ViewController: UIViewController, ARSessionDelegate {
 //    }
     
     func session(_ session: ARSession, didUpdate frame: ARFrame){
+
+        if(isAntUpdate){
+            checkShowWhichAbstract()
+        }
+        if(true){
+            updateShouldShowCot += 1;
+            if updateShouldShowCot > Nearby_Anchor_Update_Interval {
+                updateShouldShowCot = 0
+                updateShouldShowEntities()
+            }
+        }
+        updateAbstractPosition()
+        updateBackPanel()
+    }
+    
+    func updateBackPanel(){
+        if let backnode = arView.scene.findEntity(named: "trans@1"){
+            let nowTrans = arView.session.currentFrame!.camera.transform
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-10)
+            backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+        }
+        if let backnode = arView.scene.findEntity(named: "cmp@1"){
+            let nowTrans = arView.session.currentFrame!.camera.transform
+            var translation = matrix_identity_float4x4
+            translation.columns.3.z = Float(-0.25)
+            translation.columns.3.y = Float(-0.02)
+            backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+        }
+    }
+    
+    func updateAbstractPosition(){
         if(bookAbstractUI.getIsHidden() == false){
             guard let childNode = arView.scene.findEntity(named: "book@\(bookAbstractUI.id)")  else{
                 print("renderer: no such book \(bookAbstractUI.id)")
@@ -749,108 +801,87 @@ class ViewController: UIViewController, ARSessionDelegate {
                     colorAbstractUI.updatePosition(position: pos2d)
                 }
         }
-
-
-        if(isAntUpdate){
-            viewCenterPoint = arView.center
-            isAntUpdateCot = (isAntUpdateCot+1)%1000
-            var mindis = 100000.0
-            var minid = -1
-            if mode==1{
-                for i in stride(from: 0, to: coffees.count, by: 1) {
-                    let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
-                    guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
-                    let point = CGPoint(x:pos.x,y:pos.y)
-                    var screenCenter = arView.center
-                    screenCenter.x-=150
-                    let dis = calculateScreenDistance(screenCenter,point)
-                    if dis<400{
-                        let ratio = Float(min(2.3,(dis+28.0)/dis))
-                        let node = arView.scene.findEntity(named: "coffee@\(i)")!
-                        node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
-                        mindis = min(mindis,dis)
-                        if mindis == dis{
-                            minid = i
-                        }
-                    }
-                }
-            } else if mode == 2 {
-                for i in stride(from: 0, to: colors.count, by: 1) {
-                    let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
-                    guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
-                    let point = CGPoint(x:pos.x,y:pos.y)
-                    var screenCenter = arView.center
-                    screenCenter.x-=150
-                    let dis = calculateScreenDistance(screenCenter,point)
-                    if dis<400{
-                        let ratio = Float(min(1.5,(dis+28.0)/(10+dis)))
-                        let node = arEntitys[i]
-                        node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
-                        mindis = min(mindis,dis)
-                        if mindis == dis{
-                            minid = i
-                        }
-                    }
-                }
-
-            }else{
-                if isAntUpdateCot > Ant_Eye_Update_Interval{
-                    isAntUpdateCot = 0
-                    updateAntEyeEffectNodes()
-                }
-                for i in stride(from: 0, to: nowScaleNodes.count, by: 1) {
-                    let trans = books[nowScaleNodes[i]].tempTrans
-                    guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
-                    let point = CGPoint(x:pos.x,y:pos.y-200)
-                    let screenCenter = arView.center
-                    let dis = calculateScreenDistance(screenCenter,point)
-                    let ratio = Float(min(2,(dis+28.0)/dis))
-//                    print("now ratio:\(ratio), nowdis:\(dis)")
-                    
-                    let node = arEntitys[nowScaleNodes[i]]
+    }
+    
+    func checkShowWhichAbstract(){
+        viewCenterPoint = arView.center
+        isAntUpdateCot = (isAntUpdateCot+1)%1000
+        var mindis = 100000.0
+        var minid = -1
+        if mode==1{
+            for i in stride(from: 0, to: coffees.count, by: 1) {
+                let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
+                guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+                let point = CGPoint(x:pos.x,y:pos.y)
+                var screenCenter = arView.center
+                screenCenter.x-=150
+                let dis = calculateScreenDistance(screenCenter,point)
+                if dis<400{
+                    let ratio = Float(min(2.3,(dis+28.0)/dis))
+                    let node = arView.scene.findEntity(named: "coffee@\(i)")!
                     node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
                     mindis = min(mindis,dis)
                     if mindis == dis{
-                        minid = nowScaleNodes[i]
+                        minid = i
                     }
                 }
             }
-            var prevId = bookAbstractUI.id
-            if mode == 2 {prevId = colorAbstractUI.id}
-            else if mode==1 {prevId = coffeeAbstractUI.id}
-            if minid != -1 && minid != prevId{
-                if mode==2{
-                    var translation = matrix_identity_float4x4
-                    if prevId != -1
-                    {
-                        translation.columns.3.z = Float(0.0005*Float(prevId%13))
-                        arEntitys[prevId].setTransformMatrix(colors[prevId].tempTrans, relativeTo: rootnode)
+        } else if mode == 2 {
+            for i in stride(from: 0, to: colors.count, by: 1) {
+                let trans = arEntitys[i].transformMatrix(relativeTo: rootnode)
+                guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+                let point = CGPoint(x:pos.x,y:pos.y)
+                var screenCenter = arView.center
+                screenCenter.x-=150
+                let dis = calculateScreenDistance(screenCenter,point)
+                if dis<400{
+                    let ratio = Float(min(1.5,(dis+28.0)/(10+dis)))
+                    let node = arEntitys[i]
+                    node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
+                    mindis = min(mindis,dis)
+                    if mindis == dis{
+                        minid = i
                     }
-                    translation.columns.3.z = Float(0.01)
-                    arEntitys[minid].setTransformMatrix(colors[minid].tempTrans*translation, relativeTo: rootnode)
                 }
-                showAbstract(id: minid)
+            }
+
+        }else{
+            if isAntUpdateCot > Ant_Eye_Update_Interval{
+                isAntUpdateCot = 0
+                updateAntEyeEffectNodes()
+            }
+            for i in stride(from: 0, to: nowScaleNodes.count, by: 1) {
+                let trans = books[nowScaleNodes[i]].tempTrans
+                guard let pos = arView.project(calcuPointPos(trans: trans)) else{continue}
+                let point = CGPoint(x:pos.x,y:pos.y-200)
+                let screenCenter = arView.center
+                let dis = calculateScreenDistance(screenCenter,point)
+                let ratio = Float(min(2,(dis+28.0)/dis))
+//                    print("now ratio:\(ratio), nowdis:\(dis)")
+                
+                let node = arEntitys[nowScaleNodes[i]]
+                node.setScale(SIMD3<Float>(x:ratio,y:ratio,z:ratio), relativeTo: rootnode)
+                mindis = min(mindis,dis)
+                if mindis == dis{
+                    minid = nowScaleNodes[i]
+                }
             }
         }
-        if(true){
-            updateShouldShowCot += 1;
-            if updateShouldShowCot > Nearby_Anchor_Update_Interval {
-                updateShouldShowCot = 0
-                updateShouldShowEntities()
+        var prevId = bookAbstractUI.id
+        if mode == 2 {prevId = colorAbstractUI.id}
+        else if mode==1 {prevId = coffeeAbstractUI.id}
+        if minid != -1 && minid != prevId{
+            if mode==2{
+                var translation = matrix_identity_float4x4
+                if prevId != -1
+                {
+                    translation.columns.3.z = Float(0.0005*Float(prevId%13))
+                    arEntitys[prevId].setTransformMatrix(colors[prevId].tempTrans, relativeTo: rootnode)
+                }
+                translation.columns.3.z = Float(0.01)
+                arEntitys[minid].setTransformMatrix(colors[minid].tempTrans*translation, relativeTo: rootnode)
             }
-        }
-        if let backnode = arView.scene.findEntity(named: "trans@1"){
-            let nowTrans = arView.session.currentFrame!.camera.transform
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-10)
-            backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
-        }
-        if let backnode = arView.scene.findEntity(named: "cmp@1"){
-            let nowTrans = arView.session.currentFrame!.camera.transform
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = Float(-0.25)
-            translation.columns.3.y = Float(-0.02)
-            backnode.setTransformMatrix(nowTrans*translation, relativeTo: rootnode)
+            showAbstract(id: minid)
         }
     }
     
@@ -894,7 +925,6 @@ class ViewController: UIViewController, ARSessionDelegate {
         if (mode != 0){return}
         var book: AnchorEntity
         updateNearbyEntities()
-//        NSLog("update book should show, all \(bookDisArray.count) books cmp")
         for i in stride(from: 0, to: books.count ,by: 1){
             if books[i].isDisplay{
                 if arEntitys.count>i {
@@ -905,6 +935,7 @@ class ViewController: UIViewController, ARSessionDelegate {
                     }else{
                         // replace the empty anchor with real one
                         book = createBookAnchor(i)!
+                        arView.scene.removeAnchor(arEntitys[i] as! HasAnchoring)
                         arView.scene.addAnchor(book)
                         arEntitys[i] = book
                     }
@@ -943,13 +974,7 @@ class ViewController: UIViewController, ARSessionDelegate {
 
     func createBookAnchor(_ i:Int) -> AnchorEntity?{
         let nowMatrix = books[i].matrixId!-1
-        books[i].isDisplay = true;
-        var trans = picMatrix[nowMatrix].getBookTrans(id:i,element:books[i])
-        trans = picMatrix[nowMatrix].refImgOffset * trans
-        
-        trans = getForwardTrans(ori: trans, dis: 0.01 * Float(i%2)) // avoid collide
-        books[i].oriTrans = trans
-        books[i].tempTrans = trans
+        let trans = books[i].tempTrans
         let currentBook = books[i]
         let rootLoc = currentBook.loc
         var size = CGSize(width: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.width),isW: true), height: picMatrix[nowMatrix].getActualLen(oriLen:Double(rootLoc.height),isW: false))
@@ -957,17 +982,42 @@ class ViewController: UIViewController, ARSessionDelegate {
         print("bookid: \(i),size \(size)")
         let book = AnchorEntity(world: trans)
         size.width *= 0.9 // avoid collide
-        guard let plane = createPlane(id: i, size: size, mode: mode) else{
-            NSLog("fail to create plane")
-            return nil
-        }
-        book.addChild(plane)
-        
         let bookBox = loadBookModel(books[i].color,size)
+        let plane = loadBookPics(id: i, size: size)
+        book.addChild(plane)
         book.addChild(bookBox)
         book.name = "book@\(i)"
         book.generateCollisionShapes(recursive: true)
         return book
+    }
+    
+    func loadBookPics(id: Int,size:CGSize)->ModelEntity{
+        var material = UnlitMaterial()
+        material.tintColor = UIColor.white.withAlphaComponent(0.99)
+
+        
+        let imagePlane = ModelEntity(mesh: MeshResource.generatePlane(width: Float(size.width), height: Float(size.height), cornerRadius: 0), materials: [material])
+        imagePlane.name = "bookface@\(id)"
+        var textureRequest: AnyCancellable? = nil
+        let url = getDocumentsDirectory().appendingPathComponent("book@\(id).png")
+        textureRequest = TextureResource.loadAsync(contentsOf: url).sink { (error) in
+            print(error)
+            textureRequest?.cancel()
+        } receiveValue: { (texture) in
+            var material = UnlitMaterial()
+            material.baseColor = MaterialColorParameter.texture(texture)
+            guard let entity = self.arEntitys[id].findEntity(named: "bookface@\(id)")else {
+                textureRequest?.cancel()
+                NSLog("textrue loaded, but not found: book@\(id)")
+                return
+            }
+            (entity as!ModelEntity).model?.materials = [material]
+            textureRequest?.cancel()
+        }
+
+        
+        return imagePlane
+
     }
     
     // only for books
@@ -975,29 +1025,33 @@ class ViewController: UIViewController, ARSessionDelegate {
         if (mode != 0){return}
         
         // 过滤显示图书
-        for i in stride(from: 0, to: books.count ,by: 1){
-            if i%Simple_Show_Entity_Filter == 0 {
-                books[i].isDisplay = true;
-            }else {
-                books[i].isDisplay = false;
-            }
-            if books[i].title == "Operations Management:Concepts,Methods,and Strategies"
-            {
-                books[i].isDisplay = true;
-                NSLog("found \(books[i].title)")
-            }
-            if books[i].title == "ACCOUNTING PRINCIPLES"
-            {
-                books[i].isDisplay = true;
-                NSLog("found \(books[i].title)")
-            }
+        if (Simple_Filter_Nearby){
+            for i in stride(from: 0, to: books.count ,by: 1){
+                if i%Simple_Show_Entity_Filter == 0 {
+                    books[i].isDisplay = true;
+                }else {
+                    books[i].isDisplay = false;
+                }
+                if books[i].title == "Operations Management:Concepts,Methods,and Strategies"
+                {
+                    books[i].isDisplay = true;
+                    NSLog("found \(books[i].title)")
+                }
+                if books[i].title == "ACCOUNTING PRINCIPLES"
+                {
+                    books[i].isDisplay = true;
+                    NSLog("found \(books[i].title)")
+                }
 
+            }
+            return
         }
-        return
+        
         bookDisArray = [BookDisCmp]()
         for i in stride(from: 0, to: books.count ,by: 1){
-            let dis = calcuPointDis(trans1: books[i].oriTrans, trans2: (arView.session.currentFrame?.camera.transform)!)
-            bookDisArray.append(BookDisCmp(i,dis))
+            
+                let dis = calcuPointDis(trans1: books[i].tempTrans, trans2: (arView.session.currentFrame?.camera.transform)!)
+                bookDisArray.append(BookDisCmp(i,dis))
         }
         bookDisArray.sort()
         for i in stride(from: 0, to: bookDisArray.count ,by: 1){
@@ -1009,6 +1063,13 @@ class ViewController: UIViewController, ARSessionDelegate {
                 // lable to be shown
                 books[nowBookCmp.id].isDisplay = true;
             }
+        }
+        if(isFiltered && !isInRegroupView){
+            filterBooks("")
+        }
+        // make sure find result is displayed
+        for i in findResult{
+            books[i].isDisplay = true
         }
     }
     
